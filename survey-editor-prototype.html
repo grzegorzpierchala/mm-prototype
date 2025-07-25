@@ -12,25 +12,53 @@
                 selectedQuestion: null,
                 showSettings: false,
                 showQuestionTypes: null,
-                // Question type categories
+                // Question type categories - 30+ types organized intuitively
                 questionTypeCategories: {
-                    basic: [
-                        { id: 'text_input', name: 'Text Input', icon: '📝' },
+                    essentials: [
+                        { id: 'text_input', name: 'Short Text', icon: '💬' },
+                        { id: 'long_text', name: 'Long Text', icon: '📝' },
                         { id: 'multiple_choice', name: 'Multiple Choice', icon: '🔘' },
-                        { id: 'yes_no', name: 'Yes/No', icon: '👍' },
-                        { id: 'rating_scale', name: 'Rating Scale', icon: '⭐' }
+                        { id: 'checkbox', name: 'Checkboxes', icon: '☑️' },
+                        { id: 'dropdown', name: 'Dropdown', icon: '▼' },
+                        { id: 'yes_no', name: 'Yes/No', icon: '👍' }
                     ],
-                    advanced: [
-                        { id: 'matrix', name: 'Matrix', icon: '⊞' },
-                        { id: 'ranking', name: 'Ranking', icon: '🔢' },
-                        { id: 'slider', name: 'Slider', icon: '◐' },
-                        { id: 'dropdown', name: 'Dropdown', icon: '▼' }
+                    rating: [
+                        { id: 'star_rating', name: 'Star Rating', icon: '⭐' },
+                        { id: 'number_scale', name: 'Number Scale', icon: '🔢' },
+                        { id: 'nps', name: 'NPS Score', icon: '🎯' },
+                        { id: 'likert', name: 'Likert Scale', icon: '📊' },
+                        { id: 'slider', name: 'Slider', icon: '🎚️' },
+                        { id: 'emoji_scale', name: 'Emoji Scale', icon: '😊' }
                     ],
                     input: [
-                        { id: 'date_time', name: 'Date/Time', icon: '📅' },
-                        { id: 'file_upload', name: 'File Upload', icon: '📎' },
+                        { id: 'number', name: 'Number', icon: '💯' },
                         { id: 'email', name: 'Email', icon: '✉️' },
-                        { id: 'phone', name: 'Phone', icon: '📱' }
+                        { id: 'phone', name: 'Phone', icon: '📱' },
+                        { id: 'url', name: 'Website', icon: '🌐' },
+                        { id: 'date', name: 'Date', icon: '📅' },
+                        { id: 'time', name: 'Time', icon: '🕐' }
+                    ],
+                    advanced: [
+                        { id: 'matrix', name: 'Matrix Table', icon: '⊞' },
+                        { id: 'ranking', name: 'Rank Order', icon: '📋' },
+                        { id: 'constant_sum', name: 'Constant Sum', icon: '💯' },
+                        { id: 'max_diff', name: 'MaxDiff', icon: '⚖️' },
+                        { id: 'side_by_side', name: 'Side by Side', icon: '📊' },
+                        { id: 'card_sort', name: 'Card Sort', icon: '🗂️' }
+                    ],
+                    media: [
+                        { id: 'file_upload', name: 'File Upload', icon: '📎' },
+                        { id: 'image_choice', name: 'Image Choice', icon: '🖼️' },
+                        { id: 'signature', name: 'Signature', icon: '✍️' },
+                        { id: 'drawing', name: 'Drawing', icon: '🎨' },
+                        { id: 'video_response', name: 'Video', icon: '📹' },
+                        { id: 'audio_response', name: 'Audio', icon: '🎤' }
+                    ],
+                    interactive: [
+                        { id: 'heat_map', name: 'Heat Map', icon: '🔥' },
+                        { id: 'hot_spot', name: 'Hot Spot', icon: '🎯' },
+                        { id: 'map_location', name: 'Map Location', icon: '📍' },
+                        { id: 'priority_grid', name: 'Priority Grid', icon: '⊞' }
                     ]
                 },
                 
@@ -1860,6 +1888,350 @@
                                           class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
                                           rows="4" 
                                           disabled></textarea>
+                            </div>
+                            
+                            <!-- Long Text -->
+                            <div x-show="question.type === 'long_text'">
+                                <textarea placeholder="Respondent will type their detailed answer here..." 
+                                          class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                                          rows="8" 
+                                          disabled></textarea>
+                                <div class="mt-2 text-sm text-gray-500 text-right">
+                                    <span>0</span> / <span x-text="question.settings?.maxLength || 500"></span> characters
+                                </div>
+                            </div>
+                            
+                            <!-- Checkbox List -->
+                            <div x-show="question.type === 'checkbox'" class="space-y-2">
+                                <template x-for="(option, optionIndex) in question.options" :key="option.id">
+                                    <div class="question-option">
+                                        <div class="option-drag-handle">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                                            </svg>
+                                        </div>
+                                        <input type="checkbox" 
+                                               :name="question.id" 
+                                               class="text-indigo-600 rounded" 
+                                               disabled>
+                                        <input type="text" 
+                                               x-model="option.text"
+                                               @click.stop
+                                               @input="debouncedAutosave"
+                                               @keydown.enter="addOption(question.id)"
+                                               @keydown.backspace="option.text === '' && removeOption(question.id, option.id)"
+                                               :data-option-id="option.id"
+                                               class="flex-1 px-3 py-1.5 bg-white border-0 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all duration-200"
+                                               placeholder="Option text...">
+                                        <button @click.stop="removeOption(question.id, option.id)"
+                                                x-show="question.options.length > 2"
+                                                class="option-remove">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                                <button @click.stop="addOption(question.id)"
+                                        class="add-option-button">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    <span>Add option</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Yes/No -->
+                            <div x-show="question.type === 'yes_no'" class="flex gap-3">
+                                <button class="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex-1">
+                                    <svg class="w-5 h-5 mx-auto mb-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium">Yes</span>
+                                </button>
+                                <button class="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex-1">
+                                    <svg class="w-5 h-5 mx-auto mb-1 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium">No</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Dropdown -->
+                            <div x-show="question.type === 'dropdown'">
+                                <select class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed" disabled>
+                                    <option>Select an option...</option>
+                                    <template x-for="option in question.options" :key="option.id">
+                                        <option x-text="option.text"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            
+                            <!-- Star Rating -->
+                            <div x-show="question.type === 'star_rating'" class="flex gap-2">
+                                <template x-for="i in 5">
+                                    <button class="text-3xl text-gray-300 hover:text-yellow-400 transition-colors">★</button>
+                                </template>
+                            </div>
+                            
+                            <!-- Number Scale -->
+                            <div x-show="question.type === 'number_scale'" class="flex gap-2">
+                                <template x-for="i in (question.settings?.maxValue || 10)">
+                                    <button class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-indigo-100 hover:text-indigo-600 transition-colors font-medium text-sm"
+                                            x-text="i"></button>
+                                </template>
+                            </div>
+                            
+                            <!-- NPS Score -->
+                            <div x-show="question.type === 'nps'">
+                                <div class="flex gap-1">
+                                    <template x-for="i in 11">
+                                        <button class="w-10 h-10 rounded border border-gray-200 hover:border-indigo-500 transition-colors font-medium text-sm"
+                                                :class="{
+                                                    'bg-red-50 text-red-600 border-red-200': i-1 <= 6,
+                                                    'bg-yellow-50 text-yellow-600 border-yellow-200': i-1 >= 7 && i-1 <= 8,
+                                                    'bg-green-50 text-green-600 border-green-200': i-1 >= 9
+                                                }"
+                                                x-text="i-1"></button>
+                                    </template>
+                                </div>
+                                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                                    <span>Not likely</span>
+                                    <span>Very likely</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Likert Scale -->
+                            <div x-show="question.type === 'likert'" class="space-y-2">
+                                <div class="flex gap-2 justify-between">
+                                    <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex-1">Strongly Disagree</button>
+                                    <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex-1">Disagree</button>
+                                    <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex-1">Neutral</button>
+                                    <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex-1">Agree</button>
+                                    <button class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm flex-1">Strongly Agree</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Slider -->
+                            <div x-show="question.type === 'slider'" class="relative pt-6">
+                                <input type="range" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                                       :min="question.settings?.minValue || 0" 
+                                       :max="question.settings?.maxValue || 100" 
+                                       value="50"
+                                       disabled>
+                                <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                    <span x-text="question.settings?.minValue || 0"></span>
+                                    <span class="text-indigo-600 font-medium">50</span>
+                                    <span x-text="question.settings?.maxValue || 100"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Emoji Scale -->
+                            <div x-show="question.type === 'emoji_scale'" class="flex gap-3 justify-center text-4xl">
+                                <button class="hover:scale-110 transition-transform">😢</button>
+                                <button class="hover:scale-110 transition-transform">😟</button>
+                                <button class="hover:scale-110 transition-transform">😐</button>
+                                <button class="hover:scale-110 transition-transform">🙂</button>
+                                <button class="hover:scale-110 transition-transform">😊</button>
+                            </div>
+                            
+                            <!-- Number Input -->
+                            <div x-show="question.type === 'number'">
+                                <input type="number" 
+                                       placeholder="Enter a number..." 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- Email Input -->
+                            <div x-show="question.type === 'email'">
+                                <input type="email" 
+                                       placeholder="email@example.com" 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- Phone Input -->
+                            <div x-show="question.type === 'phone'">
+                                <input type="tel" 
+                                       placeholder="+1 (555) 000-0000" 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- URL Input -->
+                            <div x-show="question.type === 'url'">
+                                <input type="url" 
+                                       placeholder="https://example.com" 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- Date Input -->
+                            <div x-show="question.type === 'date'">
+                                <input type="date" 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- Time Input -->
+                            <div x-show="question.type === 'time'">
+                                <input type="time" 
+                                       class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
+                                       disabled>
+                            </div>
+                            
+                            <!-- Matrix Table -->
+                            <div x-show="question.type === 'matrix'" class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left p-2"></th>
+                                            <th class="text-center p-2 text-sm font-normal text-gray-600">Column 1</th>
+                                            <th class="text-center p-2 text-sm font-normal text-gray-600">Column 2</th>
+                                            <th class="text-center p-2 text-sm font-normal text-gray-600">Column 3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-t border-gray-100">
+                                            <td class="p-2 text-sm">Row 1</td>
+                                            <td class="text-center p-2"><input type="radio" name="row1" disabled></td>
+                                            <td class="text-center p-2"><input type="radio" name="row1" disabled></td>
+                                            <td class="text-center p-2"><input type="radio" name="row1" disabled></td>
+                                        </tr>
+                                        <tr class="border-t border-gray-100">
+                                            <td class="p-2 text-sm">Row 2</td>
+                                            <td class="text-center p-2"><input type="radio" name="row2" disabled></td>
+                                            <td class="text-center p-2"><input type="radio" name="row2" disabled></td>
+                                            <td class="text-center p-2"><input type="radio" name="row2" disabled></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Ranking -->
+                            <div x-show="question.type === 'ranking'" class="space-y-2">
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <span class="text-gray-400 cursor-move">⋮⋮</span>
+                                    <span class="font-medium text-gray-500">1.</span>
+                                    <span>First item to rank</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <span class="text-gray-400 cursor-move">⋮⋮</span>
+                                    <span class="font-medium text-gray-500">2.</span>
+                                    <span>Second item to rank</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <span class="text-gray-400 cursor-move">⋮⋮</span>
+                                    <span class="font-medium text-gray-500">3.</span>
+                                    <span>Third item to rank</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Constant Sum -->
+                            <div x-show="question.type === 'constant_sum'" class="space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <input type="number" value="0" min="0" max="100" class="w-20 px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-center" disabled>
+                                    <span class="flex-1">Option 1</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" value="0" min="0" max="100" class="w-20 px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-center" disabled>
+                                    <span class="flex-1">Option 2</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" value="0" min="0" max="100" class="w-20 px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg text-center" disabled>
+                                    <span class="flex-1">Option 3</span>
+                                </div>
+                                <div class="text-right mt-2 p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-sm text-gray-600">Total: </span>
+                                    <span class="font-medium">0 / 100</span>
+                                </div>
+                            </div>
+                            
+                            <!-- File Upload -->
+                            <div x-show="question.type === 'file_upload'">
+                                <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <p class="text-gray-600 mb-2">Drop files here or click to upload</p>
+                                    <p class="text-sm text-gray-500">PDF, DOC, DOCX, JPG, PNG up to 10MB</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Image Choice -->
+                            <div x-show="question.type === 'image_choice'" class="grid grid-cols-3 gap-3">
+                                <button class="relative group overflow-hidden rounded-lg border-2 border-gray-200 hover:border-indigo-500 transition-colors">
+                                    <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="p-2 text-sm text-center">Option 1</div>
+                                </button>
+                                <button class="relative group overflow-hidden rounded-lg border-2 border-gray-200 hover:border-indigo-500 transition-colors">
+                                    <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="p-2 text-sm text-center">Option 2</div>
+                                </button>
+                                <button class="relative group overflow-hidden rounded-lg border-2 border-gray-200 hover:border-indigo-500 transition-colors">
+                                    <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="p-2 text-sm text-center">Option 3</div>
+                                </button>
+                            </div>
+                            
+                            <!-- Signature -->
+                            <div x-show="question.type === 'signature'">
+                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                    <div class="h-32 border-b-2 border-gray-300 relative">
+                                        <div class="absolute bottom-0 left-0 text-xs text-gray-400">Sign here</div>
+                                    </div>
+                                    <div class="mt-3 flex justify-end">
+                                        <button class="text-sm text-gray-500 hover:text-gray-700">Clear signature</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Heat Map -->
+                            <div x-show="question.type === 'heat_map'">
+                                <div class="relative bg-gray-100 rounded-lg overflow-hidden">
+                                    <div class="aspect-video flex items-center justify-center">
+                                        <div class="text-center">
+                                            <svg class="w-16 h-16 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <p class="text-gray-500">Click anywhere on the image</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Sort -->
+                            <div x-show="question.type === 'card_sort'" class="space-y-4">
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Items to sort:</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <div class="px-3 py-2 bg-white rounded-lg border border-gray-200 cursor-move">Item 1</div>
+                                        <div class="px-3 py-2 bg-white rounded-lg border border-gray-200 cursor-move">Item 2</div>
+                                        <div class="px-3 py-2 bg-white rounded-lg border border-gray-200 cursor-move">Item 3</div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="p-4 border-2 border-dashed border-gray-200 rounded-lg min-h-[100px]">
+                                        <h4 class="text-sm font-medium text-gray-500 mb-2">Category A</h4>
+                                    </div>
+                                    <div class="p-4 border-2 border-dashed border-gray-200 rounded-lg min-h-[100px]">
+                                        <h4 class="text-sm font-medium text-gray-500 mb-2">Category B</h4>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Question Actions -->
@@ -3696,7 +4068,7 @@
                     {
                         id: 'q3',
                         questionNumber: 'Q3',
-                        type: 'rating_scale',
+                        type: 'nps',
                         text: 'How likely are you to recommend us to a friend?',
                         required: true,
                         settings: {
@@ -4114,50 +4486,208 @@
                     switch(question.type) {
                         case 'multiple_choice':
                         case 'dropdown':
+                        case 'checkbox':
+                        case 'image_choice':
                             if (!question.options) {
                                 question.options = [
-                                    { id: 'o1', text: 'Option 1' },
-                                    { id: 'o2', text: 'Option 2' },
-                                    { id: 'o3', text: 'Option 3' }
+                                    { id: this.generateId(), text: 'Option 1' },
+                                    { id: this.generateId(), text: 'Option 2' },
+                                    { id: this.generateId(), text: 'Option 3' }
                                 ];
                             }
                             if (!question.settings) {
                                 question.settings = {
-                                    allowMultiple: false,
+                                    allowMultiple: question.type === 'checkbox',
                                     randomizeOptions: false,
                                     displayFormat: 'list'
                                 };
                             }
                             break;
-                        case 'rating_scale':
-                            if (!question.settings) {
-                                question.settings = {
-                                    scaleType: 'numbers',
-                                    minValue: 1,
-                                    maxValue: 5,
-                                    displayFormat: 'list'
-                                };
-                            }
-                            break;
+                            
                         case 'text_input':
+                        case 'long_text':
                             if (!question.settings) {
                                 question.settings = {
-                                    inputType: 'text',
+                                    inputType: question.type === 'long_text' ? 'textarea' : 'text',
                                     placeholder: '',
-                                    rows: 4
+                                    rows: question.type === 'long_text' ? 8 : 4,
+                                    maxLength: question.type === 'long_text' ? 1000 : 200
                                 };
                             }
                             break;
+                            
+                        case 'star_rating':
+                            if (!question.settings) {
+                                question.settings = {
+                                    maxStars: 5,
+                                    allowHalf: false
+                                };
+                            }
+                            break;
+                            
+                        case 'number_scale':
+                            if (!question.settings) {
+                                question.settings = {
+                                    minValue: 1,
+                                    maxValue: 10,
+                                    displayFormat: 'buttons'
+                                };
+                            }
+                            break;
+                            
+                        case 'nps':
+                            if (!question.settings) {
+                                question.settings = {
+                                    minValue: 0,
+                                    maxValue: 10,
+                                    minLabel: 'Not likely',
+                                    maxLabel: 'Very likely'
+                                };
+                            }
+                            break;
+                            
+                        case 'likert':
+                            if (!question.settings) {
+                                question.settings = {
+                                    scaleType: 'agreement',
+                                    points: 5
+                                };
+                            }
+                            break;
+                            
+                        case 'slider':
+                            if (!question.settings) {
+                                question.settings = {
+                                    minValue: 0,
+                                    maxValue: 100,
+                                    step: 1,
+                                    showValue: true
+                                };
+                            }
+                            break;
+                            
+                        case 'emoji_scale':
+                            if (!question.settings) {
+                                question.settings = {
+                                    emojiType: 'satisfaction',
+                                    points: 5
+                                };
+                            }
+                            break;
+                            
                         case 'matrix':
                             if (!question.rows) {
-                                question.rows = ['Row 1', 'Row 2'];
+                                question.rows = [
+                                    { id: this.generateId(), text: 'Row 1' },
+                                    { id: this.generateId(), text: 'Row 2' }
+                                ];
                             }
                             if (!question.columns) {
-                                question.columns = ['Column 1', 'Column 2', 'Column 3'];
+                                question.columns = [
+                                    { id: this.generateId(), text: 'Column 1' },
+                                    { id: this.generateId(), text: 'Column 2' },
+                                    { id: this.generateId(), text: 'Column 3' }
+                                ];
+                            }
+                            if (!question.settings) {
+                                question.settings = {
+                                    matrixType: 'radio',
+                                    required: false
+                                };
                             }
                             break;
-                        // Add more type-specific initializations as needed
+                            
+                        case 'ranking':
+                        case 'card_sort':
+                            if (!question.items) {
+                                question.items = [
+                                    { id: this.generateId(), text: 'Item 1' },
+                                    { id: this.generateId(), text: 'Item 2' },
+                                    { id: this.generateId(), text: 'Item 3' }
+                                ];
+                            }
+                            if (question.type === 'card_sort' && !question.categories) {
+                                question.categories = [
+                                    { id: this.generateId(), text: 'Category A' },
+                                    { id: this.generateId(), text: 'Category B' }
+                                ];
+                            }
+                            break;
+                            
+                        case 'constant_sum':
+                            if (!question.options) {
+                                question.options = [
+                                    { id: this.generateId(), text: 'Option 1', value: 0 },
+                                    { id: this.generateId(), text: 'Option 2', value: 0 },
+                                    { id: this.generateId(), text: 'Option 3', value: 0 }
+                                ];
+                            }
+                            if (!question.settings) {
+                                question.settings = {
+                                    totalPoints: 100,
+                                    forceTotal: true
+                                };
+                            }
+                            break;
+                            
+                        case 'file_upload':
+                            if (!question.settings) {
+                                question.settings = {
+                                    maxFiles: 5,
+                                    maxSize: 10, // MB
+                                    allowedTypes: ['pdf', 'doc', 'docx', 'jpg', 'png']
+                                };
+                            }
+                            break;
+                            
+                        case 'signature':
+                            if (!question.settings) {
+                                question.settings = {
+                                    penColor: '#000000',
+                                    penWidth: 2
+                                };
+                            }
+                            break;
+                            
+                        case 'date':
+                        case 'time':
+                            if (!question.settings) {
+                                question.settings = {
+                                    format: question.type === 'date' ? 'MM/DD/YYYY' : 'HH:MM',
+                                    minDate: null,
+                                    maxDate: null
+                                };
+                            }
+                            break;
+                            
+                        case 'yes_no':
+                            if (!question.settings) {
+                                question.settings = {
+                                    yesLabel: 'Yes',
+                                    noLabel: 'No',
+                                    defaultValue: null
+                                };
+                            }
+                            break;
+                            
+                        // Default settings for any other types
+                        default:
+                            if (!question.settings) {
+                                question.settings = {};
+                            }
+                            break;
                     }
+                    
+                    // Ensure validation object exists
+                    if (!question.validation) {
+                        question.validation = {
+                            requiredError: 'This field is required'
+                        };
+                    }
+                },
+                
+                generateId() {
+                    return 'id_' + Math.random().toString(36).substring(2, 11);
                 }
             }
         }
