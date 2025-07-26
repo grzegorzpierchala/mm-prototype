@@ -1,6 +1,7 @@
 import './style.css'
 import './originalStyles.css'
 import Alpine from 'alpinejs'
+import sort from '@alpinejs/sort'
 import surveyEditor from './components/surveyEditor'
 
 // Import stores
@@ -9,9 +10,8 @@ import './stores/uiStore'
 import './stores/commentStore'
 import './stores/versionStore'
 
-// Import Alpine.js plugins if needed
-// import focus from '@alpinejs/focus'
-// import persist from '@alpinejs/persist'
+// Register Alpine plugins
+Alpine.plugin(sort)
 
 // Make Alpine available globally before components register
 window.Alpine = Alpine

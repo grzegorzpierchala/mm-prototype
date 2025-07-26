@@ -448,6 +448,121 @@ select option {
   color: #059669;
 }
 
+/* Alpine Sort Plugin Styles */
+.sortable-drag {
+  opacity: 0.8 !important;
+  cursor: grabbing !important;
+  z-index: 1000 !important;
+}
+
+.sortable-ghost {
+  opacity: 0.3;
+  background: #f3f4f6;
+  border: 2px dashed #d1d5db;
+}
+
+/* Prevent text selection during dragging */
+.sortable-chosen {
+  cursor: grabbing !important;
+}
+
+.sortable-chosen * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Prevent text selection on the entire container during drag */
+.sortable-dragging {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+.sortable-dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Drop indicator styles - removed the line indicator */
+.sortable-drop-indicator {
+  position: relative;
+}
+
+/* Just keep subtle highlighting without the line */
+.sortable-drop-indicator.drop-before,
+.sortable-drop-indicator.drop-after {
+  opacity: 0.8;
+}
+
+/* Visual feedback for drop zones during drag */
+.question-blocks-container.sortable-dragging {
+  background-color: rgba(240, 241, 255, 0.3);
+  border: 2px dashed #c7d2fe;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Highlight the active drop zone */
+.sortable-active-container {
+  background-color: rgba(240, 241, 255, 0.5);
+  box-shadow: inset 0 0 0 2px #6366f1;
+  border-radius: 8px;
+}
+
+/* Option container drop feedback */
+.space-y-2.sortable-dragging {
+  background-color: rgba(240, 241, 255, 0.2);
+  padding: 4px;
+  margin: -4px;
+  border-radius: 6px;
+  border: 1px dashed #c7d2fe;
+}
+
+/* Drag handle styling */
+.block-handle {
+  cursor: grab;
+  transition: opacity 0.2s;
+}
+
+.block-handle:active {
+  cursor: grabbing;
+}
+
+.option-drag-handle {
+  cursor: grab;
+  transition: opacity 0.2s;
+}
+
+.option-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Smooth transitions for non-dragging items */
+.question-blocks-container > div:not(.sortable-drag) {
+  transition: transform 0.2s ease;
+}
+
+.space-y-2 > div:not(.sortable-drag) {
+  transition: transform 0.2s ease;
+}
+
+/* Hide original when dragging */
+.sortable-drag {
+  visibility: hidden;
+}
+
+/* Style the dragged element */
+.sortable-fallback {
+  opacity: 0.8 !important;
+  transform: rotate(2deg) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
 .comment-badge.reference {
   background: #E5E7EB;
   color: #6B7280;
@@ -1169,17 +1284,29 @@ input:focus, textarea:focus, select:focus {
   padding: 8px 0;
   background: transparent;
   border: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease;
   position: relative;
   margin-left: -8px;
   margin-right: -8px;
   padding-left: 8px;
   padding-right: 8px;
+  border-radius: 6px;
 }
 
-.question-option:hover {
+/* Only apply hover background when actually hovering and not dragging */
+.question-option:hover:not(.dragging):not(.opacity-50) {
   background: #F9FAFB;
-  border-radius: 6px;
+}
+
+/* Dragging state - ensure transparent background */
+.question-option.dragging,
+.question-option.opacity-50 {
+  background: transparent;
+}
+
+/* Force transparent background when not hovering */
+.question-option:not(:hover) {
+  background: transparent;
 }
 
 .option-drag-handle {

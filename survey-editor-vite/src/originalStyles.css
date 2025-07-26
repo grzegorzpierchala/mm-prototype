@@ -71,7 +71,7 @@
     padding: 8px;
     padding-left: 40px;
     padding-right: 40px;
-    background: #f9fafb;
+    background: transparent;
     border-radius: 6px;
     transition: all 0.2s;
 }

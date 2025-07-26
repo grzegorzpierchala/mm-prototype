@@ -3,6 +3,7 @@ export function initDragDrop() {
   let draggedElement = null;
   let draggedIndex = null;
   let placeholder = null;
+  let currentDragData = null;
 
   return {
     isDragging: false,
@@ -96,80 +97,185 @@ export function initDragDrop() {
       const handle = el.querySelector('.option-drag-handle');
       if (!handle) return;
       
-      handle.addEventListener('mousedown', () => {
+      // Remove any existing listeners first
+      const oldHandleClone = handle.cloneNode(true);
+      handle.parentNode.replaceChild(oldHandleClone, handle);
+      const newHandle = oldHandleClone;
+      
+      // Store the element reference for cleanup
+      el._dragHandle = newHandle;
+      el._cleanupDrag = null;
+      
+      // Make the entire option draggable, but only when dragging from handle
+      el.draggable = false;
+      
+      // Store drag data on the element
+      el.dataset.questionId = questionId;
+      el.dataset.optionId = optionId;
+      el.dataset.optionIndex = optionIndex;
+      
+      // Handle mousedown on drag handle
+      newHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Enable dragging
         el.draggable = true;
+        el.classList.add('cursor-grabbing');
+        
+        // Store current drag data
+        currentDragData = {
+          questionId: questionId,
+          optionId: optionId,
+          optionIndex: optionIndex,
+          element: el
+        };
+        
+        // Create cleanup function
+        const cleanup = () => {
+          if (el._cleanupDrag === cleanup) {
+            el.draggable = false;
+            el.classList.remove('cursor-grabbing', 'opacity-50', 'dragging');
+            el._cleanupDrag = null;
+            
+            // Clean up all drop indicators
+            document.querySelectorAll('.question-option').forEach(opt => {
+              opt.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+            });
+          }
+          document.removeEventListener('mouseup', cleanup);
+        };
+        
+        el._cleanupDrag = cleanup;
+        document.addEventListener('mouseup', cleanup);
       });
       
+      // Drag start
       el.addEventListener('dragstart', (e) => {
-        if (!el.draggable) {
+        if (!el.draggable || !currentDragData || currentDragData.element !== el) {
           e.preventDefault();
           return;
         }
         
-        el.classList.add('opacity-50');
+        console.log('Option drag start:', currentDragData);
+        
+        // Add visual feedback
+        el.classList.add('opacity-50', 'dragging');
+        
+        // Set drag data
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('questionId', questionId);
-        e.dataTransfer.setData('optionId', optionId);
-        e.dataTransfer.setData('optionIndex', optionIndex.toString());
+        e.dataTransfer.setData('text/plain', 'dragging'); // Chrome requires some data
       });
       
-      el.addEventListener('dragend', () => {
-        el.classList.remove('opacity-50');
+      // Drag end
+      el.addEventListener('dragend', (e) => {
+        console.log('Drag end');
+        
+        // Clean up
+        el.classList.remove('opacity-50', 'dragging', 'cursor-grabbing');
         el.draggable = false;
-      });
-      
-      el.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
         
-        const draggingOptionId = e.dataTransfer.getData('optionId');
-        if (!draggingOptionId || draggingOptionId === optionId) return;
+        // Clean up all drop indicators
+        document.querySelectorAll('.question-option').forEach(opt => {
+          opt.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+        });
         
-        const rect = el.getBoundingClientRect();
-        const y = e.clientY - rect.top;
-        const height = rect.height;
+        // Clear current drag data
+        if (currentDragData && currentDragData.element === el) {
+          currentDragData = null;
+        }
         
-        if (y < height / 2) {
-          el.classList.add('border-t-2', 'border-indigo-500');
-          el.classList.remove('border-b-2');
-        } else {
-          el.classList.add('border-b-2', 'border-indigo-500');
-          el.classList.remove('border-t-2');
+        // Run cleanup if exists
+        if (el._cleanupDrag) {
+          el._cleanupDrag();
         }
       });
       
-      el.addEventListener('dragleave', () => {
-        el.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
-      });
-      
-      el.addEventListener('drop', (e) => {
+      // Drag over
+      el.addEventListener('dragover', (e) => {
+        if (!currentDragData || currentDragData.optionId === optionId || currentDragData.questionId !== questionId) {
+          return;
+        }
+        
         e.preventDefault();
-        el.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+        e.dataTransfer.dropEffect = 'move';
         
-        const draggedQuestionId = e.dataTransfer.getData('questionId');
-        const draggedOptionId = e.dataTransfer.getData('optionId');
-        const draggedOptionIndex = parseInt(e.dataTransfer.getData('optionIndex'));
+        // Clear other indicators
+        document.querySelectorAll('.question-option').forEach(opt => {
+          if (opt !== el) {
+            opt.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+          }
+        });
         
-        if (draggedQuestionId !== questionId || draggedOptionId === optionId) return;
-        
-        const question = Alpine.store('survey').questions.find(q => q.id === questionId);
-        if (!question) return;
-        
+        // Show drop indicator
         const rect = el.getBoundingClientRect();
         const y = e.clientY - rect.top;
-        const height = rect.height;
-        const insertBefore = y < height / 2;
+        const isTopHalf = y < rect.height / 2;
         
-        // Find the target option index
+        el.classList.toggle('border-t-2', isTopHalf);
+        el.classList.toggle('border-b-2', !isTopHalf);
+        el.classList.add('border-indigo-500');
+      });
+      
+      // Drag leave
+      el.addEventListener('dragleave', (e) => {
+        // Only remove if truly leaving the element
+        if (e.relatedTarget && !el.contains(e.relatedTarget)) {
+          el.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+        }
+      });
+      
+      // Drop
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Drop event, currentDragData:', currentDragData, 'target:', optionId);
+        
+        // Clean up visual indicators
+        el.classList.remove('border-t-2', 'border-b-2', 'border-indigo-500');
+        
+        if (!currentDragData || currentDragData.questionId !== questionId || currentDragData.optionId === optionId) {
+          return;
+        }
+        
+        // Get the question from store
+        const question = Alpine.store('survey').questions.find(q => q.id === questionId);
+        if (!question || !question.options) return;
+        
+        // Calculate drop position
+        const rect = el.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        const insertBefore = y < rect.height / 2;
+        
+        // Find current indices
+        const draggedIndex = question.options.findIndex(o => o.id === currentDragData.optionId);
         const targetIndex = question.options.findIndex(o => o.id === optionId);
         
-        // Reorder options
-        const [movedOption] = question.options.splice(draggedOptionIndex, 1);
-        const newIndex = insertBefore ? targetIndex : targetIndex + 1;
-        const adjustedIndex = draggedOptionIndex < targetIndex ? newIndex - 1 : newIndex;
-        question.options.splice(adjustedIndex, 0, movedOption);
+        console.log('Reordering:', {
+          draggedIndex,
+          targetIndex,
+          insertBefore,
+          options: question.options.map(o => o.text)
+        });
         
-        // Trigger autosave
+        if (draggedIndex === -1 || targetIndex === -1) return;
+        
+        // Calculate new index
+        let newIndex;
+        if (draggedIndex < targetIndex) {
+          newIndex = insertBefore ? targetIndex - 1 : targetIndex;
+        } else {
+          newIndex = insertBefore ? targetIndex : targetIndex + 1;
+        }
+        
+        // Perform the reorder
+        const [movedOption] = question.options.splice(draggedIndex, 1);
+        question.options.splice(newIndex, 0, movedOption);
+        
+        console.log('Options after reorder:', question.options.map(o => o.text));
+        
+        // Trigger update
         Alpine.store('ui').debouncedAutoSave();
       });
     }

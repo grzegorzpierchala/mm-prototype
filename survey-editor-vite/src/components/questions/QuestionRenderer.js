@@ -1,10 +1,45 @@
 // Question Renderer - Template for rendering questions
 export function QuestionRenderer() {
   return `
+    <div class="question-blocks-container space-y-4"
+         x-data="{
+           handleQuestionSort(item, position) {
+             console.log('Question reordered:', item, 'to position', position);
+             const questions = [...$store.survey.questions];
+             const oldIndex = questions.findIndex(q => q.id === item);
+             if (oldIndex !== -1 && oldIndex !== position) {
+               const [movedQuestion] = questions.splice(oldIndex, 1);
+               questions.splice(position, 0, movedQuestion);
+               $store.survey.questions = questions;
+               $store.ui.debouncedAutoSave();
+             }
+           }
+         }"
+         x-sort="handleQuestionSort"
+         x-sort:config="{ 
+           handle: '.block-handle',
+           animation: 150,
+           ghostClass: 'sortable-ghost',
+           dragClass: 'sortable-drag',
+           chosenClass: 'sortable-chosen',
+           onStart: function(evt) {
+             // Add dragging state to container and prevent text selection
+             evt.from.classList.add('sortable-dragging');
+             document.body.style.userSelect = 'none';
+             document.body.style.webkitUserSelect = 'none';
+           },
+           onEnd: function(evt) {
+             // Clean up dragging state and restore text selection
+             evt.from.classList.remove('sortable-dragging');
+             document.body.style.userSelect = '';
+             document.body.style.webkitUserSelect = '';
+           }
+         }">
     <template x-for="(question, index) in $store.survey.questions" :key="question.id">
       <div class="block group relative bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-all"
            :class="$store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen ? 'ring-2 ring-indigo-500 shadow-sm' : ''"
-           x-init="dragDrop.initQuestionDrag($el, question.id, index)">
+           :data-question-id="question.id"
+           x-sort:item="question.id">
         
         <!-- Drag Handle -->
         <div class="block-handle absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -117,10 +152,51 @@ export function QuestionRenderer() {
                    placeholder="Type your question here...">
             
             <!-- Question Type Specific Content -->
-            <div x-show="question.type === 'multiple_choice'" class="space-y-2">
+            <div x-show="question.type === 'multiple_choice'" 
+                 class="space-y-2"
+                 x-data="{
+                   handleOptionSort(item, position) {
+                     console.log('Option reordered:', item, 'to position', position);
+                     const questionId = question.id;
+                     const questions = [...$store.survey.questions];
+                     const qIndex = questions.findIndex(q => q.id === questionId);
+                     if (qIndex !== -1 && questions[qIndex].options) {
+                       const options = [...questions[qIndex].options];
+                       const oldIndex = options.findIndex(o => o.id === item);
+                       if (oldIndex !== -1 && oldIndex !== position) {
+                         const [movedOption] = options.splice(oldIndex, 1);
+                         options.splice(position, 0, movedOption);
+                         questions[qIndex].options = options;
+                         $store.survey.questions = questions;
+                         $store.ui.debouncedAutoSave();
+                       }
+                     }
+                   }
+                 }"
+                 x-sort="handleOptionSort"
+                 x-sort:config="{ 
+                   handle: '.option-drag-handle',
+                   animation: 150,
+                   ghostClass: 'sortable-ghost',
+                   dragClass: 'sortable-drag',
+                   chosenClass: 'sortable-chosen',
+                   onStart: function(evt) {
+                     // Add dragging state to container and prevent text selection
+                     evt.from.classList.add('sortable-dragging');
+                     document.body.style.userSelect = 'none';
+                     document.body.style.webkitUserSelect = 'none';
+                   },
+                   onEnd: function(evt) {
+                     // Clean up dragging state and restore text selection
+                     evt.from.classList.remove('sortable-dragging');
+                     document.body.style.userSelect = '';
+                     document.body.style.webkitUserSelect = '';
+                   }
+                 }">
                 <template x-for="(option, optionIndex) in question.options" :key="option.id">
                     <div class="question-option"
-                         x-init="dragDrop.initOptionDrag($el, question.id, option.id, optionIndex)">
+                         :data-option-id="option.id"
+                         x-sort:item="option.id">
                         <div class="option-drag-handle">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
@@ -181,10 +257,51 @@ export function QuestionRenderer() {
             </div>
             
             <!-- Checkbox List -->
-            <div x-show="question.type === 'checkbox'" class="space-y-2">
+            <div x-show="question.type === 'checkbox'" 
+                 class="space-y-2"
+                 x-data="{
+                   handleOptionSort(item, position) {
+                     console.log('Option reordered:', item, 'to position', position);
+                     const questionId = question.id;
+                     const questions = [...$store.survey.questions];
+                     const qIndex = questions.findIndex(q => q.id === questionId);
+                     if (qIndex !== -1 && questions[qIndex].options) {
+                       const options = [...questions[qIndex].options];
+                       const oldIndex = options.findIndex(o => o.id === item);
+                       if (oldIndex !== -1 && oldIndex !== position) {
+                         const [movedOption] = options.splice(oldIndex, 1);
+                         options.splice(position, 0, movedOption);
+                         questions[qIndex].options = options;
+                         $store.survey.questions = questions;
+                         $store.ui.debouncedAutoSave();
+                       }
+                     }
+                   }
+                 }"
+                 x-sort="handleOptionSort"
+                 x-sort:config="{ 
+                   handle: '.option-drag-handle',
+                   animation: 150,
+                   ghostClass: 'sortable-ghost',
+                   dragClass: 'sortable-drag',
+                   chosenClass: 'sortable-chosen',
+                   onStart: function(evt) {
+                     // Add dragging state to container and prevent text selection
+                     evt.from.classList.add('sortable-dragging');
+                     document.body.style.userSelect = 'none';
+                     document.body.style.webkitUserSelect = 'none';
+                   },
+                   onEnd: function(evt) {
+                     // Clean up dragging state and restore text selection
+                     evt.from.classList.remove('sortable-dragging');
+                     document.body.style.userSelect = '';
+                     document.body.style.webkitUserSelect = '';
+                   }
+                 }">
                 <template x-for="(option, optionIndex) in question.options" :key="option.id">
                     <div class="question-option"
-                         x-init="dragDrop.initOptionDrag($el, question.id, option.id, optionIndex)">
+                         :data-option-id="option.id"
+                         x-sort:item="option.id">
                         <div class="option-drag-handle">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
@@ -413,5 +530,6 @@ export function QuestionRenderer() {
         </div>
       </div>
     </template>
+    </div>
   `
 }
