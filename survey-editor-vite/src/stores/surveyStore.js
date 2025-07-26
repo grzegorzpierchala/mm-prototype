@@ -3,7 +3,7 @@ import Alpine from 'alpinejs'
 // Survey Store - Main survey data and questions
 Alpine.store('survey', {
   // Survey metadata
-  title: 'Customer Satisfaction Survey',
+  title: 'Customer Satisfaction Survey 2024',
   description: 'Help us improve your dining experience by sharing your feedback',
   status: 'draft', // draft, published, archived
   

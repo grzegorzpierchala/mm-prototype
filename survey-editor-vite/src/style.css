@@ -149,6 +149,78 @@ input:checked + .toggle-slider:before {
   transform: translateX(16px);
 }
 
+/* Custom Select Styling */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239CA3AF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.75rem;
+  transition: all 0.2s ease;
+}
+
+select:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236366F1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* Settings panel select specific styles */
+.settings-panel select {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  padding: 10px 2.75rem 10px 16px;
+  height: 44px;
+}
+
+.settings-panel select:hover {
+  background-color: #fafafa;
+  border-color: #d1d5db;
+}
+
+.settings-panel select:focus {
+  background-color: white;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Disabled select styling */
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #f9fafb;
+}
+
+/* Select option styling (limited browser support) */
+select option {
+  padding: 8px 16px;
+  font-weight: normal;
+}
+
+/* Better dropdown appearance for modern browsers */
+@supports (-webkit-appearance: none) {
+  select {
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  select:hover {
+    background-color: #fafafa;
+  }
+}
+
 /* Settings Panel Specific Styles */
 .settings-panel {
   width: 380px;

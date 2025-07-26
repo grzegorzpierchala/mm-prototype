@@ -564,23 +564,28 @@
 .collab-avatars {
     display: flex;
     align-items: center;
-    position: relative;
+    margin-left: 16px;
 }
 
 .collab-avatar {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: #e5e7eb;
+    border: 2px solid white;
+    margin-left: -8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
     font-size: 12px;
-    margin-left: -8px;
-    border: 2px solid white;
+    font-weight: 600;
     position: relative;
     z-index: 1;
+}
+
+/* Default styles for avatars without explicit colors */
+.collab-avatar:not([class*="bg-"]) {
+    background: #e5e7eb;
+    color: #4b5563;
 }
 
 .collab-avatar:first-child {
@@ -593,27 +598,26 @@
 .collab-avatar:nth-child(4) { z-index: 1; }
 
 .activity-dot {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 10px;
-    height: 10px;
-    background: #10b981;
-    border: 2px solid white;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    z-index: 5;
+    background: #10b981;
+    margin-left: 6px;
+    animation: pulse 2s infinite;
 }
 
 /* Version Badge */
 .version-badge {
-    display: flex;
-    align-items: center;
-    padding: 4px 12px;
     background: #f3f4f6;
-    border-radius: 6px;
+    color: #6b7280;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-left: 8px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .version-badge:hover {

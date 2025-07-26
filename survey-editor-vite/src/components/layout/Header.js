@@ -6,7 +6,7 @@ export function Header() {
         <div class="flex items-center space-x-3">
           <a href="#" class="text-gray-500 hover:text-gray-700">← Surveys</a>
           <span class="text-gray-400">/</span>
-          <h1 class="text-xl font-medium text-gray-900" x-text="$store.survey.title"></h1>
+          <h1 class="text-xl font-medium text-gray-900">Customer Satisfaction Survey 2024</h1>
         </div>
         <div class="flex items-center space-x-4">
           <!-- Collaboration Avatars -->
@@ -22,7 +22,7 @@ export function Header() {
           <div class="version-badge" 
                @click="$store.ui.toggleVersionHistory()" 
                title="View version history">
-            <span>v<span x-text="$store.versions.currentVersion"></span></span>
+            <span>v3</span>
             <span class="text-xs opacity-70 ml-1">(2 hours ago)</span>
           </div>
           

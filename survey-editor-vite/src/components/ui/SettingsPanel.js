@@ -57,7 +57,7 @@ export function SettingsPanel() {
                 <h4 class="settings-section-title">Type</h4>
                 <select x-model="$store.survey.questions.find(q => q.id === $store.ui.selectedQuestionId).type" 
                         @change="$store.ui.debouncedAutoSave()"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base">
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-medium">
                   <option value="multiple_choice">Multiple Choice</option>
                   <option value="text_input">Text Input</option>
                   <option value="rating_scale">Rating Scale</option>
