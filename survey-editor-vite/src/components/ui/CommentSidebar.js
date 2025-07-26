@@ -38,14 +38,14 @@ export function CommentSidebar() {
         </div>
         
         <!-- Question Context -->
-        <div x-show="$store.ui.activeCommentThread" class="comment-question-context">
-          <template x-if="$store.ui.activeCommentThread">
+        <div x-show="$store.ui.activeCommentQuestionId" class="comment-question-context">
+          <template x-if="$store.ui.activeCommentQuestionId">
             <div>
               <div class="text-xs text-gray-500">
-                <span x-text="$store.survey.questions.find(q => q.id === $store.ui.activeCommentThread)?.questionNumber"></span>
+                <span x-text="$store.survey.questions.find(q => q.id === $store.ui.activeCommentQuestionId)?.questionNumber"></span>
               </div>
               <div class="comment-question-text" 
-                   x-text="$store.survey.questions.find(q => q.id === $store.ui.activeCommentThread)?.text || 'Untitled Question'">
+                   x-text="$store.survey.questions.find(q => q.id === $store.ui.activeCommentQuestionId)?.text || 'Untitled Question'">
               </div>
             </div>
           </template>
@@ -54,9 +54,9 @@ export function CommentSidebar() {
       
       <!-- Comment List -->
       <div class="comment-sidebar-body">
-        <template x-if="$store.ui.activeCommentThread && $store.comments.threads[$store.ui.activeCommentThread]">
+        <template x-if="$store.ui.activeCommentQuestionId && $store.comment.threads[$store.ui.activeCommentQuestionId]">
           <div class="comment-list">
-            <template x-for="comment in $store.comments.threads[$store.ui.activeCommentThread]" :key="comment.id">
+            <template x-for="comment in $store.comment.threads[$store.ui.activeCommentQuestionId]" :key="comment.id">
               <div class="comment-item" :class="{ 'resolved': comment.resolved }">
                 <!-- Comment Type Badge -->
                 <div x-show="comment.type" 
@@ -69,8 +69,8 @@ export function CommentSidebar() {
                        'approval': comment.type === 'approval',
                        'reference': comment.type === 'reference'
                      }">
-                  <span x-text="$store.comments.commentTypes[comment.type]?.icon"></span>
-                  <span x-text="$store.comments.commentTypes[comment.type]?.label"></span>
+                  <span x-text="$store.comment.commentTypes[comment.type]?.icon"></span>
+                  <span x-text="$store.comment.commentTypes[comment.type]?.label"></span>
                 </div>
                 
                 <!-- Author Info -->
@@ -98,7 +98,7 @@ export function CommentSidebar() {
                 
                 <!-- Comment Actions -->
                 <div class="comment-actions">
-                  <button @click="$store.comments.resolveComment($store.ui.activeCommentThread, comment.id)"
+                  <button @click="$store.comment.resolveComment($store.ui.activeCommentQuestionId, comment.id)"
                           class="comment-action">
                     <span x-show="!comment.resolved">Mark as resolved</span>
                     <span x-show="comment.resolved">Unresolve</span>
@@ -107,7 +107,7 @@ export function CommentSidebar() {
                           class="comment-action">
                     Reply
                   </button>
-                  <button @click="$store.comments.deleteComment($store.ui.activeCommentThread, comment.id)"
+                  <button @click="$store.comment.deleteComment($store.ui.activeCommentQuestionId, comment.id)"
                           class="comment-action text-red-600 hover:text-red-700">
                     Delete
                   </button>
@@ -143,7 +143,7 @@ export function CommentSidebar() {
                      class="mt-3 ml-9">
                   <textarea 
                     x-model="replyText"
-                    @keydown.enter.meta="if(replyText.trim()) { $store.comments.addReply($store.ui.activeCommentThread, comment.id, replyText); replyText = ''; comment.showReply = false; }"
+                    @keydown.enter.meta="if(replyText.trim()) { $store.comment.addReply($store.ui.activeCommentQuestionId, comment.id, replyText); replyText = ''; comment.showReply = false; }"
                     class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     rows="2"
                     placeholder="Write a reply..."></textarea>
@@ -152,7 +152,7 @@ export function CommentSidebar() {
                             class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
                       Cancel
                     </button>
-                    <button @click="if(replyText.trim()) { $store.comments.addReply($store.ui.activeCommentThread, comment.id, replyText); replyText = ''; comment.showReply = false; }"
+                    <button @click="if(replyText.trim()) { $store.comment.addReply($store.ui.activeCommentQuestionId, comment.id, replyText); replyText = ''; comment.showReply = false; }"
                             class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                       Reply
                     </button>
@@ -164,7 +164,7 @@ export function CommentSidebar() {
         </template>
         
         <!-- Empty State -->
-        <div x-show="!$store.ui.activeCommentThread || !$store.comments.threads[$store.ui.activeCommentThread] || $store.comments.threads[$store.ui.activeCommentThread].length === 0"
+        <div x-show="!$store.ui.activeCommentQuestionId || !$store.comment.threads[$store.ui.activeCommentQuestionId] || $store.comment.threads[$store.ui.activeCommentQuestionId].length === 0"
              class="flex flex-col items-center justify-center h-full text-gray-400">
           <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
@@ -180,10 +180,10 @@ export function CommentSidebar() {
       <div class="comment-sidebar-footer">
         <!-- Comment Type Selector -->
         <div class="comment-type-selector">
-          <template x-for="(type, key) in $store.comments.commentTypes" :key="key">
-            <button @click="$store.comments.newCommentType = key"
+          <template x-for="(type, key) in $store.comment.commentTypes" :key="key">
+            <button @click="$store.comment.newCommentType = key"
                     class="comment-type-option"
-                    :class="{ 'selected': $store.comments.newCommentType === key }">
+                    :class="{ 'selected': $store.comment.newCommentType === key }">
               <span x-text="type.icon"></span>
               <span x-text="type.label"></span>
             </button>
@@ -192,11 +192,11 @@ export function CommentSidebar() {
         
         <!-- Comment Input -->
         <textarea 
-          x-model="$store.comments.newCommentText"
-          @keydown.enter.meta="if($store.comments.newCommentText.trim() && $store.ui.activeCommentThread) { 
-            $store.comments.addComment($store.ui.activeCommentThread, { 
-              type: $store.comments.newCommentType, 
-              text: $store.comments.newCommentText 
+          x-model="$store.comment.newCommentText"
+          @keydown.enter.meta="if($store.comment.newCommentText.trim() && $store.ui.activeCommentQuestionId) { 
+            $store.comment.addComment($store.ui.activeCommentQuestionId, { 
+              type: $store.comment.newCommentType, 
+              text: $store.comment.newCommentText 
             }); 
           }"
           class="comment-textarea"
@@ -207,13 +207,13 @@ export function CommentSidebar() {
           <div class="text-xs text-gray-500">
             <kbd class="kbd text-xs">⌘</kbd> + <kbd class="kbd text-xs">Enter</kbd> to submit
           </div>
-          <button @click="if($store.comments.newCommentText.trim() && $store.ui.activeCommentThread) { 
-                    $store.comments.addComment($store.ui.activeCommentThread, { 
-                      type: $store.comments.newCommentType, 
-                      text: $store.comments.newCommentText 
+          <button @click="if($store.comment.newCommentText.trim() && $store.ui.activeCommentQuestionId) { 
+                    $store.comment.addComment($store.ui.activeCommentQuestionId, { 
+                      type: $store.comment.newCommentType, 
+                      text: $store.comment.newCommentText 
                     }); 
                   }"
-                  :disabled="!$store.comments.newCommentText.trim() || !$store.ui.activeCommentThread"
+                  :disabled="!$store.comment.newCommentText.trim() || !$store.ui.activeCommentQuestionId"
                   class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
             Comment
           </button>

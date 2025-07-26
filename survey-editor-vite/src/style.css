@@ -88,7 +88,7 @@ body {
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 48px;
+  width: 44px;
   height: 24px;
 }
 
@@ -96,6 +96,7 @@ body {
   opacity: 0;
   width: 0;
   height: 0;
+  position: absolute;
 }
 
 .toggle-slider {
@@ -105,30 +106,30 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #E5E7EB;
-  transition: 0.3s;
+  background-color: #e5e7eb;
+  transition: 0.2s;
   border-radius: 24px;
 }
 
 .toggle-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
   background-color: white;
-  transition: 0.3s;
+  transition: 0.2s;
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #4F46E5;
+input:checked + .toggle-slider {
+  background-color: #6366f1;
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(24px);
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
 }
 
 .toggle-switch-sm {
@@ -136,11 +137,12 @@ body {
   height: 20px;
 }
 
+
 .toggle-switch-sm .toggle-slider:before {
-  height: 14px;
-  width: 14px;
-  left: 3px;
-  bottom: 3px;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
 }
 
 .toggle-switch-sm input:checked + .toggle-slider:before {
@@ -804,9 +806,66 @@ body {
 
 /* Smooth transitions */
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
+  transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+/* Specific transitions for interactive elements */
+button, .button, [role="button"] {
+  transition: all 0.2s ease;
+}
+
+button:active, .button:active, [role="button"]:active {
+  transform: scale(0.98);
+}
+
+/* Dropdown animations */
+.question-type-dropdown {
+  animation: slideUp 0.2s ease-out;
+}
+
+/* Panel slide animations */
+.settings-panel, .comment-sidebar, .version-history-panel {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hover effects with scale */
+.question-card {
+  transition: all 0.2s ease;
+}
+
+.question-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Smooth focus transitions */
+input:focus, textarea:focus, select:focus {
+  transition: all 0.2s ease;
+}
+
+/* Add option button hover effect */
+.add-option-button:hover {
+  transform: translateX(4px);
+}
+
+/* Comment bubble pulse animation */
+.comment-bubble.has-unresolved {
+  animation: pulse 2s infinite;
+}
+
+/* Loading states */
+.saving .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Focus styles */

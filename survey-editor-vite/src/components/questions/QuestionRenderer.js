@@ -3,7 +3,8 @@ export function QuestionRenderer() {
   return `
     <template x-for="(question, index) in $store.survey.questions" :key="question.id">
       <div class="block group relative bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-all"
-           :class="selectedQuestion === question.id ? 'ring-2 ring-indigo-500 shadow-sm' : ''">
+           :class="$store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen ? 'ring-2 ring-indigo-500 shadow-sm' : ''"
+           x-init="dragDrop.initQuestionDrag($el, question.id, index)">
         
         <!-- Drag Handle -->
         <div class="block-handle absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -37,7 +38,7 @@ export function QuestionRenderer() {
         </div>
         
         <!-- Question Content -->
-        <div class="p-6" @click="selectQuestion(question.id)">
+        <div class="p-6" @click="$store.ui.openSettingsPanel(question.id)">
             <!-- Question Type Badge and Question Number Container -->
             <div class="flex items-center gap-3 mb-4">
                 <!-- Question Type Badge and Dropdown Container -->
@@ -52,7 +53,47 @@ export function QuestionRenderer() {
                             </svg>
                         </button>
                         
-                        <!-- Question Type Dropdown would go here -->
+                        <!-- Ultra-thin Question Type Dropdown -->
+                        <div x-show="showQuestionTypes === question.id" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             @click.away="showQuestionTypes = null"
+                             @keydown.escape="showQuestionTypes = null"
+                             class="question-type-dropdown">
+                            
+                            <div class="question-type-dropdown-content">
+                                <!-- Recently Used (if available) -->
+                                <div x-show="recentlyUsedTypes.length > 0" class="question-type-section">
+                                    <template x-for="type in recentlyUsedTypes" :key="'recent-' + type.id">
+                                        <button class="question-type-item"
+                                                :class="{ 'highlighted': isTypeHighlighted('recent-' + type.id) }"
+                                                @click="changeQuestionType(question.id, type.id)"
+                                                @mouseenter="setHighlightedType('recent-' + type.id)">
+                                            <span class="question-type-item-icon" x-text="type.icon"></span>
+                                            <span class="question-type-item-name" x-text="type.name"></span>
+                                            <span class="question-type-star">★</span>
+                                        </button>
+                                    </template>
+                                </div>
+                                
+                                <!-- Main question types -->
+                                <template x-for="(category, categoryName) in getQuestionTypeCategories()" :key="categoryName">
+                                    <div x-show="category.length > 0" class="question-type-section">
+                                        <div class="question-type-section-title" x-text="categoryName.charAt(0).toUpperCase() + categoryName.slice(1)"></div>
+                                        <template x-for="type in category" :key="type.id">
+                                            <button class="question-type-item"
+                                                    :class="{ 'highlighted': isTypeHighlighted(categoryName + '-' + type.id) }"
+                                                    @click="changeQuestionType(question.id, type.id)"
+                                                    @mouseenter="setHighlightedType(categoryName + '-' + type.id)">
+                                                <span class="question-type-item-icon" x-text="type.icon"></span>
+                                                <span class="question-type-item-name" x-text="type.name"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                 </div>
                 
                 <!-- Question Number -->
@@ -78,7 +119,8 @@ export function QuestionRenderer() {
             <!-- Question Type Specific Content -->
             <div x-show="question.type === 'multiple_choice'" class="space-y-2">
                 <template x-for="(option, optionIndex) in question.options" :key="option.id">
-                    <div class="question-option">
+                    <div class="question-option"
+                         x-init="dragDrop.initOptionDrag($el, question.id, option.id, optionIndex)">
                         <div class="option-drag-handle">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
@@ -144,7 +186,8 @@ export function QuestionRenderer() {
             <!-- Checkbox List -->
             <div x-show="question.type === 'checkbox'" class="space-y-2">
                 <template x-for="(option, optionIndex) in question.options" :key="option.id">
-                    <div class="question-option">
+                    <div class="question-option"
+                         x-init="dragDrop.initOptionDrag($el, question.id, option.id, optionIndex)">
                         <div class="option-drag-handle">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
@@ -363,7 +406,7 @@ export function QuestionRenderer() {
                 </label>
                 <button class="hover:text-gray-700 transition-colors">Add Logic</button>
                 <button @click.stop="$store.survey.duplicateQuestion(question.id)" class="hover:text-gray-700 transition-colors">Duplicate</button>
-                <button @click.stop="selectQuestion(question.id)"
+                <button @click.stop="$store.ui.openSettingsPanel(question.id)"
                         class="hover:text-gray-700 transition-colors flex items-center space-x-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>

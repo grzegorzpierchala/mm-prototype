@@ -69,7 +69,9 @@ export function Header() {
           </div>
           
           <!-- Keyboard Shortcuts Help -->
-          <button class="text-gray-500 hover:text-gray-700" title="Keyboard shortcuts">
+          <button @click="$store.ui.showKeyboardHelp = true" 
+                  class="text-gray-500 hover:text-gray-700" 
+                  title="Keyboard shortcuts (Shift+/)">
             <span class="kbd">?</span>
           </button>
         </div>

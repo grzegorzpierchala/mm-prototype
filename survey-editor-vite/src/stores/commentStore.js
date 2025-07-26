@@ -1,7 +1,7 @@
 import Alpine from 'alpinejs'
 
 // Comment Store - Managing comments and threads
-Alpine.store('comments', {
+Alpine.store('comment', {
   // Comments organized by question ID
   threads: {
     'q1': [
@@ -138,5 +138,10 @@ Alpine.store('comments', {
     if (this.threads[questionId].length === 0) {
       delete this.threads[questionId]
     }
+  },
+  
+  toggleCommentThread(questionId) {
+    // This will be handled by the UI store to open/close the comment sidebar
+    Alpine.store('ui').toggleCommentSidebar(questionId)
   }
 })

@@ -103,5 +103,27 @@ Alpine.store('ui', {
         this.autoSave()
       }, 1000)
     }
-  }
+  },
+  
+  // Comment sidebar
+  commentSidebarOpen: false,
+  activeCommentQuestionId: null,
+  
+  toggleCommentSidebar(questionId) {
+    if (this.activeCommentQuestionId === questionId && this.commentSidebarOpen) {
+      this.commentSidebarOpen = false
+      this.activeCommentQuestionId = null
+    } else {
+      this.commentSidebarOpen = true
+      this.activeCommentQuestionId = questionId
+    }
+  },
+  
+  closeCommentSidebar() {
+    this.commentSidebarOpen = false
+    this.activeCommentQuestionId = null
+  },
+  
+  // Keyboard shortcuts help
+  showKeyboardHelp: false
 })

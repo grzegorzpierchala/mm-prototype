@@ -36,7 +36,8 @@
       "Bash(npm uninstall:*)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "mcp__playwright__browser_tab_select"
     ],
     "deny": []
   }

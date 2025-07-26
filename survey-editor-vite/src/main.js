@@ -32,6 +32,7 @@ import { SettingsPanel } from './components/ui/SettingsPanel'
 import { CommentSidebar } from './components/ui/CommentSidebar'
 import { VersionHistory } from './components/ui/VersionHistory'
 import { AIAssistant } from './components/ui/AIAssistant'
+import { KeyboardHelp } from './components/ui/KeyboardHelp'
 
 // Set up the app structure
 document.querySelector('#app').innerHTML = `
@@ -47,6 +48,7 @@ document.querySelector('#app').innerHTML = `
     ${CommentSidebar()}
     ${VersionHistory()}
     ${AIAssistant()}
+    ${KeyboardHelp()}
     
   </div>
 `

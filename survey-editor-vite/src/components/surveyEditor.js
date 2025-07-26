@@ -1,18 +1,26 @@
 // Main survey editor Alpine component
+import { initDragDrop } from '../utils/dragDrop'
+import { initKeyboardShortcuts } from '../utils/keyboardShortcuts'
+
 export default function surveyEditor() {
   return {
     // Local state that doesn't need to be in stores
     showQuestionTypes: null,
     highlightedType: null,
-    selectedQuestion: null,
     duplicateQuestions: [],
     showSlashMenu: false,
+    dragDrop: null,
+    keyboardShortcuts: null,
     
     // Initialize
     init() {
       console.log('Survey Editor initialized')
       // Initialize auto-save
       this.$store.ui.initAutoSave()
+      // Initialize drag and drop
+      this.dragDrop = initDragDrop()
+      // Initialize keyboard shortcuts
+      this.keyboardShortcuts = initKeyboardShortcuts()
     },
     
     // Question Management
@@ -77,12 +85,6 @@ export default function surveyEditor() {
       return defaults[type] || { requiredError: 'This field is required' }
     },
     
-    // Select a question
-    selectQuestion(questionId) {
-      this.selectedQuestion = questionId
-      this.$store.ui.selectQuestion(questionId)
-      this.$store.ui.openSettingsPanel(questionId)
-    },
     
     // Remove a question
     removeQuestion(questionId) {
