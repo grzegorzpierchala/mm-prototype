@@ -1,5 +1,6 @@
 // Main Layout Component - Container for different tab content
 import { QuestionRenderer } from '../questions/QuestionRenderer'
+import { PreviewPage } from '../pages/PreviewPage'
 
 export function MainLayout() {
   return `
@@ -38,66 +39,7 @@ export function MainLayout() {
         </div>
       </div>
 
-      <!-- Preview Tab Content -->
-      <div x-show="$store.ui.activeTab === 'preview'" 
-           x-data="{ previewDevice: $store.ui.previewDevice }">
-        <!-- Device Selector -->
-        <div class="flex justify-center mb-6">
-          <div class="inline-flex bg-gray-100 rounded-lg p-1">
-            <button @click="$store.ui.setPreviewDevice('desktop')" 
-                    :class="$store.ui.previewDevice === 'desktop' ? 'bg-white shadow-sm' : ''"
-                    class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
-              Desktop
-            </button>
-            <button @click="$store.ui.setPreviewDevice('tablet')" 
-                    :class="$store.ui.previewDevice === 'tablet' ? 'bg-white shadow-sm' : ''"
-                    class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
-              Tablet
-            </button>
-            <button @click="$store.ui.setPreviewDevice('mobile')" 
-                    :class="$store.ui.previewDevice === 'mobile' ? 'bg-white shadow-sm' : ''"
-                    class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
-              Mobile
-            </button>
-          </div>
-        </div>
-        
-        <!-- Preview Container -->
-        <div class="flex justify-center">
-          <!-- Desktop Preview -->
-          <div x-show="$store.ui.previewDevice === 'desktop'" 
-               x-transition
-               class="w-full max-w-3xl">
-            <div class="bg-white rounded-lg shadow-lg p-8">
-              <h1 class="text-2xl font-bold mb-2" x-text="$store.survey.title"></h1>
-              <p class="text-gray-600 mb-8" x-text="$store.survey.description"></p>
-              <!-- Preview questions here -->
-            </div>
-          </div>
-          
-          <!-- Tablet Preview -->
-          <div x-show="$store.ui.previewDevice === 'tablet'" 
-               x-transition
-               class="w-full max-w-2xl">
-            <div class="device-frame bg-white rounded-lg shadow-lg p-6 border-8 border-gray-800">
-              <h1 class="text-xl font-bold mb-2" x-text="$store.survey.title"></h1>
-              <p class="text-gray-600 mb-6 text-sm" x-text="$store.survey.description"></p>
-              <!-- Preview questions here -->
-            </div>
-          </div>
-          
-          <!-- Mobile Preview -->
-          <div x-show="$store.ui.previewDevice === 'mobile'" 
-               x-transition
-               class="w-full max-w-sm">
-            <div class="device-frame bg-white rounded-lg shadow-lg p-4 border-8 border-gray-800">
-              <h1 class="text-lg font-bold mb-1" x-text="$store.survey.title"></h1>
-              <p class="text-gray-600 mb-4 text-xs" x-text="$store.survey.description"></p>
-              <!-- Preview questions here -->
-            </div>
-          </div>
-        </div>
-      </div>
+      ${PreviewPage()}
 
       <!-- Share Tab Content -->
       <div x-show="$store.ui.activeTab === 'share'" 

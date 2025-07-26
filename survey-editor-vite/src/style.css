@@ -1498,6 +1498,36 @@ input[type="range"].slider::-moz-range-thumb {
   margin-right: 8px;
 }
 
+/* Device Frame Styles for Preview */
+.device-frame {
+  position: relative;
+  transform: scale(0.7);
+  transform-origin: top center;
+}
+
+.device-frame::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -15px;
+  width: 3px;
+  height: 60px;
+  background: #1a1a1a;
+  border-radius: 2px 0 0 2px;
+  transform: translateY(-50%);
+}
+
+.device-frame::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  right: -15px;
+  width: 3px;
+  height: 40px;
+  background: #1a1a1a;
+  border-radius: 0 2px 2px 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .settings-panel,
