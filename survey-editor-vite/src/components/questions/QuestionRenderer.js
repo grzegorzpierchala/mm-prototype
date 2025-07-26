@@ -127,10 +127,7 @@ export function QuestionRenderer() {
                             </svg>
                         </div>
                         
-                        <input type="radio" 
-                               :name="question.id" 
-                               class="text-indigo-600" 
-                               disabled>
+                        <div class="w-4 h-4 border-2 border-gray-300 rounded-full flex-shrink-0"></div>
                         
                         <!-- Option Text -->
                         <input type="text" 
@@ -193,10 +190,7 @@ export function QuestionRenderer() {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                             </svg>
                         </div>
-                        <input type="checkbox" 
-                               :name="question.id" 
-                               class="text-indigo-600 rounded" 
-                               disabled>
+                        <div class="w-4 h-4 border-2 border-gray-300 rounded flex-shrink-0"></div>
                         <input type="text" 
                                x-model="option.text"
                                @click.stop

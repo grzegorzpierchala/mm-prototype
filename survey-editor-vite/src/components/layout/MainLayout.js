@@ -1,6 +1,8 @@
 // Main Layout Component - Container for different tab content
 import { QuestionRenderer } from '../questions/QuestionRenderer'
 import { PreviewPage } from '../pages/PreviewPage'
+import { SharePage } from '../pages/SharePage'
+import { SettingsPage } from '../pages/SettingsPage'
 
 export function MainLayout() {
   return `
@@ -41,98 +43,9 @@ export function MainLayout() {
 
       ${PreviewPage()}
 
-      <!-- Share Tab Content -->
-      <div x-show="$store.ui.activeTab === 'share'" 
-           class="max-w-2xl mx-auto">
-        <div class="bg-white rounded-lg shadow p-8">
-          <h2 class="text-2xl font-bold mb-6">Share Your Survey</h2>
-          
-          <!-- Survey Link -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Survey Link</label>
-            <div class="flex">
-              <input type="text" 
-                     value="https://surveys.example.com/s/abc123" 
-                     readonly 
-                     class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50">
-              <button class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">
-                Copy
-              </button>
-            </div>
-          </div>
-          
-          <!-- QR Code -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">QR Code</label>
-            <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-              <span class="text-gray-400">QR Code</span>
-            </div>
-          </div>
-          
-          <!-- Embed Code -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Embed Code</label>
-            <textarea 
-              readonly 
-              rows="4" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-              ><iframe src="https://surveys.example.com/embed/abc123" width="100%" height="600"></iframe></textarea>
-          </div>
-        </div>
-      </div>
+      ${SharePage()}
 
-      <!-- Settings Tab Content -->
-      <div x-show="$store.ui.activeTab === 'settings'" 
-           class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <h2 class="text-xl font-semibold mb-6">Survey Settings</h2>
-            
-            <!-- General Settings -->
-            <div class="space-y-6">
-              <div>
-                <label class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-700">Allow anonymous responses</span>
-                  <label class="toggle-switch">
-                    <input type="checkbox" x-model="$store.survey.settings.allowAnonymous">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </label>
-              </div>
-              
-              <div>
-                <label class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-700">Require all questions</span>
-                  <label class="toggle-switch">
-                    <input type="checkbox" x-model="$store.survey.settings.requireAllQuestions">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </label>
-              </div>
-              
-              <div>
-                <label class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-700">Show progress bar</span>
-                  <label class="toggle-switch">
-                    <input type="checkbox" x-model="$store.survey.settings.showProgressBar">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </label>
-              </div>
-              
-              <div>
-                <label class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-700">Allow back navigation</span>
-                  <label class="toggle-switch">
-                    <input type="checkbox" x-model="$store.survey.settings.allowBackNavigation">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      ${SettingsPage()}
 
     </main>
   `
