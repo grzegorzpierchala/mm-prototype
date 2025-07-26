@@ -1,7 +1,42 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:www.qualtrics.com)"
+      "WebFetch(domain:www.qualtrics.com)",
+      "Bash(env)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_drag",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_navigate_forward",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_tab_new",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_network_requests",
+      "Bash(dir:*)",
+      "mcp__playwright-mcp-server__browser_navigate",
+      "mcp__playwright-mcp-server__browser_take_screenshot",
+      "mcp__playwright-mcp-server__browser_tab_new",
+      "mcp__playwright-mcp-server__browser_tab_select",
+      "mcp__playwright-mcp-server__browser_click",
+      "mcp__playwright-mcp-server__browser_evaluate",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(./node_modules/.bin/tailwindcss:*)",
+      "Bash(npm exec:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }
