@@ -465,13 +465,20 @@ select option {
 
 /* Question block drag and drop styles */
 .block[draggable="true"] {
-  cursor: move;
+  cursor: default; /* Default cursor since we'll only allow dragging from padding */
 }
 
-.block[draggable="true"]:active {
+/* Only apply drag styling when actually dragging */
+.block.dragging {
   cursor: grabbing;
   opacity: 0.8;
   transform: scale(0.98);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Visual feedback for draggable areas on hover */
+.block:hover .drag-indicator {
+  opacity: 1;
 }
 
 /* Drag handle styling for both questions and options */

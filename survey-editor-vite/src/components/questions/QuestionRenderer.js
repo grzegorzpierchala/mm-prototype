@@ -14,12 +14,21 @@ export function QuestionRenderer() {
            handleQuestionDragStart(e, questionId) {
              this.draggedQuestion = questionId
              e.dataTransfer.effectAllowed = 'move'
-             e.dataTransfer.setData('text/html', e.target.innerHTML)
-             e.target.classList.add('opacity-40')
+             e.dataTransfer.setData('text/html', '')
+             
+             // Find the block element and add dragging class
+             const blockElement = e.target.closest('.block')
+             if (blockElement) {
+               blockElement.classList.add('dragging')
+             }
            },
            
            handleQuestionDragEnd(e) {
-             e.target.classList.remove('opacity-40')
+             // Remove dragging class from the block
+             const blockElement = e.target.closest('.block')
+             if (blockElement) {
+               blockElement.classList.remove('dragging')
+             }
              const questions = [...$store.survey.questions]
              const draggedIndex = questions.findIndex(q => q.id === this.draggedQuestion)
              const targetIndex = questions.findIndex(q => q.id === this.draggedOverQuestion)
@@ -124,19 +133,39 @@ export function QuestionRenderer() {
                'opacity-50': draggedQuestion === question.id
              }"
              :data-question-id="question.id"
-             draggable="true"
-             @dragstart="handleQuestionDragStart($event, question.id)"
-             @dragend="handleQuestionDragEnd($event)"
              @dragover="handleQuestionDragOver($event, question.id)"
              @drop="handleQuestionDrop($event)"
              @dragenter="handleQuestionDragEnter($event, question.id)"
              @dragleave="handleQuestionDragLeave($event)">
         
-        <!-- Drag Handle -->
-        <div class="drag-handle absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
-            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M3 4.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm3-6a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/>
-            </svg>
+        <!-- Drag Overlay - Creates draggable padding zones -->
+        <div class="absolute inset-0 pointer-events-none">
+          <!-- Top padding drag zone -->
+          <div class="absolute top-0 left-0 right-0 h-6 pointer-events-auto cursor-move"
+               draggable="true"
+               @dragstart="handleQuestionDragStart($event, question.id)"
+               @dragend="handleQuestionDragEnd($event)"></div>
+          <!-- Bottom padding drag zone -->
+          <div class="absolute bottom-0 left-0 right-0 h-6 pointer-events-auto cursor-move"
+               draggable="true"
+               @dragstart="handleQuestionDragStart($event, question.id)"
+               @dragend="handleQuestionDragEnd($event)"></div>
+          <!-- Left padding drag zone -->
+          <div class="absolute top-0 left-0 bottom-0 w-6 pointer-events-auto cursor-move"
+               draggable="true"
+               @dragstart="handleQuestionDragStart($event, question.id)"
+               @dragend="handleQuestionDragEnd($event)"></div>
+          <!-- Right padding drag zone -->
+          <div class="absolute top-0 right-0 bottom-0 w-6 pointer-events-auto cursor-move"
+               draggable="true"
+               @dragstart="handleQuestionDragStart($event, question.id)"
+               @dragend="handleQuestionDragEnd($event)"></div>
+        </div>
+        
+        <!-- Visual Drag Indicator (shows on hover in padding areas) -->
+        <div class="absolute inset-0 pointer-events-none">
+          <div class="absolute inset-0 border-2 border-dashed border-gray-300 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+               style="margin: 4px;"></div>
         </div>
         
         <!-- Comment Indicator -->
