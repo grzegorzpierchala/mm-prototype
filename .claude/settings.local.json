@@ -38,7 +38,13 @@
       "Bash(true)",
       "Bash(npm run dev:*)",
       "mcp__playwright__browser_tab_select",
-      "WebFetch(domain:alpinejs.dev)"
+      "WebFetch(domain:alpinejs.dev)",
+      "Bash(npm init:*)",
+      "Bash(npm run extract:*)",
+      "Bash(node:*)",
+      "Bash(npm run validate:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

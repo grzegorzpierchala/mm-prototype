@@ -11,17 +11,88 @@ This is a **high-fidelity prototype** focused on:
 - **Zero to minimal backend** - Mock data and simulated interactions for demo purposes
 - **Fast iteration cycles** - Quick changes based on stakeholder feedback
 
-### Before starting work
-- Always in plan mode to make a plan
-- After get the plan, make sure you write the plan to .claude/tasks/TASK_NAME.md
-- The plan should be a detailed implementation plan, the reasoning behind them, as well as tasks broken down.
-- If the task require external knowledge or certain package, also research to get latest knowledge (Use Task tool for research)
-- Don't over plan it, always think MVP unless I tell you to think more about it and spend more time on research.
-- Once you write the plan, firstly ask me to review it. Do not continue until I approve the plan.
+## Work Management & Audit Trail (MANDATORY)
 
-### While implementing
-- You should update the plan as you work.
-- After you complete tasks in the plan, you should update and append detailed descriptions of the changes you made, so following tasks can be easily hand over to other engineers.
+### Project Structure
+```
+.claude/
+  /backlog/           # Future work items (user stories)
+  /work-log/          # Active and completed work with full audit trail
+    YYYY-MM-DD-HH-MM-task-name.md
+```
+
+### CRITICAL: Work Documentation Process
+
+**TRIGGER CONDITIONS** - Create work log file IMMEDIATELY when:
+- User requests ANY new feature, bug fix, or modification
+- User asks a "how to" question that requires implementation
+- User requests research or investigation that leads to code changes
+- Continuing work from a previous session
+
+**WORKFLOW INTEGRATION**:
+1. **Capture Phase** (When task is requested):
+   - Create `.claude/work-log/YYYY-MM-DD-HH-MM-[descriptive-task-name].md`
+   - Document: Context, User Request, Initial Assessment
+   - Enter plan mode if needed for complex tasks
+   
+2. **Planning Phase** (Before implementation):
+   - Add detailed plan to the work log file
+   - Use TodoWrite tool to create active task list
+   - Get user approval if significant work
+   
+3. **Implementation Phase** (During work):
+   - Keep TodoWrite tasks synchronized with progress
+   - Update work log file after EACH significant action:
+     - Commands run and their output
+     - Files created/modified with line numbers
+     - Decisions made and reasoning
+     - Problems encountered and solutions
+   
+4. **Completion Phase** (After implementation):
+   - Final summary of all changes
+   - List of affected files
+   - Testing performed
+   - Next steps or follow-up items
+
+### Work Log Template
+```markdown
+# Task: [Descriptive Name]
+**Date**: YYYY-MM-DD HH:MM
+**Status**: Planning | In Progress | Completed | Blocked
+**Category**: Feature | Bug Fix | Refactor | Research
+
+## Context
+[Why this work was requested, any relevant background]
+
+## User Request
+[Exact user request or problem statement]
+
+## Plan
+[Detailed implementation plan with reasoning]
+
+## Implementation Log
+### [Timestamp] - [Action]
+- **What**: [Description of action taken]
+- **Files**: [Files affected with line numbers]
+- **Result**: [Outcome of the action]
+- **Notes**: [Any decisions, problems, or insights]
+
+### [Timestamp] - [Next Action]
+...
+
+## Summary
+- **Changes Made**: [List all modifications]
+- **Files Modified**: [Complete list with line ranges]
+- **Testing**: [What was tested and results]
+- **Outstanding Items**: [Any unfinished work or future improvements]
+```
+
+### Enforcement Rules
+- I MUST create a work log file BEFORE any implementation begins
+- I MUST update the log after each significant action (not just at the end)
+- I MUST use both TodoWrite (for active tracking) AND work log files (for audit trail)
+- If I forget, I should immediately stop and create the documentation
+- Work logs are permanent records - never delete, only update status
 
 ## Project Overview
 

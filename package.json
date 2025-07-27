@@ -1,0 +1,26 @@
+{
+  "name": "mm-prototype",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "extract": "node extract-qualtrics-docs.js",
+    "validate": "node validate-docs.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grzegorzpierchala/mm-prototype.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grzegorzpierchala/mm-prototype/issues"
+  },
+  "homepage": "https://github.com/grzegorzpierchala/mm-prototype#readme",
+  "description": "",
+  "dependencies": {
+    "playwright": "^1.54.1",
+    "turndown": "^7.2.0"
+  }
+}
