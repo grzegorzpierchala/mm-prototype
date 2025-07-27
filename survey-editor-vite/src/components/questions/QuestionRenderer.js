@@ -387,9 +387,11 @@ export function QuestionRenderer() {
             <!-- Question Text -->
             <div class="mb-4" @click.stop>
                 <textarea x-model="question.text" 
-                          @input="$store.ui.debouncedAutoSave()"
-                          rows="2"
-                          class="w-full px-0 py-0 border-0 resize-none focus:outline-none focus:ring-0 text-lg font-medium text-gray-800 placeholder-gray-400"
+                          @input="$store.ui.debouncedAutoSave(); $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                          @focus="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                          x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                          rows="1"
+                          class="w-full px-0 py-0 border-0 resize-none focus:outline-none focus:ring-0 text-lg font-medium text-gray-800 placeholder-gray-400 overflow-hidden"
                           placeholder="Type your question here..."
                           style="background: transparent;"></textarea>
             </div>
@@ -842,7 +844,7 @@ export function QuestionRenderer() {
                           </svg>
                         </div>
                         
-                        <label class="flex items-center flex-1 p-3 rounded-lg cursor-pointer transition-all"
+                        <label class="flex items-center flex-1 py-2 px-3 rounded-lg cursor-pointer transition-all"
                                :class="{
                                  'bg-gray-50': isSelected(option.id),
                                  'hover:bg-gray-50': !isSelected(option.id)
@@ -871,7 +873,7 @@ export function QuestionRenderer() {
                         <!-- Remove Option Button (subtle) -->
                         <button @click="$store.survey.removeOption(question.id, option.id)"
                                 x-show="question.options.length > 2"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-300 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
                                 title="Remove option">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -909,7 +911,7 @@ export function QuestionRenderer() {
                   <div class="border border-gray-200 rounded-lg p-2 max-h-48 overflow-y-auto">
                     <template x-for="option in question.options" :key="option.id">
                       <div class="question-option group relative">
-                        <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <label class="flex items-center py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
                           <input :type="question.settings.answerType === 'multiple' ? 'checkbox' : 'radio'"
                                  :name="'mc_' + question.id"
                                  :checked="isSelected(option.id)"
@@ -924,7 +926,7 @@ export function QuestionRenderer() {
                           <!-- Remove Option Button (subtle) -->
                           <button @click="$store.survey.removeOption(question.id, option.id)"
                                   x-show="question.options.length > 2"
-                                  class="ml-auto p-1 text-gray-300 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                  class="ml-auto p-1 text-gray-500 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
                                   title="Remove option">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -996,7 +998,7 @@ export function QuestionRenderer() {
                      }">
                   <!-- Select All Option -->
                   <label x-show="question.settings.selectAllOption" 
-                         class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-50 font-medium">
+                         class="flex items-center py-2 px-3 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-50 font-medium">
                     <input type="checkbox"
                            :checked="response.length === question.options.length"
                            @change="toggleSelectAll()"
@@ -1006,7 +1008,7 @@ export function QuestionRenderer() {
                   
                   <!-- Regular Options -->
                   <template x-for="option in question.options" :key="option.id">
-                    <label class="flex items-center p-3 border rounded-lg cursor-pointer transition-all hover:bg-gray-50"
+                    <label class="flex items-center py-2 px-3 border rounded-lg cursor-pointer transition-all hover:bg-gray-50"
                            :class="{
                              'border-blue-500 bg-blue-50': response.includes(option.id),
                              'border-gray-200': !response.includes(option.id),
