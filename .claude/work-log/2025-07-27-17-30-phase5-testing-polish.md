@@ -290,6 +290,24 @@ Phase 5 of the comprehensive question type enhancement project. Test all 30 ques
     - No blinking or visual glitches observed
     - Auto-save triggers properly after drag operations
 
+### 19:55 - Fixed Options Drag and Drop and Added Visual Indicators
+- **What**: Fixed the option drag handlers and made drop indicators more visible
+- **Files**:
+  - QuestionRenderer.js (lines 689-720) - Fixed handleDragEnd to accept questionId parameter
+  - QuestionRenderer.js (line 802) - Updated dragend event to pass question.id
+  - style.css (lines 520-541) - Enhanced option drop indicators with better visibility
+- **Result**: Options drag and drop now working with visual indicators
+- **Notes**:
+  - Issue was that the `question` variable in handlers wasn't accessible from the store
+  - Fixed by passing questionId and looking up the question from the store
+  - Drop indicators now have:
+    - 4px height with indigo color (#6366F1)
+    - Extended left/right margins (-10px) for better visibility
+    - Subtle shadow for depth
+    - Higher z-index (50) to ensure visibility
+  - Tested successfully - options can be reordered smoothly
+  - Visual indicators appear as blue lines showing where items will drop
+
 ### 18:55 - Updated Required Checkbox to Toggle Switch Style
 - **What**: Changed the Required checkbox in question blocks to match settings panel toggle style
 - **Files**:

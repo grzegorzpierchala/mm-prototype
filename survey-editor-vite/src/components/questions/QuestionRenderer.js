@@ -653,6 +653,8 @@ export function QuestionRenderer() {
                 draggedItem: null,
                 draggedOverItem: null,
                 dropPosition: 'before',
+                lastOptionDragEnter: null,
+                optionDragEnterTimeout: null,
                 
                 updateResponse(optionId) {
                   if (question.settings.answerType === 'multiple') {
@@ -686,8 +688,11 @@ export function QuestionRenderer() {
                   e.target.classList.add('opacity-40')
                 },
                 
-                handleDragEnd(e) {
+                handleDragEnd(e, questionId) {
                   e.target.classList.remove('opacity-40')
+                  const question = $store.survey.questions.find(q => q.id === questionId)
+                  if (!question) return
+                  
                   const items = [...question.options]
                   if (this.draggedItem !== null && this.draggedOverItem !== null && this.draggedItem !== this.draggedOverItem) {
                     const draggedItemContent = items[this.draggedItem]
@@ -704,9 +709,16 @@ export function QuestionRenderer() {
                     question.options = items
                     $store.ui.debouncedAutoSave()
                   }
+                  
+                  // Clear all drag state
                   this.draggedItem = null
                   this.draggedOverItem = null
                   this.dropPosition = 'before'
+                  this.lastOptionDragEnter = null
+                  if (this.optionDragEnterTimeout) {
+                    clearTimeout(this.optionDragEnterTimeout)
+                    this.optionDragEnterTimeout = null
+                  }
                 },
                 
                 handleDragOver(e, optionIndex) {
@@ -715,23 +727,49 @@ export function QuestionRenderer() {
                   }
                   e.dataTransfer.dropEffect = 'move'
                   
-                  // Calculate if we're in the top or bottom half
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  const y = e.clientY - rect.top
-                  this.dropPosition = y < rect.height / 2 ? 'before' : 'after'
+                  // Only process if we're over a valid drop target
+                  if (this.draggedItem !== null && this.draggedItem !== optionIndex) {
+                    // Calculate if we're in the top or bottom half
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const y = e.clientY - rect.top
+                    this.dropPosition = y < rect.height / 2 ? 'before' : 'after'
+                    
+                    // Update draggedOver if needed
+                    if (this.draggedOverItem !== optionIndex) {
+                      this.draggedOverItem = optionIndex
+                    }
+                  }
                   
                   return false
                 },
                 
-                handleDragEnter(optionIndex) {
+                handleDragEnter(e, optionIndex) {
+                  // Debounce drag enter to prevent rapid firing
                   if (this.draggedItem !== null && this.draggedItem !== optionIndex) {
-                    this.draggedOverItem = optionIndex
+                    if (this.optionDragEnterTimeout) {
+                      clearTimeout(this.optionDragEnterTimeout)
+                    }
+                    
+                    this.lastOptionDragEnter = optionIndex
+                    this.optionDragEnterTimeout = setTimeout(() => {
+                      if (this.lastOptionDragEnter === optionIndex) {
+                        this.draggedOverItem = optionIndex
+                      }
+                    }, 50)
                   }
                 },
                 
                 handleDragLeave(e) {
-                  // Only clear if we're actually leaving the element
-                  if (e.target === e.currentTarget) {
+                  // Check if we're actually leaving the drop zone
+                  const relatedTarget = e.relatedTarget
+                  const currentTarget = e.currentTarget
+                  
+                  // Only clear if we're not entering a child element
+                  if (!currentTarget.contains(relatedTarget)) {
+                    if (this.optionDragEnterTimeout) {
+                      clearTimeout(this.optionDragEnterTimeout)
+                      this.optionDragEnterTimeout = null
+                    }
                     this.draggedOverItem = null
                   }
                 },
@@ -761,7 +799,7 @@ export function QuestionRenderer() {
                         <div class="question-option group relative flex items-center"
                              draggable="true"
                              @dragstart="handleDragStart($event, optionIndex)"
-                             @dragend="handleDragEnd($event)"
+                             @dragend="handleDragEnd($event, question.id)"
                              @dragover="handleDragOver($event, optionIndex)"
                              @drop="handleDrop($event)"
                              @dragenter="handleDragEnter($event, optionIndex)"

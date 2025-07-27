@@ -519,6 +519,31 @@ select option {
   position: relative;
 }
 
+/* Option-specific drop indicators */
+.option-wrapper.drop-indicator-before::before,
+.option-wrapper.drop-indicator-after::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  height: 4px;
+  background: #6366F1;
+  border-radius: 2px;
+  pointer-events: none !important;
+  z-index: 50;
+  opacity: 1;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+}
+
+.option-wrapper.drop-indicator-before::before {
+  top: -6px;
+}
+
+.option-wrapper.drop-indicator-after::after {
+  bottom: -6px;
+}
+
 /* Prevent layout shifts during drag */
 .question-blocks-container {
   position: relative;
