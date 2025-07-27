@@ -9,6 +9,7 @@ import './stores/surveyStore'
 import './stores/uiStore'
 import './stores/commentStore'
 import './stores/versionStore'
+import './stores/validationStore'
 
 // Register Alpine plugins
 Alpine.plugin(sort)
@@ -18,6 +19,37 @@ window.Alpine = Alpine
 
 // Register components before Alpine starts
 Alpine.data('surveyEditor', surveyEditor)
+
+// Import validation components first
+import ValidationError, { ValidationSummary } from './components/ui/ValidationError'
+
+// Register validation component
+Alpine.data('validationSummary', () => ({
+  errorCount: 0,
+  questionsWithErrors: [],
+  
+  init() {
+    this.$watch('$store.validation.results', () => {
+      this.errorCount = this.$store.validation.getErrorCount()
+      this.questionsWithErrors = this.$store.validation.getQuestionsWithErrors()
+    })
+    // Initial values
+    this.errorCount = this.$store.validation.getErrorCount()
+    this.questionsWithErrors = this.$store.validation.getQuestionsWithErrors()
+  },
+  
+  scrollToError(questionId) {
+    const element = document.querySelector(`[data-question-id="${questionId}"]`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // Flash the question
+      element.classList.add('ring-2', 'ring-red-500', 'ring-offset-2')
+      setTimeout(() => {
+        element.classList.remove('ring-2', 'ring-red-500', 'ring-offset-2')
+      }, 2000)
+    }
+  }
+}))
 
 // Initialize UI store
 Alpine.store('ui').initAutoSave()
@@ -49,6 +81,7 @@ document.querySelector('#app').innerHTML = `
     ${VersionHistory()}
     ${AIAssistant()}
     ${KeyboardHelp()}
+    ${ValidationSummary()}
     
   </div>
 `

@@ -125,5 +125,35 @@ Alpine.store('ui', {
   },
   
   // Keyboard shortcuts help
-  showKeyboardHelp: false
+  showKeyboardHelp: false,
+  
+  // Settings Panel Tab Visibility
+  hasDisplaySettings(questionType) {
+    const displayTypes = [
+      'multiple_choice', 'checkbox', 'dropdown', 'slider', 'star_rating',
+      'number_scale', 'likert', 'matrix', 'yes_no', 'emoji_scale',
+      'long_text', 'constant_sum', 'ranking', 'side_by_side',
+      'image_choice', 'priority_grid'
+    ]
+    return displayTypes.includes(questionType)
+  },
+  
+  hasLogicSettings(questionType) {
+    const logicTypes = [
+      'multiple_choice', 'dropdown', 'checkbox', 'yes_no', 'number_scale',
+      'star_rating', 'nps', 'likert', 'slider', 'emoji_scale',
+      'matrix', 'ranking', 'image_choice'
+    ]
+    return logicTypes.includes(questionType)
+  },
+  
+  hasAdvancedSettings(questionType) {
+    const advancedTypes = [
+      'text_input', 'long_text', 'multiple_choice', 'checkbox',
+      'matrix', 'file_upload', 'signature', 'drawing',
+      'video_response', 'audio_response', 'heat_map', 'hot_spot',
+      'map_location', 'card_sort', 'constant_sum', 'max_diff'
+    ]
+    return advancedTypes.includes(questionType)
+  }
 })

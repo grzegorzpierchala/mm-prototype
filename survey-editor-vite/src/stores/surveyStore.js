@@ -109,5 +109,84 @@ Alpine.store('survey', {
       this.questions.splice(index + 1, 0, duplicate)
       return duplicate.id
     }
+  },
+  
+  addOption(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question) return
+    
+    // Initialize options array if it doesn't exist
+    if (!question.options) {
+      question.options = []
+    }
+    
+    const newOption = {
+      id: `opt_${Date.now()}`,
+      text: `Option ${question.options.length + 1}`
+    }
+    
+    question.options.push(newOption)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removeOption(questionId, optionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.options || question.options.length <= 2) return
+    
+    question.options = question.options.filter(opt => opt.id !== optionId)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  // Matrix management methods
+  addMatrixRow(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || question.type !== 'matrix') return
+    
+    // Initialize statements array if it doesn't exist
+    if (!question.settings.statements) {
+      question.settings.statements = []
+    }
+    
+    const newRow = {
+      id: `row_${Date.now()}`,
+      text: `Statement ${question.settings.statements.length + 1}`
+    }
+    
+    question.settings.statements.push(newRow)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removeMatrixRow(questionId, rowId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.settings.statements || question.settings.statements.length <= 1) return
+    
+    question.settings.statements = question.settings.statements.filter(row => row.id !== rowId)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  addMatrixColumn(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || question.type !== 'matrix') return
+    
+    // Initialize scalePoints array if it doesn't exist
+    if (!question.settings.scalePoints) {
+      question.settings.scalePoints = []
+    }
+    
+    const newColumn = {
+      id: `col_${Date.now()}`,
+      text: `Option ${question.settings.scalePoints.length + 1}`
+    }
+    
+    question.settings.scalePoints.push(newColumn)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removeMatrixColumn(questionId, columnId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.settings.scalePoints || question.settings.scalePoints.length <= 1) return
+    
+    question.settings.scalePoints = question.settings.scalePoints.filter(col => col.id !== columnId)
+    Alpine.store('ui').debouncedAutoSave()
   }
 })

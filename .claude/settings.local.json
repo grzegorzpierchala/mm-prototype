@@ -44,7 +44,10 @@
       "Bash(node:*)",
       "Bash(npm run validate:*)",
       "WebFetch(domain:docs.anthropic.com)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(mv:*)",
+      "Bash(npx eslint:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

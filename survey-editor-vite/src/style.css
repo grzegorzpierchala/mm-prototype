@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global focus fix - prevent browser default black outline */
+@layer base {
+  input,
+  textarea,
+  select,
+  button,
+  [contenteditable],
+  [tabindex]:not([tabindex="-1"]) {
+    &:focus {
+      outline: none !important;
+      outline-offset: 0 !important;
+    }
+  }
+}
+
 /* Custom styles for the survey editor prototype */
 @layer components {
   /* Block handle styles */
@@ -448,98 +463,71 @@ select option {
   color: #059669;
 }
 
-/* Alpine Sort Plugin Styles */
-.sortable-drag {
-  opacity: 0.8 !important;
-  cursor: grabbing !important;
-  z-index: 1000 !important;
+/* Question block drag and drop styles */
+.block[draggable="true"] {
+  cursor: move;
 }
 
-.sortable-ghost {
-  opacity: 0.3;
-  background: #f3f4f6;
-  border: 2px dashed #d1d5db;
+.block[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.8;
+  transform: scale(0.98);
 }
 
-/* Prevent text selection during dragging */
-.sortable-chosen {
-  cursor: grabbing !important;
+/* Drag handle styling for both questions and options */
+.drag-handle {
+  cursor: grab;
+  user-select: none;
 }
 
-.sortable-chosen * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
+.drag-handle:active {
+  cursor: grabbing;
 }
 
-/* Prevent text selection on the entire container during drag */
-.sortable-dragging {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
+/* Drop indicator lines - improved stability */
+.drop-indicator-before::before,
+.drop-indicator-after::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #6366F1;
+  border-radius: 2px;
+  pointer-events: none !important;
+  z-index: 20;
+  opacity: 1;
+  transition: opacity 0.15s ease;
 }
 
-.sortable-dragging * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
+.drop-indicator-before::before {
+  top: -12px;
 }
 
-/* Drop indicator styles - removed the line indicator */
-.sortable-drop-indicator {
+.drop-indicator-after::after {
+  bottom: -12px;
+}
+
+/* Ensure wrappers don't interfere with drag events */
+.question-block-wrapper {
+  margin-bottom: 16px;
   position: relative;
 }
 
-/* Just keep subtle highlighting without the line */
-.sortable-drop-indicator.drop-before,
-.sortable-drop-indicator.drop-after {
-  opacity: 0.8;
+.option-wrapper {
+  margin: 4px 0;
+  position: relative;
 }
 
-/* Visual feedback for drop zones during drag */
-.question-blocks-container.sortable-dragging {
-  background-color: rgba(240, 241, 255, 0.3);
-  border: 2px dashed #c7d2fe;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+/* Prevent layout shifts during drag */
+.question-blocks-container {
+  position: relative;
 }
 
-/* Highlight the active drop zone */
-.sortable-active-container {
-  background-color: rgba(240, 241, 255, 0.5);
-  box-shadow: inset 0 0 0 2px #6366f1;
-  border-radius: 8px;
-}
-
-/* Option container drop feedback */
-.space-y-2.sortable-dragging {
-  background-color: rgba(240, 241, 255, 0.2);
-  padding: 4px;
-  margin: -4px;
-  border-radius: 6px;
-  border: 1px dashed #c7d2fe;
-}
-
-/* Drag handle styling */
-.block-handle {
-  cursor: grab;
-  transition: opacity 0.2s;
-}
-
-.block-handle:active {
-  cursor: grabbing;
-}
-
-.option-drag-handle {
-  cursor: grab;
-  transition: opacity 0.2s;
-}
-
-.option-drag-handle:active {
-  cursor: grabbing;
+/* Drag over state - subtle background change instead of border */
+.dragging-over {
+  background-color: rgba(99, 102, 241, 0.03);
+  transition: background-color 0.15s ease;
 }
 
 /* Smooth transitions for non-dragging items */
@@ -1016,9 +1004,30 @@ button:active, .button:active, [role="button"]:active {
   transform: translateY(-2px);
 }
 
+/* Global focus style fix - prevent default black border */
+input, textarea, select, button {
+  outline: none !important;
+}
+
 /* Smooth focus transitions */
 input:focus, textarea:focus, select:focus {
   transition: all 0.2s ease;
+  outline: none !important;
+}
+
+/* Prevent default browser focus outline on all focusable elements */
+*:focus {
+  outline: none !important;
+}
+
+/* Apply custom focus styles immediately without delay */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  border-color: #4F46E5;
 }
 
 /* Add option button hover effect */
@@ -1045,15 +1054,8 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* Focus styles */
-*:focus {
-  outline: none;
-}
-
-*:focus-visible {
-  outline: 2px solid #4F46E5;
-  outline-offset: 2px;
-}
+/* Focus styles - removed to prevent conflicts */
+/* Custom focus-visible styles are defined above */
 
 /* Question type specific styles */
 .star-rating {
@@ -1324,24 +1326,33 @@ input:focus, textarea:focus, select:focus {
   cursor: grabbing;
 }
 
-.option-remove {
-  padding: 4px;
-  color: #9CA3AF;
-  background: none;
-  border: none;
-  cursor: pointer;
+/* Multiple choice option - ultrathin design */
+.question-option {
+  margin: 4px 0;
+  position: relative;
   transition: all 0.2s ease;
-  opacity: 0;
 }
 
-.question-option:hover .option-remove {
-  opacity: 1;
+.question-option:hover {
+  transform: translateX(2px);
 }
 
-.option-remove:hover {
-  color: #EF4444;
-  background: #FEE2E2;
-  border-radius: 4px;
+/* Drag and drop states */
+.question-option[draggable="true"]:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* Option wrapper for spacing */
+.option-wrapper {
+  position: relative;
+  margin: 2px 0;
+}
+
+/* Question block wrapper */
+.question-block-wrapper {
+  position: relative;
+  margin-bottom: 16px;
 }
 
 .add-option-button {
@@ -1370,66 +1381,97 @@ input:focus, textarea:focus, select:focus {
   top: 100%;
   left: 0;
   z-index: 50;
-  margin-top: 4px;
-  width: 280px;
+  margin-top: 8px;
+  width: 300px;
   background: white;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 .question-type-dropdown-content {
-  max-height: 400px;
+  max-height: 560px;
   overflow-y: auto;
-  padding: 8px;
+  padding: 6px;
+  padding-bottom: 12px;
 }
 
 .question-type-section {
+  margin-bottom: 2px;
+}
+
+.question-type-section:last-child {
   margin-bottom: 8px;
 }
 
 .question-type-section-title {
-  padding: 8px 12px;
+  padding: 8px 12px 4px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #6B7280;
+  color: #9CA3AF;
   letter-spacing: 0.05em;
 }
 
-.question-type-item {
+.question-type-option {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 12px;
+  margin: 1px 0;
   text-align: left;
-  background: none;
+  background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.question-type-item:hover {
-  background: #F3F4F6;
-}
-
-.question-type-item-icon {
-  width: 24px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.question-type-item-name {
-  flex: 1;
+  transition: all 0.15s ease;
   font-size: 14px;
+  font-weight: 500;
   color: #374151;
 }
 
-.question-type-star {
-  color: #FDE047;
-  font-size: 14px;
+.question-type-option:hover {
+  background: #F3F4F6;
+  transform: translateX(2px);
+}
+
+.question-type-option.bg-gray-50 {
+  background: #F9FAFB;
+  color: #6366F1;
+}
+
+.question-type-option span:first-child {
+  width: 24px;
+  text-align: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.question-type-option span:last-child {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Custom scrollbar for dropdown */
+.question-type-dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.question-type-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.question-type-dropdown-content::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 3px;
+}
+
+.question-type-dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
 }
 
 /* Comment bubble */
