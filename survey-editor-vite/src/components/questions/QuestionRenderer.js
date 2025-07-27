@@ -192,208 +192,32 @@ export function QuestionRenderer() {
         
         <!-- Question Content -->
         <div class="p-6" @click="$store.ui.openSettingsPanel(question.id)">
-            <!-- Question Type Badge and Question Number Container -->
-            <div class="flex items-center gap-3 mb-4">
-                <!-- Question Type Badge and Dropdown Container -->
-                <div class="relative inline-block">
-                        <button @click.stop="showQuestionTypes = showQuestionTypes === question.id ? null : question.id"
-                                @keydown.escape="showQuestionTypes = null"
-                                class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-all"
-                                :class="showQuestionTypes === question.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'">
-                            <span x-text="question.type.replace('_', ' ').replace(/\\b\\w/g, l => l.toUpperCase())"></span>
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Ultra-thin Question Type Dropdown -->
-                        <div x-show="showQuestionTypes === question.id" 
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             @click.away="showQuestionTypes = null"
-                             @keydown.escape="showQuestionTypes = null"
-                             class="question-type-dropdown">
-                            
-                            <div class="question-type-dropdown-content">
-                                <!-- Recently Used (if available) -->
-                                <div x-show="$store.ui.recentlyUsedTypes && $store.ui.recentlyUsedTypes.length > 0" class="question-type-section">
-                                    <h4 class="question-type-section-title">Recently Used</h4>
-                                    <template x-for="typeId in ($store.ui.recentlyUsedTypes || [])" :key="typeId">
-                                        <button @click="$dispatch('change-question-type', {questionId: question.id, newType: typeId}); showQuestionTypes = null"
-                                                class="question-type-option"
-                                                x-show="['text_input', 'long_text', 'multiple_choice', 'checkbox', 'dropdown', 'yes_no', 'star_rating', 'number_scale', 'nps', 'likert', 'slider', 'emoji_scale', 'number', 'email', 'phone', 'url', 'date', 'time', 'matrix', 'ranking', 'constant_sum', 'max_diff', 'side_by_side', 'card_sort', 'file_upload', 'image_choice', 'signature', 'drawing', 'video_response', 'audio_response', 'heat_map', 'hot_spot', 'map_location', 'priority_grid'].includes(typeId)">
-                                            <span x-text="{
-                                              text_input: '💬',
-                                              long_text: '📝',
-                                              multiple_choice: '🔘',
-                                              checkbox: '☑️',
-                                              dropdown: '▼',
-                                              yes_no: '👍',
-                                              star_rating: '⭐',
-                                              number_scale: '🔢',
-                                              nps: '🎯',
-                                              likert: '📊',
-                                              slider: '🎚️',
-                                              emoji_scale: '😊',
-                                              number: '💯',
-                                              email: '✉️',
-                                              phone: '📱',
-                                              url: '🌐',
-                                              date: '📅',
-                                              time: '🕐',
-                                              matrix: '⊞',
-                                              ranking: '📋',
-                                              constant_sum: '💯',
-                                              max_diff: '⚖️',
-                                              side_by_side: '📊',
-                                              card_sort: '🗂️',
-                                              file_upload: '📎',
-                                              image_choice: '🖼️',
-                                              signature: '✍️',
-                                              drawing: '🎨',
-                                              video_response: '📹',
-                                              audio_response: '🎤',
-                                              heat_map: '🔥',
-                                              hot_spot: '🎯',
-                                              map_location: '📍',
-                                              priority_grid: '⊞'
-                                            }[typeId]"></span>
-                                            <span x-text="{
-                                              text_input: 'Short Text',
-                                              long_text: 'Long Text',
-                                              multiple_choice: 'Multiple Choice',
-                                              checkbox: 'Checkboxes',
-                                              dropdown: 'Dropdown',
-                                              yes_no: 'Yes/No',
-                                              star_rating: 'Star Rating',
-                                              number_scale: 'Number Scale',
-                                              nps: 'NPS Score',
-                                              likert: 'Likert Scale',
-                                              slider: 'Slider',
-                                              emoji_scale: 'Emoji Scale',
-                                              number: 'Number',
-                                              email: 'Email',
-                                              phone: 'Phone',
-                                              url: 'Website',
-                                              date: 'Date',
-                                              time: 'Time',
-                                              matrix: 'Matrix Table',
-                                              ranking: 'Rank Order',
-                                              constant_sum: 'Constant Sum',
-                                              max_diff: 'MaxDiff',
-                                              side_by_side: 'Side by Side',
-                                              card_sort: 'Card Sort',
-                                              file_upload: 'File Upload',
-                                              image_choice: 'Image Choice',
-                                              signature: 'Signature',
-                                              drawing: 'Drawing',
-                                              video_response: 'Video',
-                                              audio_response: 'Audio',
-                                              heat_map: 'Heat Map',
-                                              hot_spot: 'Hot Spot',
-                                              map_location: 'Map Location',
-                                              priority_grid: 'Priority Grid'
-                                            }[typeId]"></span>
-                                        </button>
-                                    </template>
-                                </div>
-                                
-                                <!-- Question Type Categories -->
-                                <template x-for="(types, category) in {
-                                    essentials: [
-                                      { id: 'text_input', name: 'Short Text', icon: '💬' },
-                                      { id: 'long_text', name: 'Long Text', icon: '📝' },
-                                      { id: 'multiple_choice', name: 'Multiple Choice', icon: '🔘' },
-                                      { id: 'checkbox', name: 'Checkboxes', icon: '☑️' },
-                                      { id: 'dropdown', name: 'Dropdown', icon: '▼' },
-                                      { id: 'yes_no', name: 'Yes/No', icon: '👍' }
-                                    ],
-                                    rating: [
-                                      { id: 'star_rating', name: 'Star Rating', icon: '⭐' },
-                                      { id: 'number_scale', name: 'Number Scale', icon: '🔢' },
-                                      { id: 'nps', name: 'NPS Score', icon: '🎯' },
-                                      { id: 'likert', name: 'Likert Scale', icon: '📊' },
-                                      { id: 'slider', name: 'Slider', icon: '🎚️' },
-                                      { id: 'emoji_scale', name: 'Emoji Scale', icon: '😊' }
-                                    ],
-                                    input: [
-                                      { id: 'number', name: 'Number', icon: '💯' },
-                                      { id: 'email', name: 'Email', icon: '✉️' },
-                                      { id: 'phone', name: 'Phone', icon: '📱' },
-                                      { id: 'url', name: 'Website', icon: '🌐' },
-                                      { id: 'date', name: 'Date', icon: '📅' },
-                                      { id: 'time', name: 'Time', icon: '🕐' }
-                                    ],
-                                    advanced: [
-                                      { id: 'matrix', name: 'Matrix Table', icon: '⊞' },
-                                      { id: 'ranking', name: 'Rank Order', icon: '📋' },
-                                      { id: 'constant_sum', name: 'Constant Sum', icon: '💯' },
-                                      { id: 'max_diff', name: 'MaxDiff', icon: '⚖️' },
-                                      { id: 'side_by_side', name: 'Side by Side', icon: '📊' },
-                                      { id: 'card_sort', name: 'Card Sort', icon: '🗂️' }
-                                    ],
-                                    media: [
-                                      { id: 'file_upload', name: 'File Upload', icon: '📎' },
-                                      { id: 'image_choice', name: 'Image Choice', icon: '🖼️' },
-                                      { id: 'signature', name: 'Signature', icon: '✍️' },
-                                      { id: 'drawing', name: 'Drawing', icon: '🎨' },
-                                      { id: 'video_response', name: 'Video', icon: '📹' },
-                                      { id: 'audio_response', name: 'Audio', icon: '🎤' }
-                                    ],
-                                    interactive: [
-                                      { id: 'heat_map', name: 'Heat Map', icon: '🔥' },
-                                      { id: 'hot_spot', name: 'Hot Spot', icon: '🎯' },
-                                      { id: 'map_location', name: 'Map Location', icon: '📍' },
-                                      { id: 'priority_grid', name: 'Priority Grid', icon: '⊞' }
-                                    ]
-                                  }" :key="category">
-                                    <div class="question-type-section">
-                                        <h4 class="question-type-section-title"
-                                            x-text="category.charAt(0).toUpperCase() + category.slice(1)"></h4>
-                                        <template x-for="type in types" :key="type.id">
-                                            <button @click="$dispatch('change-question-type', {questionId: question.id, newType: type.id}); showQuestionTypes = null"
-                                                    class="question-type-option"
-                                                    :class="{ 'bg-gray-50': type.id === question.type }">
-                                                <span x-text="type.icon"></span>
-                                                <span x-text="type.name"></span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
+            <!-- Question Number -->
+            <div class="mb-2" @click.stop>
+                <div class="relative">
+                    <input type="text" 
+                           x-model="question.questionNumber" 
+                           @input="$dispatch('validate-question-number', {questionId: question.id}); $store.ui.debouncedAutoSave()"
+                           @blur="$dispatch('validate-question-number', {questionId: question.id})"
+                           class="text-sm font-medium text-gray-500 bg-transparent border-0 focus:bg-gray-50 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+                           :class="{'text-red-500': !(!$store.ui.questionNumberValidation[question.id] || $store.ui.questionNumberValidation[question.id].isValid)}"
+                           placeholder="Q1"
+                           title="Question number for research purposes">
+                    <div x-show="$store.ui.questionNumberValidation[question.id] && !$store.ui.questionNumberValidation[question.id].isValid" 
+                         x-transition
+                         class="absolute top-full mt-1 left-0 text-xs text-red-600 whitespace-nowrap z-10">
+                        Duplicate question number
                     </div>
-                    
-                    <!-- Question Number -->
-                    <div class="relative" @click.stop>
-                        <input type="text" 
-                               x-model="question.questionNumber" 
-                               @input="$dispatch('validate-question-number', {questionId: question.id}); $store.ui.debouncedAutoSave()"
-                               @blur="$dispatch('validate-question-number', {questionId: question.id})"
-                               class="px-3 py-1 text-sm font-medium rounded-md border transition-all"
-                               :class="(!$store.ui.questionNumberValidation[question.id] || $store.ui.questionNumberValidation[question.id].isValid) ? 
-                                       'border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20' : 
-                                       'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'"
-                               placeholder="Q1">
-                        <div x-show="$store.ui.questionNumberValidation[question.id] && !$store.ui.questionNumberValidation[question.id].isValid" 
-                             x-transition
-                             class="absolute top-full mt-1 left-0 text-xs text-red-600 whitespace-nowrap">
-                            Duplicate question number
-                        </div>
-                    </div>
+                </div>
             </div>
             
             <!-- Question Text -->
             <div class="mb-4" @click.stop>
-                <textarea x-model="question.text" 
-                          @input="$store.ui.debouncedAutoSave(); $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                          @focus="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                          x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                          rows="1"
-                          class="w-full px-0 py-0 border-0 resize-none focus:outline-none focus:ring-0 text-lg font-medium text-gray-800 placeholder-gray-400 overflow-hidden"
-                          placeholder="Type your question here..."
-                          style="background: transparent;"></textarea>
+                <input type="text" 
+                       x-model="question.text" 
+                       @input="$store.ui.debouncedAutoSave()"
+                       class="text-lg font-medium text-gray-900 w-full bg-transparent border-0 focus:bg-gray-50 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                       placeholder="Type your question here...">
             </div>
             
             <!-- Question-specific content based on type -->
@@ -3607,6 +3431,178 @@ export function QuestionRenderer() {
             <!-- Question Actions -->
             <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
                 <div class="flex items-center gap-4">
+                    <!-- Question Type Dropdown -->
+                    <div class="relative inline-block">
+                        <button @click.stop="showQuestionTypes = showQuestionTypes === question.id ? null : question.id"
+                                @keydown.escape="showQuestionTypes = null"
+                                class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-all"
+                                :class="showQuestionTypes === question.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'">
+                            <span x-text="question.type.replace('_', ' ').replace(/\\b\\w/g, l => l.toUpperCase())"></span>
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Ultra-thin Question Type Dropdown -->
+                        <div x-show="showQuestionTypes === question.id" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             @click.away="showQuestionTypes = null"
+                             @keydown.escape="showQuestionTypes = null"
+                             class="question-type-dropdown absolute bottom-full mb-2 left-0">
+                            
+                            <div class="question-type-dropdown-content">
+                                <!-- Recently Used (if available) -->
+                                <div x-show="$store.ui.recentlyUsedTypes && $store.ui.recentlyUsedTypes.length > 0" class="question-type-section">
+                                    <h4 class="question-type-section-title">Recently Used</h4>
+                                    <template x-for="typeId in ($store.ui.recentlyUsedTypes || [])" :key="typeId">
+                                        <button @click="$dispatch('change-question-type', {questionId: question.id, newType: typeId}); showQuestionTypes = null"
+                                                class="question-type-option"
+                                                x-show="['text_input', 'long_text', 'multiple_choice', 'checkbox', 'dropdown', 'yes_no', 'star_rating', 'number_scale', 'nps', 'likert', 'slider', 'emoji_scale', 'number', 'email', 'phone', 'url', 'date', 'time', 'matrix', 'ranking', 'constant_sum', 'max_diff', 'side_by_side', 'card_sort', 'file_upload', 'image_choice', 'signature', 'drawing', 'video_response', 'audio_response', 'heat_map', 'hot_spot', 'map_location', 'priority_grid'].includes(typeId)">
+                                            <span x-text="{
+                                              text_input: '💬',
+                                              long_text: '📝',
+                                              multiple_choice: '🔘',
+                                              checkbox: '☑️',
+                                              dropdown: '▼',
+                                              yes_no: '👍',
+                                              star_rating: '⭐',
+                                              number_scale: '🔢',
+                                              nps: '🎯',
+                                              likert: '📊',
+                                              slider: '🎚️',
+                                              emoji_scale: '😊',
+                                              number: '💯',
+                                              email: '✉️',
+                                              phone: '📱',
+                                              url: '🌐',
+                                              date: '📅',
+                                              time: '🕐',
+                                              matrix: '⊞',
+                                              ranking: '📋',
+                                              constant_sum: '💯',
+                                              max_diff: '⚖️',
+                                              side_by_side: '📊',
+                                              card_sort: '🗂️',
+                                              file_upload: '📎',
+                                              image_choice: '🖼️',
+                                              signature: '✍️',
+                                              drawing: '🎨',
+                                              video_response: '📹',
+                                              audio_response: '🎤',
+                                              heat_map: '🔥',
+                                              hot_spot: '🎯',
+                                              map_location: '📍',
+                                              priority_grid: '⊞'
+                                            }[typeId]"></span>
+                                            <span x-text="{
+                                              text_input: 'Short Text',
+                                              long_text: 'Long Text',
+                                              multiple_choice: 'Multiple Choice',
+                                              checkbox: 'Checkboxes',
+                                              dropdown: 'Dropdown',
+                                              yes_no: 'Yes/No',
+                                              star_rating: 'Star Rating',
+                                              number_scale: 'Number Scale',
+                                              nps: 'NPS Score',
+                                              likert: 'Likert Scale',
+                                              slider: 'Slider',
+                                              emoji_scale: 'Emoji Scale',
+                                              number: 'Number',
+                                              email: 'Email',
+                                              phone: 'Phone',
+                                              url: 'Website',
+                                              date: 'Date',
+                                              time: 'Time',
+                                              matrix: 'Matrix Table',
+                                              ranking: 'Rank Order',
+                                              constant_sum: 'Constant Sum',
+                                              max_diff: 'MaxDiff',
+                                              side_by_side: 'Side by Side',
+                                              card_sort: 'Card Sort',
+                                              file_upload: 'File Upload',
+                                              image_choice: 'Image Choice',
+                                              signature: 'Signature',
+                                              drawing: 'Drawing',
+                                              video_response: 'Video',
+                                              audio_response: 'Audio',
+                                              heat_map: 'Heat Map',
+                                              hot_spot: 'Hot Spot',
+                                              map_location: 'Map Location',
+                                              priority_grid: 'Priority Grid'
+                                            }[typeId]"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                
+                                <!-- Question Type Categories -->
+                                <template x-for="(types, category) in {
+                                    essentials: [
+                                      { id: 'text_input', name: 'Short Text', icon: '💬' },
+                                      { id: 'long_text', name: 'Long Text', icon: '📝' },
+                                      { id: 'multiple_choice', name: 'Multiple Choice', icon: '🔘' },
+                                      { id: 'checkbox', name: 'Checkboxes', icon: '☑️' },
+                                      { id: 'dropdown', name: 'Dropdown', icon: '▼' },
+                                      { id: 'yes_no', name: 'Yes/No', icon: '👍' }
+                                    ],
+                                    rating: [
+                                      { id: 'star_rating', name: 'Star Rating', icon: '⭐' },
+                                      { id: 'number_scale', name: 'Number Scale', icon: '🔢' },
+                                      { id: 'nps', name: 'NPS Score', icon: '🎯' },
+                                      { id: 'likert', name: 'Likert Scale', icon: '📊' },
+                                      { id: 'slider', name: 'Slider', icon: '🎚️' },
+                                      { id: 'emoji_scale', name: 'Emoji Scale', icon: '😊' }
+                                    ],
+                                    input: [
+                                      { id: 'number', name: 'Number', icon: '💯' },
+                                      { id: 'email', name: 'Email', icon: '✉️' },
+                                      { id: 'phone', name: 'Phone', icon: '📱' },
+                                      { id: 'url', name: 'Website', icon: '🌐' },
+                                      { id: 'date', name: 'Date', icon: '📅' },
+                                      { id: 'time', name: 'Time', icon: '🕐' }
+                                    ],
+                                    advanced: [
+                                      { id: 'matrix', name: 'Matrix Table', icon: '⊞' },
+                                      { id: 'ranking', name: 'Rank Order', icon: '📋' },
+                                      { id: 'constant_sum', name: 'Constant Sum', icon: '💯' },
+                                      { id: 'max_diff', name: 'MaxDiff', icon: '⚖️' },
+                                      { id: 'side_by_side', name: 'Side by Side', icon: '📊' },
+                                      { id: 'card_sort', name: 'Card Sort', icon: '🗂️' }
+                                    ],
+                                    media: [
+                                      { id: 'file_upload', name: 'File Upload', icon: '📎' },
+                                      { id: 'image_choice', name: 'Image Choice', icon: '🖼️' },
+                                      { id: 'signature', name: 'Signature', icon: '✍️' },
+                                      { id: 'drawing', name: 'Drawing', icon: '🎨' },
+                                      { id: 'video_response', name: 'Video', icon: '📹' },
+                                      { id: 'audio_response', name: 'Audio', icon: '🎤' }
+                                    ],
+                                    interactive: [
+                                      { id: 'heat_map', name: 'Heat Map', icon: '🔥' },
+                                      { id: 'hot_spot', name: 'Hot Spot', icon: '🎯' },
+                                      { id: 'map_location', name: 'Map Location', icon: '📍' },
+                                      { id: 'priority_grid', name: 'Priority Grid', icon: '⊞' }
+                                    ]
+                                  }" :key="category">
+                                    <div class="question-type-section">
+                                        <h4 class="question-type-section-title"
+                                            x-text="category.charAt(0).toUpperCase() + category.slice(1)"></h4>
+                                        <template x-for="type in types" :key="type.id">
+                                            <button @click="$dispatch('change-question-type', {questionId: question.id, newType: type.id}); showQuestionTypes = null"
+                                                    class="question-type-option"
+                                                    :class="{ 'bg-gray-50': type.id === question.type }">
+                                                <span x-text="type.icon"></span>
+                                                <span x-text="type.name"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Required Toggle -->
                     <div class="flex items-center gap-2">
                         <label class="toggle-switch toggle-switch-sm">
                             <input type="checkbox" 
