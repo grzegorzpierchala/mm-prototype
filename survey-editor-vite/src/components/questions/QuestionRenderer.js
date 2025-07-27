@@ -262,6 +262,7 @@ export function QuestionRenderer() {
                            @focus="focused = true"
                            @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                            :maxlength="question.settings.maxLength"
+                           :disabled="$store.ui.activeTab === 'build'"
                            class="w-full px-4 py-3 border rounded-lg transition-all"
                            :class="{
                              'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -278,6 +279,7 @@ export function QuestionRenderer() {
                               @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                               :maxlength="question.settings.maxLength"
                               rows="3"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="w-full px-4 py-3 border rounded-lg transition-all resize-none"
                               :class="{
                                 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -294,6 +296,7 @@ export function QuestionRenderer() {
                               @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                               :maxlength="question.settings.maxLength"
                               rows="6"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="w-full px-4 py-3 border rounded-lg transition-all resize-y"
                               :class="{
                                 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -329,6 +332,7 @@ export function QuestionRenderer() {
                              @keydown.escape="showAutocomplete = false"
                              @keydown.enter.prevent="filteredAutocomplete.length > 0 && updateResponse(filteredAutocomplete[0]); showAutocomplete = false"
                              :maxlength="question.settings.maxLength"
+                             :disabled="$store.ui.activeTab === 'build'"
                              class="w-full px-4 py-3 border rounded-lg transition-all"
                              :class="{
                                'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -422,6 +426,7 @@ export function QuestionRenderer() {
                             @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                             :maxlength="question.settings.maxLength"
                             :rows="question.settings.rows" 
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="w-full px-4 py-3 border rounded-lg transition-all"
                             :class="{
                               'resize-y': question.settings.resizable,
@@ -651,38 +656,45 @@ export function QuestionRenderer() {
                              'drop-indicator-before': draggedOverItem === optionIndex && dropPosition === 'before' && draggedItem !== optionIndex,
                              'drop-indicator-after': draggedOverItem === optionIndex && dropPosition === 'after' && draggedItem !== optionIndex
                            }">
-                        <div class="question-option group relative flex items-center"
-                             draggable="true"
+                        <div class="question-option group relative flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
+                             :class="{'opacity-50': draggedItem === optionIndex}">
+                        
+                        <!-- Drag Handle -->
+                        <div class="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-600"
+                             :draggable="true"
                              @dragstart="handleDragStart($event, optionIndex)"
                              @dragend="handleDragEnd($event, question.id)"
                              @dragover="handleDragOver($event, optionIndex)"
                              @drop="handleDrop($event)"
                              @dragenter="handleDragEnter($event, optionIndex)"
-                             @dragleave="handleDragLeave($event)"
-                             :class="{'opacity-50': draggedItem === optionIndex}">
-                        
-                        <!-- Drag Handle (subtle dots) -->
-                        <div class="drag-handle absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
-                          <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M3 4.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm3-6a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/>
+                             @dragleave="handleDragLeave($event)">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                           </svg>
                         </div>
                         
-                        <label class="flex items-center flex-1 py-2 px-3 rounded-lg cursor-pointer transition-all"
+                        <label class="flex items-center flex-1 transition-all"
                                :class="{
-                                 'bg-gray-50': isSelected(option.id),
-                                 'hover:bg-gray-50': !isSelected(option.id)
+                                 'cursor-pointer': $store.ui.activeTab !== 'build'
                                }">
                           <input :type="question.settings.answerType === 'multiple' ? 'checkbox' : 'radio'"
                                  :name="'mc_' + question.id"
                                  :checked="isSelected(option.id)"
                                  @change="updateResponse(option.id)"
+                                 :disabled="$store.ui.activeTab === 'build'"
                                  class="flex-shrink-0"
                                  :class="{
                                    'w-4 h-4 text-indigo-600 focus:ring-indigo-500': question.settings.answerType === 'single',
                                    'w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500': question.settings.answerType === 'multiple'
                                  }">
-                          <span class="ml-3 text-gray-700 flex-1" x-text="option.text"></span>
+                          <input type="text" 
+                                 x-model="option.text"
+                                 @click.stop
+                                 @input="$store.ui.debouncedAutoSave"
+                                 @keydown.enter="$store.survey.addOption(question.id)"
+                                 @keydown.backspace="option.text === '' && $store.survey.removeOption(question.id, option.id)"
+                                 class="ml-3 flex-1 px-3 py-1.5 bg-transparent border-0 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all duration-200"
+                                 placeholder="Option text...">
                           
                           <!-- Text Entry Option -->
                           <template x-if="question.settings.allowTextEntry && question.settings.allowTextEntry[option.id]">
@@ -690,14 +702,15 @@ export function QuestionRenderer() {
                                    placeholder="Please specify..."
                                    class="ml-3 flex-1 px-2 py-1 text-sm border border-gray-200 rounded"
                                    x-show="isSelected(option.id)"
+                                   :disabled="$store.ui.activeTab === 'build'"
                                    @click.stop>
                           </template>
                         </label>
                         
-                        <!-- Remove Option Button (subtle) -->
+                        <!-- Remove Option Button -->
                         <button @click="$store.survey.removeOption(question.id, option.id)"
                                 x-show="question.options.length > 2"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                class="p-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
                                 title="Remove option">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -714,6 +727,7 @@ export function QuestionRenderer() {
                   <div class="relative">
                     <select x-model="response"
                             @change="$store.validation.updateResponse(question.id, response); $store.validation.validateQuestion(question.id)"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="w-full px-4 py-3 border rounded-lg appearance-none bg-white"
                             :class="{
                               'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -735,11 +749,16 @@ export function QuestionRenderer() {
                   <div class="border border-gray-200 rounded-lg p-2 max-h-48 overflow-y-auto">
                     <template x-for="option in question.options" :key="option.id">
                       <div class="question-option group relative">
-                        <label class="flex items-center py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <label class="flex items-center py-1.5 px-2 rounded"
+                               :class="{
+                                 'hover:bg-gray-50 cursor-pointer': $store.ui.activeTab !== 'build',
+                                 'cursor-not-allowed': $store.ui.activeTab === 'build'
+                               }">
                           <input :type="question.settings.answerType === 'multiple' ? 'checkbox' : 'radio'"
                                  :name="'mc_' + question.id"
                                  :checked="isSelected(option.id)"
                                  @change="updateResponse(option.id)"
+                                 :disabled="$store.ui.activeTab === 'build'"
                                  class="flex-shrink-0"
                                  :class="{
                                    'w-4 h-4 text-indigo-600 focus:ring-indigo-500': question.settings.answerType === 'single',
@@ -784,6 +803,9 @@ export function QuestionRenderer() {
             <template x-if="question.type === 'checkbox'">
               <div x-data="{
                 response: $store.validation.responses[question.id] || [],
+                draggedItem: null,
+                draggedOverItem: null,
+                dropPosition: 'before',
                 
                 updateResponse(optionId) {
                   if (this.response.includes(optionId)) {
@@ -810,6 +832,79 @@ export function QuestionRenderer() {
                   $store.validation.updateResponse(question.id, this.response)
                 },
                 
+                handleDragStart(e, optionIndex) {
+                  this.draggedItem = optionIndex
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.dataTransfer.setData('text/html', e.target.innerHTML)
+                },
+                
+                handleDragEnd(e, questionId) {
+                  const question = $store.survey.questions.find(q => q.id === questionId)
+                  if (!question) return
+                  
+                  const items = [...question.options]
+                  if (this.draggedItem !== null && this.draggedOverItem !== null && this.draggedItem !== this.draggedOverItem) {
+                    const draggedItemContent = items[this.draggedItem]
+                    items.splice(this.draggedItem, 1)
+                    
+                    let insertIndex = this.draggedOverItem
+                    if (this.dropPosition === 'after') {
+                      insertIndex = this.draggedItem < this.draggedOverItem ? this.draggedOverItem : this.draggedOverItem + 1
+                    } else {
+                      insertIndex = this.draggedItem < this.draggedOverItem ? this.draggedOverItem - 1 : this.draggedOverItem
+                    }
+                    
+                    items.splice(insertIndex, 0, draggedItemContent)
+                    question.options = items
+                    $store.ui.debouncedAutoSave()
+                  }
+                  
+                  this.draggedItem = null
+                  this.draggedOverItem = null
+                  this.dropPosition = 'before'
+                },
+                
+                handleDragOver(e, optionIndex) {
+                  if (e.preventDefault) {
+                    e.preventDefault()
+                  }
+                  e.dataTransfer.dropEffect = 'move'
+                  
+                  if (this.draggedItem !== null && this.draggedItem !== optionIndex) {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const y = e.clientY - rect.top
+                    this.dropPosition = y < rect.height / 2 ? 'before' : 'after'
+                    
+                    if (this.draggedOverItem !== optionIndex) {
+                      this.draggedOverItem = optionIndex
+                    }
+                  }
+                  
+                  return false
+                },
+                
+                handleDragEnter(e, optionIndex) {
+                  if (this.draggedItem !== null && this.draggedItem !== optionIndex) {
+                    this.draggedOverItem = optionIndex
+                  }
+                },
+                
+                handleDragLeave(e) {
+                  const relatedTarget = e.relatedTarget
+                  const currentTarget = e.currentTarget
+                  
+                  if (!currentTarget.contains(relatedTarget)) {
+                    this.draggedOverItem = null
+                  }
+                },
+                
+                handleDrop(e) {
+                  if (e.stopPropagation) {
+                    e.stopPropagation()
+                  }
+                  return false
+                },
+                
                 get validation() {
                   return $store.validation.getValidation(question.id)
                 }
@@ -822,32 +917,74 @@ export function QuestionRenderer() {
                      }">
                   <!-- Select All Option -->
                   <label x-show="question.settings.selectAllOption" 
-                         class="flex items-center py-2 px-3 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-50 font-medium">
+                         class="flex items-center py-2 px-3 border border-gray-300 rounded-lg transition-all hover:bg-gray-50 font-medium"
+                         :class="{'cursor-pointer': $store.ui.activeTab !== 'build'}">
                     <input type="checkbox"
                            :checked="response.length === question.options.length"
                            @change="toggleSelectAll()"
+                           :disabled="$store.ui.activeTab === 'build'"
                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
                     <span class="ml-3 text-gray-700">Select All</span>
                   </label>
                   
                   <!-- Regular Options -->
-                  <template x-for="option in question.options" :key="option.id">
-                    <label class="flex items-center py-2 px-3 border rounded-lg cursor-pointer transition-all hover:bg-gray-50"
-                           :class="{
-                             'border-blue-500 bg-blue-50': response.includes(option.id),
-                             'border-gray-200': !response.includes(option.id),
-                             'border-orange-500 bg-orange-50': question.settings.exclusiveOptions?.includes(option.id) && response.includes(option.id)
-                           }">
-                      <input type="checkbox"
-                             :checked="response.includes(option.id)"
-                             @change="updateResponse(option.id)"
-                             class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                      <span class="ml-3 text-gray-700" x-text="option.text"></span>
-                      <span x-show="question.settings.exclusiveOptions?.includes(option.id)" 
-                            class="ml-auto text-xs text-orange-600 font-medium">
-                        Exclusive
-                      </span>
-                    </label>
+                  <template x-for="(option, optionIndex) in question.options" :key="option.id">
+                    <div class="option-wrapper relative"
+                         :class="{
+                           'drop-indicator-before': draggedOverItem === optionIndex && dropPosition === 'before' && draggedItem !== optionIndex,
+                           'drop-indicator-after': draggedOverItem === optionIndex && dropPosition === 'after' && draggedItem !== optionIndex
+                         }">
+                      <div class="question-option group relative flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
+                           :class="{'opacity-50': draggedItem === optionIndex}">
+                        
+                        <!-- Drag Handle -->
+                        <div class="drag-handle cursor-move p-1 text-gray-400 hover:text-gray-600"
+                             :draggable="true"
+                             @dragstart="handleDragStart($event, optionIndex)"
+                             @dragend="handleDragEnd($event, question.id)"
+                             @dragover="handleDragOver($event, optionIndex)"
+                             @drop="handleDrop($event)"
+                             @dragenter="handleDragEnter($event, optionIndex)"
+                             @dragleave="handleDragLeave($event)">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                          </svg>
+                        </div>
+                        
+                        <label class="flex items-center flex-1 transition-all"
+                               :class="{
+                                 'cursor-pointer': $store.ui.activeTab !== 'build'
+                               }">
+                          <input type="checkbox"
+                                 :checked="response.includes(option.id)"
+                                 @change="updateResponse(option.id)"
+                                 :disabled="$store.ui.activeTab === 'build'"
+                                 class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 flex-shrink-0">
+                          <input type="text" 
+                                 x-model="option.text"
+                                 @click.stop
+                                 @input="$store.ui.debouncedAutoSave"
+                                 @keydown.enter="$store.survey.addOption(question.id)"
+                                 @keydown.backspace="option.text === '' && $store.survey.removeOption(question.id, option.id)"
+                                 class="ml-3 flex-1 px-3 py-1.5 bg-transparent border-0 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all duration-200"
+                                 placeholder="Option text...">
+                          <span x-show="question.settings.exclusiveOptions?.includes(option.id)" 
+                                class="ml-auto text-xs text-orange-600 font-medium flex-shrink-0">
+                            Exclusive
+                          </span>
+                        </label>
+                        
+                        <!-- Remove Option Button -->
+                        <button @click="$store.survey.removeOption(question.id, option.id)"
+                                x-show="question.options.length > 2"
+                                class="p-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                title="Remove option">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
                   </template>
                 </div>
                 
@@ -1028,6 +1165,7 @@ export function QuestionRenderer() {
                 <template x-if="question.settings.displayFormat === 'buttons'">
                   <div class="flex gap-3">
                     <button @click="selectOption('yes')"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="flex-1 px-6 py-3 rounded-lg border-2 transition-all"
                             :class="{
                               'border-green-500 bg-green-50 text-green-700': response === 'yes',
@@ -1040,6 +1178,7 @@ export function QuestionRenderer() {
                     </button>
                     
                     <button @click="selectOption('no')"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="flex-1 px-6 py-3 rounded-lg border-2 transition-all"
                             :class="{
                               'border-red-500 bg-red-50 text-red-700': response === 'no',
@@ -1053,6 +1192,7 @@ export function QuestionRenderer() {
                     
                     <button x-show="question.settings.labels.maybe" 
                             @click="selectOption('maybe')"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="flex-1 px-6 py-3 rounded-lg border-2 transition-all"
                             :class="{
                               'border-amber-500 bg-amber-50 text-amber-700': response === 'maybe',
@@ -1071,6 +1211,7 @@ export function QuestionRenderer() {
                           x-text="question.settings.labels.no"></span>
                     
                     <button @click="selectOption(response === 'yes' ? 'no' : 'yes')"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors"
                             :class="response === 'yes' ? 'bg-green-500' : 'bg-gray-300'">
                       <span class="absolute left-1 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"
@@ -1091,6 +1232,7 @@ export function QuestionRenderer() {
                              :name="'yn_' + question.id"
                              :checked="response === 'yes'"
                              @change="selectOption('yes')"
+                             :disabled="$store.ui.activeTab === 'build'"
                              class="w-4 h-4 text-green-600 focus:ring-green-500">
                       <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
                             x-text="question.settings.labels.yes"></span>
@@ -1101,6 +1243,7 @@ export function QuestionRenderer() {
                              :name="'yn_' + question.id"
                              :checked="response === 'no'"
                              @change="selectOption('no')"
+                             :disabled="$store.ui.activeTab === 'build'"
                              class="w-4 h-4 text-red-600 focus:ring-red-500">
                       <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
                             x-text="question.settings.labels.no"></span>
@@ -1112,6 +1255,7 @@ export function QuestionRenderer() {
                              :name="'yn_' + question.id"
                              :checked="response === 'maybe'"
                              @change="selectOption('maybe')"
+                             :disabled="$store.ui.activeTab === 'build'"
                              class="w-4 h-4 text-amber-600 focus:ring-amber-500">
                       <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
                             x-text="question.settings.labels.maybe"></span>
@@ -1168,6 +1312,7 @@ export function QuestionRenderer() {
                     <button @click="selectRating(star)"
                             @mouseenter="hoveredStar = star"
                             @mouseleave="hoveredStar = 0"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="text-3xl transition-all transform hover:scale-110"
                             :style="{ color: isActive(star) ? question.settings.color : '#E5E7EB' }">
                       <span x-text="question.settings.customIcon"></span>
@@ -1219,6 +1364,7 @@ export function QuestionRenderer() {
                        :class="question.settings.layout === 'vertical' ? 'flex-col' : 'flex-wrap'">
                     <template x-for="i in (question.settings.maxValue - question.settings.minValue + 1)" :key="i">
                       <button @click="selectNumber(question.settings.minValue + i - 1)"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="min-w-[40px] h-10 px-3 rounded-lg border-2 font-medium transition-all"
                               :class="{
                                 'border-blue-500 bg-blue-50 text-blue-700': response === (question.settings.minValue + i - 1),
@@ -1230,6 +1376,7 @@ export function QuestionRenderer() {
                     
                     <button x-show="question.settings.notApplicable"
                             @click="selectNumber('N/A')"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="min-w-[40px] h-10 px-3 rounded-lg border-2 font-medium transition-all"
                             :class="{
                               'border-gray-500 bg-gray-100 text-gray-700': response === 'N/A',
@@ -1250,6 +1397,7 @@ export function QuestionRenderer() {
                            x-model="response"
                            @input="$store.validation.updateResponse(question.id, parseInt(response))"
                            @change="$store.validation.validateQuestion(question.id)"
+                           :disabled="$store.ui.activeTab === 'build'"
                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                     <div class="flex justify-between mt-2">
                       <template x-for="i in 5" :key="i">
@@ -1309,6 +1457,7 @@ export function QuestionRenderer() {
                   <div class="flex gap-1">
                     <template x-for="score in 11" :key="score - 1">
                       <button @click="selectScore(score - 1)"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="flex-1 h-12 rounded font-medium transition-all border-2"
                               :style="{
                                 backgroundColor: response === (score - 1) ? getScoreColor(score - 1) + '20' : '',
@@ -1342,7 +1491,8 @@ export function QuestionRenderer() {
                     </p>
                     <textarea class="w-full px-3 py-2 border border-gray-200 rounded text-sm"
                               rows="2"
-                              placeholder="Your feedback..."></textarea>
+                              placeholder="Your feedback..."
+                              :disabled="$store.ui.activeTab === 'build'"></textarea>
                   </div>
                 </div>
                 
@@ -1399,6 +1549,7 @@ export function QuestionRenderer() {
                                    :name="'likert_' + question.id + '_' + statement.id"
                                    :checked="responses[statement.id] === index"
                                    @change="selectOption(statement.id, index)"
+                                   :disabled="$store.ui.activeTab === 'build'"
                                    class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                           </label>
                         </template>
@@ -1413,6 +1564,7 @@ export function QuestionRenderer() {
                                    :name="'likert_' + question.id + '_' + statement.id"
                                    :checked="responses[statement.id] === index"
                                    @change="selectOption(statement.id, index)"
+                                   :disabled="$store.ui.activeTab === 'build'"
                                    class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                             <span class="ml-3 text-sm" x-text="label"></span>
                           </label>
@@ -1474,6 +1626,7 @@ export function QuestionRenderer() {
                                    :value="responses[statement.id] || question.settings.min"
                                    @input="updateSlider(statement.id, $event.target.value)"
                                    @change="$store.validation.validateQuestion(question.id)"
+                                   :disabled="$store.ui.activeTab === 'build'"
                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
                                    :style="{ background: getSliderBackground(responses[statement.id] || question.settings.min) }">
                             
@@ -1500,6 +1653,7 @@ export function QuestionRenderer() {
                         <div class="flex items-end gap-1 h-32">
                           <template x-for="i in Math.ceil((question.settings.max - question.settings.min) / question.settings.increments) + 1" :key="i">
                             <button @click="updateSlider(statement.id, question.settings.min + (i - 1) * question.settings.increments); $store.validation.validateQuestion(question.id)"
+                                    :disabled="$store.ui.activeTab === 'build'"
                                     class="flex-1 bg-gray-200 hover:bg-gray-300 rounded-t transition-all"
                                     :class="{
                                       'bg-blue-500 hover:bg-blue-600': (responses[statement.id] || question.settings.min) >= question.settings.min + (i - 1) * question.settings.increments
@@ -1516,6 +1670,7 @@ export function QuestionRenderer() {
                         <div class="flex gap-2">
                           <template x-for="i in question.settings.max" :key="i">
                             <button @click="updateSlider(statement.id, i); $store.validation.validateQuestion(question.id)"
+                                    :disabled="$store.ui.activeTab === 'build'"
                                     class="text-2xl transition-all transform hover:scale-110"
                                     :class="{
                                       'text-yellow-400': (responses[statement.id] || 0) >= i,
@@ -1535,6 +1690,7 @@ export function QuestionRenderer() {
                       <label x-show="question.settings.notApplicable" class="mt-2 flex items-center text-sm">
                         <input type="checkbox"
                                @change="responses[statement.id] = $event.target.checked ? 'N/A' : question.settings.min; $store.validation.updateResponse(question.id, responses)"
+                               :disabled="$store.ui.activeTab === 'build'"
                                class="w-4 h-4 text-gray-600 rounded">
                         <span class="ml-2 text-gray-600">Not Applicable</span>
                       </label>
@@ -1575,6 +1731,7 @@ export function QuestionRenderer() {
                       <button @click="selectEmoji(index)"
                               @mouseenter="hoveredEmoji = index"
                               @mouseleave="hoveredEmoji = null"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="text-5xl transition-all transform"
                               :class="{
                                 'scale-125 animate-bounce': response === index,
@@ -1649,6 +1806,7 @@ export function QuestionRenderer() {
                           <template x-for="column in question.settings.columns" :key="column.id">
                             <td class="text-center p-3">
                               <button @click="updateResponse(row.id, column.id)"
+                                      :disabled="$store.ui.activeTab === 'build'"
                                       class="w-5 h-5 rounded border-2 transition-all"
                                       :class="isSelected(row.id, column.id) 
                                         ? 'bg-blue-500 border-blue-500' 
@@ -1775,6 +1933,7 @@ export function QuestionRenderer() {
                                @input="updateValue(option.id, $event.target.value)"
                                min="0"
                                max="100"
+                               :disabled="$store.ui.activeTab === 'build'"
                                class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         <span class="text-gray-500">%</span>
                       </div>
@@ -1853,6 +2012,7 @@ export function QuestionRenderer() {
                         <tr class="border-t border-gray-100">
                           <td class="text-center p-3">
                             <button @click="selectMost(option.id)"
+                                    :disabled="$store.ui.activeTab === 'build'"
                                     class="w-6 h-6 rounded-full border-2 transition-all"
                                     :class="mostImportant === option.id 
                                       ? 'bg-green-500 border-green-500' 
@@ -1867,6 +2027,7 @@ export function QuestionRenderer() {
                           <td class="p-3 text-center font-medium text-gray-700" x-text="option.text"></td>
                           <td class="text-center p-3">
                             <button @click="selectLeast(option.id)"
+                                    :disabled="$store.ui.activeTab === 'build'"
                                     class="w-6 h-6 rounded-full border-2 transition-all"
                                     :class="leastImportant === option.id 
                                       ? 'bg-red-500 border-red-500' 
@@ -1918,6 +2079,7 @@ export function QuestionRenderer() {
                                :value="responses[subQuestion.id] || ''"
                                @input="updateResponse(subQuestion.id, $event.target.value)"
                                :placeholder="subQuestion.placeholder"
+                               :disabled="$store.ui.activeTab === 'build'"
                                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                       </template>
                       
@@ -1925,6 +2087,7 @@ export function QuestionRenderer() {
                       <template x-if="subQuestion.type === 'select'">
                         <select :value="responses[subQuestion.id] || ''"
                                 @change="updateResponse(subQuestion.id, $event.target.value)"
+                                :disabled="$store.ui.activeTab === 'build'"
                                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                           <option value="">Choose...</option>
                           <template x-for="option in subQuestion.options" :key="option">
@@ -1943,6 +2106,7 @@ export function QuestionRenderer() {
                                      :value="option"
                                      :checked="responses[subQuestion.id] === option"
                                      @change="updateResponse(subQuestion.id, option)"
+                                     :disabled="$store.ui.activeTab === 'build'"
                                      class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                               <span class="ml-2" x-text="option"></span>
                             </label>
@@ -2039,6 +2203,7 @@ export function QuestionRenderer() {
                          :min="question.validation.min"
                          :max="question.validation.max"
                          :step="question.settings.decimalPlaces > 0 ? Math.pow(10, -question.settings.decimalPlaces) : 1"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2101,6 +2266,7 @@ export function QuestionRenderer() {
                          @input="updateResponse($event.target.value)"
                          @focus="focused = true"
                          @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2176,6 +2342,7 @@ export function QuestionRenderer() {
                          @input="updateResponse($event.target.value)"
                          @focus="focused = true"
                          @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2236,6 +2403,7 @@ export function QuestionRenderer() {
                          @input="updateResponse($event.target.value)"
                          @focus="focused = true"
                          @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2297,6 +2465,7 @@ export function QuestionRenderer() {
                          @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                          :min="question.validation.minDate"
                          :max="question.validation.maxDate"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2365,6 +2534,7 @@ export function QuestionRenderer() {
                          @focus="focused = true"
                          @blur="focused = false; $store.validation.mode === 'blur' && $store.validation.validateQuestion(question.id)"
                          :step="question.settings.format === '24hour' ? 60 : 1"
+                         :disabled="$store.ui.activeTab === 'build'"
                          class="w-full px-4 py-3 border rounded-lg transition-all"
                          :class="{
                            'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20': !validation.errors.length,
@@ -2470,6 +2640,7 @@ export function QuestionRenderer() {
                   <input type="file" 
                          @change="handleFiles($event.target.files)"
                          :multiple="question.settings.multiple"
+                         :disabled="$store.ui.activeTab === 'build'"
                          :accept="question.settings.acceptedFormats ? question.settings.acceptedFormats.join(',') : ''"
                          class="hidden" 
                          :id="'file-upload-' + question.id">
@@ -2507,6 +2678,7 @@ export function QuestionRenderer() {
                         </div>
                       </div>
                       <button @click="removeFile(index)"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-gray-100">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -2562,6 +2734,7 @@ export function QuestionRenderer() {
                      }">
                   <template x-for="option in question.options" :key="option.id">
                     <button @click="toggleSelection(option.id)"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="relative overflow-hidden rounded-lg border-2 transition-all"
                             :class="isSelected(option.id) 
                               ? 'border-blue-500 shadow-lg' 
@@ -2672,13 +2845,13 @@ export function QuestionRenderer() {
                 <div class="space-y-3">
                   <div class="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
                     <canvas x-ref="signatureCanvas"
-                            @mousedown="startDrawing($event)"
-                            @mousemove="draw($event)"
-                            @mouseup="stopDrawing()"
-                            @mouseleave="stopDrawing()"
-                            @touchstart.prevent="startDrawing($event)"
-                            @touchmove.prevent="draw($event)"
-                            @touchend.prevent="stopDrawing()"
+                            @mousedown="$store.ui.activeTab !== 'build' && startDrawing($event)"
+                            @mousemove="$store.ui.activeTab !== 'build' && draw($event)"
+                            @mouseup="$store.ui.activeTab !== 'build' && stopDrawing()"
+                            @mouseleave="$store.ui.activeTab !== 'build' && stopDrawing()"
+                            @touchstart.prevent="$store.ui.activeTab !== 'build' && startDrawing($event)"
+                            @touchmove.prevent="$store.ui.activeTab !== 'build' && draw($event)"
+                            @touchend.prevent="$store.ui.activeTab !== 'build' && stopDrawing()"
                             class="w-full h-48 cursor-crosshair touch-none"></canvas>
                     
                     <!-- Signature Line -->
@@ -2688,7 +2861,7 @@ export function QuestionRenderer() {
                   
                   <div class="flex justify-between">
                     <button @click="clearSignature()"
-                            :disabled="!hasSignature"
+                            :disabled="!hasSignature || $store.ui.activeTab === 'build'"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                       Clear Signature
                     </button>
@@ -2788,10 +2961,12 @@ export function QuestionRenderer() {
                     <!-- Color Picker -->
                     <div class="flex items-center gap-2">
                       <label class="text-sm font-medium text-gray-700">Color:</label>
-                      <input type="color" x-model="currentColor" class="w-8 h-8 rounded cursor-pointer">
+                      <input type="color" x-model="currentColor"
+                             :disabled="$store.ui.activeTab === 'build'" class="w-8 h-8 rounded cursor-pointer">
                       <div class="flex gap-1">
                         <template x-for="color in ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00']" :key="color">
                           <button @click="currentColor = color"
+                                  :disabled="$store.ui.activeTab === 'build'"
                                   class="w-6 h-6 rounded border-2 border-gray-300"
                                   :style="'background-color: ' + color"></button>
                         </template>
@@ -2801,7 +2976,8 @@ export function QuestionRenderer() {
                     <!-- Brush Size -->
                     <div class="flex items-center gap-2">
                       <label class="text-sm font-medium text-gray-700">Size:</label>
-                      <input type="range" x-model="currentSize" min="1" max="20" class="w-24">
+                      <input type="range" x-model="currentSize" min="1" max="20"
+                             :disabled="$store.ui.activeTab === 'build'" class="w-24">
                       <span class="text-sm text-gray-600" x-text="currentSize + 'px'"></span>
                     </div>
                   </div>
@@ -2809,19 +2985,19 @@ export function QuestionRenderer() {
                   <!-- Canvas -->
                   <div class="relative border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
                     <canvas x-ref="drawingCanvas"
-                            @mousedown="startDrawing($event)"
-                            @mousemove="draw($event)"
-                            @mouseup="stopDrawing()"
-                            @mouseleave="stopDrawing()"
-                            @touchstart.prevent="startDrawing($event)"
-                            @touchmove.prevent="draw($event)"
-                            @touchend.prevent="stopDrawing()"
+                            @mousedown="$store.ui.activeTab !== 'build' && startDrawing($event)"
+                            @mousemove="$store.ui.activeTab !== 'build' && draw($event)"
+                            @mouseup="$store.ui.activeTab !== 'build' && stopDrawing()"
+                            @mouseleave="$store.ui.activeTab !== 'build' && stopDrawing()"
+                            @touchstart.prevent="$store.ui.activeTab !== 'build' && startDrawing($event)"
+                            @touchmove.prevent="$store.ui.activeTab !== 'build' && draw($event)"
+                            @touchend.prevent="$store.ui.activeTab !== 'build' && stopDrawing()"
                             class="w-full h-64 cursor-crosshair touch-none"></canvas>
                   </div>
                   
                   <div class="flex justify-between">
                     <button @click="clearDrawing()"
-                            :disabled="!hasDrawing"
+                            :disabled="!hasDrawing || $store.ui.activeTab === 'build'"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                       Clear Drawing
                     </button>
@@ -2914,7 +3090,8 @@ export function QuestionRenderer() {
                   <div class="flex justify-center gap-4">
                     <button x-show="!isRecording && !hasRecording"
                             @click="startRecording()"
-                            class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="10" cy="10" r="8"/>
                       </svg>
@@ -2923,7 +3100,8 @@ export function QuestionRenderer() {
                     
                     <button x-show="isRecording"
                             @click="stopRecording()"
-                            class="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <rect x="6" y="6" width="8" height="8"/>
                       </svg>
@@ -2932,7 +3110,8 @@ export function QuestionRenderer() {
                     
                     <button x-show="hasRecording"
                             @click="deleteRecording()"
-                            class="px-6 py-3 bg-white text-gray-700 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-white text-gray-700 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       Re-record
                     </button>
                   </div>
@@ -3032,7 +3211,8 @@ export function QuestionRenderer() {
                   <div class="flex justify-center gap-4">
                     <button x-show="!isRecording && !hasRecording"
                             @click="startRecording()"
-                            class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="10" cy="10" r="8"/>
                       </svg>
@@ -3041,7 +3221,8 @@ export function QuestionRenderer() {
                     
                     <button x-show="isRecording"
                             @click="stopRecording()"
-                            class="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <rect x="6" y="6" width="8" height="8"/>
                       </svg>
@@ -3050,7 +3231,8 @@ export function QuestionRenderer() {
                     
                     <button x-show="hasRecording"
                             @click="deleteRecording()"
-                            class="px-6 py-3 bg-white text-gray-700 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            :disabled="$store.ui.activeTab === 'build'"
+                            class="px-6 py-3 bg-white text-gray-700 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       Re-record
                     </button>
                   </div>
@@ -3099,7 +3281,7 @@ export function QuestionRenderer() {
               }">
                 <div class="space-y-3">
                   <div class="relative bg-gray-100 rounded-lg overflow-hidden cursor-crosshair"
-                       @click="handleClick($event)">
+                       @click="$store.ui.activeTab !== 'build' && handleClick($event)">
                     <!-- Base Image -->
                     <img :src="question.settings.imageUrl || 'https://via.placeholder.com/800x400?text=Click+on+the+image'" 
                          class="w-full h-auto">
@@ -3128,6 +3310,7 @@ export function QuestionRenderer() {
                     </p>
                     <button @click="clearClicks()"
                             x-show="clicks.length > 0"
+                            :disabled="$store.ui.activeTab === 'build'"
                             class="text-sm text-red-600 hover:text-red-700">
                       Clear all
                     </button>
@@ -3179,6 +3362,7 @@ export function QuestionRenderer() {
                     <!-- Hot Spots -->
                     <template x-for="spot in (question.settings.hotSpots || [])" :key="spot.id">
                       <button @click="toggleSpot(spot.id)"
+                              :disabled="$store.ui.activeTab === 'build'"
                               class="absolute transform -translate-x-1/2 -translate-y-1/2"
                               :style="'left: ' + spot.x + '%; top: ' + spot.y + '%;'">
                         <div class="relative">
@@ -3257,7 +3441,7 @@ export function QuestionRenderer() {
                     </div>
                     
                     <!-- Mock interaction -->
-                    <div @click="selectLocation(40.7128, -74.0060)" 
+                    <div @click="$store.ui.activeTab !== 'build' && selectLocation(40.7128, -74.0060)" 
                          class="absolute inset-0 cursor-pointer"></div>
                     
                     <!-- Selected Location Marker -->
@@ -3282,6 +3466,7 @@ export function QuestionRenderer() {
                   <div x-show="question.settings.allowSearch" class="relative">
                     <input type="text" 
                            placeholder="Search for a location..."
+                           :disabled="$store.ui.activeTab === 'build'"
                            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" 
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
