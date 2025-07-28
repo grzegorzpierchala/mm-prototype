@@ -44,7 +44,8 @@ Alpine.store('survey', {
       text: 'What could we improve about your experience?',
       required: false,
       settings: {
-        placeholder: 'Respondent will type their answer here...'
+        placeholder: 'Type your answer here...',
+        textType: 'multiple_lines'
       },
       validation: {
         maxLength: 500,
