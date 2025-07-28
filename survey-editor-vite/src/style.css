@@ -483,12 +483,12 @@ select option {
 
 /* Drag handle styling for both questions and options */
 .drag-handle {
-  cursor: grab;
+  cursor: move;
   user-select: none;
 }
 
 .drag-handle:active {
-  cursor: grabbing;
+  cursor: move;
 }
 
 /* Drop indicator lines - improved stability */
@@ -1185,7 +1185,7 @@ button:focus-visible {
 
 /* Drag handle */
 .drag-handle {
-  cursor: grab;
+  cursor: move;
   padding: 8px;
   color: #9CA3AF;
   transition: color 0.2s ease;
@@ -1196,7 +1196,7 @@ button:focus-visible {
 }
 
 .drag-handle:active {
-  cursor: grabbing;
+  cursor: move;
 }
 
 /* Question number input */
@@ -1344,7 +1344,7 @@ button:focus-visible {
 }
 
 .option-drag-handle {
-  cursor: grab;
+  cursor: move;
   color: #9CA3AF;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -1355,7 +1355,7 @@ button:focus-visible {
 }
 
 .option-drag-handle:active {
-  cursor: grabbing;
+  cursor: move;
 }
 
 /* Multiple choice option - ultrathin design */
