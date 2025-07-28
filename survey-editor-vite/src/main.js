@@ -1,5 +1,4 @@
 import './style.css'
-import './originalStyles.css'
 import Alpine from 'alpinejs'
 import sort from '@alpinejs/sort'
 import surveyEditor from './components/surveyEditor'
