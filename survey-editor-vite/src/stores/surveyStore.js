@@ -53,6 +53,24 @@ Alpine.store('survey', {
         pattern: '',
         patternError: ''
       }
+    },
+    {
+      id: 'q3',
+      type: 'rating_scale',
+      questionNumber: 'Q3',
+      text: 'How likely are you to recommend our restaurant to a friend?',
+      required: true,
+      settings: {
+        scaleType: 'nps',
+        minValue: 0,
+        maxValue: 10,
+        minLabel: 'Not at all likely',
+        maxLabel: 'Extremely likely',
+        showNumbers: true
+      },
+      validation: {
+        requiredError: 'Please select a rating'
+      }
     }
   ],
   

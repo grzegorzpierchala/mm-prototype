@@ -166,28 +166,6 @@ export function QuestionRenderer() {
         
         <!-- Visual Drag Indicator removed - using border hover effect instead -->
         
-        <!-- Comment Indicator -->
-        <div class="comment-indicator"
-             :class="{ 
-                 'has-comments': $store.comment.getCommentCount(question.id) > 0
-             }"
-             @click="$store.comment.toggleCommentThread(question.id)">
-            <div class="comment-bubble"
-                 :class="{ 
-                     'has-comments': $store.comment.getCommentCount(question.id) > 0,
-                     'has-unresolved': $store.comment.hasUnresolvedComments(question.id)
-                 }">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
-                    </path>
-                </svg>
-                <span x-show="$store.comment.getCommentCount(question.id) > 0" 
-                      class="comment-count" 
-                      x-text="$store.comment.getCommentCount(question.id)"></span>
-            </div>
-        </div>
-        
         <!-- Question Content -->
         <div class="p-6" @click="$store.ui.openSettingsPanel(question.id)">
             <!-- Question Number -->
@@ -4332,6 +4310,36 @@ export function QuestionRenderer() {
                             <span class="toggle-slider"></span>
                         </label>
                         <span class="text-sm text-gray-600">Required</span>
+                    </div>
+                    
+                    <!-- Comment Indicator Button
+                         States:
+                         1. No comments: Just gray icon
+                         2. All read: Gray number + icon (e.g. "5 💬")
+                         3. Has unread: Gray number + icon + red badge with unread count
+                    -->
+                    <div class="comment-indicator-button"
+                         @click.stop="$store.comment.toggleCommentThread(question.id)"
+                         :title="$store.comment.getCommentCount(question.id) > 0 
+                                ? $store.comment.getCommentCount(question.id) + ' comments' 
+                                : 'Add comment'">
+                        
+                        <!-- Total Comment Count (shown when there are comments) -->
+                        <span x-show="$store.comment.getCommentCount(question.id) > 0" 
+                              class="comment-total-count"
+                              x-text="$store.comment.getCommentCount(question.id)"></span>
+                        
+                        <!-- Comment Icon SVG -->
+                        <svg class="comment-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                            </path>
+                        </svg>
+                        
+                        <!-- Unread Notification Badge (red circle with count) -->
+                        <span x-show="$store.comment.getUnreadCount && $store.comment.getUnreadCount(question.id) > 0" 
+                              class="comment-unread-badge"
+                              x-text="$store.comment.getUnreadCount(question.id)"></span>
                     </div>
                 </div>
                 

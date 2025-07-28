@@ -80,28 +80,85 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Comment indicators */
-.comment-indicator {
+/* =================================================================
+   Comment Indicator Styles
+   Three states:
+   1. No comments - Just icon
+   2. Has comments (all read) - Number + icon  
+   3. Has unread comments - Number + icon + red badge
+   ================================================================= */
+
+/* Main comment button container */
+.comment-indicator-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 10px;
+  min-height: 28px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  margin-left: 12px;
+  background-color: transparent;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  vertical-align: middle;
+}
+
+/* Hover state for comment button */
+.comment-indicator-button:hover {
+  background-color: #f9fafb; /* gray-50 */
+  border-color: #d1d5db; /* gray-300 */
+}
+
+/* Total comment count (shown before icon when comments exist) */
+.comment-total-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280; /* gray-500 */
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Comment icon SVG styling */
+.comment-icon-svg {
+  width: 16px;
+  height: 16px;
+  color: #6b7280; /* gray-500 */
+  transition: color 0.15s ease;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  display: block;
+}
+
+/* Darker icon on hover */
+.comment-indicator-button:hover .comment-icon-svg {
+  color: #4b5563; /* gray-600 */
+}
+
+/* Unread notification badge (red circle with white text) */
+.comment-unread-badge {
   position: absolute;
-  right: -40px;
-  top: 16px;
-  width: 32px;
-  height: 32px;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: #ef4444; /* red-500 */
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
+  border-radius: 10px;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .block {
   animation: fadeIn 0.3s ease-out;
-}
-
-.block:hover .comment-indicator,
-.comment-indicator.has-comments {
-  opacity: 1;
 }
 
 .block-actions {
