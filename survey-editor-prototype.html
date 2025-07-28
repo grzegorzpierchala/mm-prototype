@@ -2263,10 +2263,59 @@
 
                 <!-- Add Block Button -->
                 <div class="flex items-center justify-center py-8">
-                    <button @click="showSlashMenu = true" class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                        <span class="text-xl">+</span>
-                        <span>Add block or type / for commands</span>
-                    </button>
+                    <div class="relative inline-block">
+                        <button @click="showAddQuestionDropdown = !showAddQuestionDropdown; $refs.addQuestionButton = $el"
+                                x-ref="addQuestionButton"
+                                class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                            <span class="text-xl">+</span>
+                            <span>Add Question</span>
+                        </button>
+                        
+                        <!-- Add Question Type Dropdown -->
+                        <div x-show="showAddQuestionDropdown" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             @click.away="showAddQuestionDropdown = false"
+                             @keydown.escape="showAddQuestionDropdown = false"
+                             :class="{ 'bottom-full mb-2': shouldOpenUpward() }"
+                             class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-80 max-h-[500px] bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                            
+                            <div class="max-h-[500px] overflow-y-auto">
+                                <!-- Recently Used (if available) -->
+                                <div x-show="recentlyUsedTypes && recentlyUsedTypes.length > 0" class="border-b border-gray-100">
+                                    <div class="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Recently Used</div>
+                                    <template x-for="type in recentlyUsedTypes" :key="'add-recent-' + type.id">
+                                        <button @click="addNewQuestion(type.id)"
+                                                class="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors">
+                                            <span class="text-2xl" x-text="type.icon"></span>
+                                            <div class="flex-1">
+                                                <div class="font-medium text-gray-900" x-text="type.name"></div>
+                                            </div>
+                                            <span class="text-yellow-500">★</span>
+                                        </button>
+                                    </template>
+                                </div>
+                                
+                                <!-- Main question types by category -->
+                                <template x-for="(category, categoryName) in questionTypeCategories" :key="'add-cat-' + categoryName">
+                                    <div class="border-b border-gray-100 last:border-b-0">
+                                        <div class="px-3 py-2 text-xs font-medium text-gray-500 uppercase" 
+                                             x-text="categoryName.charAt(0).toUpperCase() + categoryName.slice(1)"></div>
+                                        <template x-for="type in category" :key="'add-type-' + type.id">
+                                            <button @click="addNewQuestion(type.id)"
+                                                    class="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors">
+                                                <span class="text-2xl" x-text="type.icon"></span>
+                                                <div class="flex-1">
+                                                    <div class="font-medium text-gray-900" x-text="type.name"></div>
+                                                </div>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -3970,6 +4019,7 @@
                 saveStatus: 'saved',
                 activeTab: 'build',
                 showSlashMenu: false,
+                showAddQuestionDropdown: false,
                 settingsSection: 'general',
                 versionPanelOpen: false,
                 selectedVersion: null,

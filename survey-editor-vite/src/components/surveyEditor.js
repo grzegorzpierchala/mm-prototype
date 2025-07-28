@@ -29,6 +29,12 @@ export default function surveyEditor() {
         const { questionId } = event.detail
         this.validateQuestionNumber(questionId)
       })
+      
+      // Listen for add-question event
+      this.$el.addEventListener('add-question', (event) => {
+        const { type } = event.detail
+        this.addQuestion(type)
+      })
     },
     
     // Question Management
