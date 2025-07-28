@@ -127,9 +127,11 @@ export function QuestionRenderer() {
              'drop-indicator-before': draggedOverQuestion === question.id && dropPosition === 'before' && draggedQuestion !== question.id,
              'drop-indicator-after': draggedOverQuestion === question.id && dropPosition === 'after' && draggedQuestion !== question.id
            }">
-        <div class="block group relative bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-all"
+        <div class="block group relative bg-white rounded-lg border-2 transition-all"
              :class="{
-               'ring-2 ring-indigo-500 shadow-sm': $store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen,
+               'border-indigo-500 shadow-sm': $store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen,
+               'border-indigo-400 shadow-sm': !($store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen) && false,
+               'border-gray-200 hover:border-indigo-300 hover:shadow-sm': !($store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen),
                'opacity-50': draggedQuestion === question.id
              }"
              :data-question-id="question.id"
@@ -162,11 +164,7 @@ export function QuestionRenderer() {
                @dragend="handleQuestionDragEnd($event)"></div>
         </div>
         
-        <!-- Visual Drag Indicator (shows on hover in padding areas) -->
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="absolute inset-0 border-2 border-dashed border-gray-300 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-               style="margin: 4px;"></div>
-        </div>
+        <!-- Visual Drag Indicator removed - using border hover effect instead -->
         
         <!-- Comment Indicator -->
         <div class="comment-indicator"
