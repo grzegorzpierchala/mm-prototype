@@ -3616,7 +3616,12 @@ export function QuestionRenderer() {
                 <div class="flex items-center gap-4">
                     <!-- Question Type Dropdown -->
                     <div class="relative inline-block">
-                        <button @click.stop="showQuestionTypes = showQuestionTypes === question.id ? null : question.id"
+                        <button @click.stop="
+                                    showQuestionTypes = showQuestionTypes === question.id ? null : question.id;
+                                    if (showQuestionTypes === question.id) {
+                                        $dispatch('dropdown-shown', question.id);
+                                    }
+                                "
                                 @keydown.escape="showQuestionTypes = null"
                                 class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full transition-all"
                                 :class="showQuestionTypes === question.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'">
@@ -3633,7 +3638,50 @@ export function QuestionRenderer() {
                              x-transition:enter-end="opacity-100 scale-100"
                              @click.away="showQuestionTypes = null"
                              @keydown.escape="showQuestionTypes = null"
-                             class="question-type-dropdown absolute bottom-full mb-2 left-0">
+                             x-data="{ 
+                                dropdownPosition: 'below',
+                                calculatePosition() {
+                                    // Get the button that triggered the dropdown
+                                    const button = this.$el.closest('.relative').querySelector('button');
+                                    if (!button) return;
+                                    
+                                    const buttonRect = button.getBoundingClientRect();
+                                    const viewportMidpoint = window.innerHeight / 2;
+                                    
+                                    // Simple rule: if button is below 50% of viewport, open upward
+                                    // If button is above 50% of viewport, open downward
+                                    if (buttonRect.top > viewportMidpoint) {
+                                        this.dropdownPosition = 'above';
+                                    } else {
+                                        this.dropdownPosition = 'below';
+                                    }
+                                }
+                             }"
+                             x-init="
+                                // Watch for dropdown visibility changes
+                                $watch('showQuestionTypes', (value) => {
+                                    if (value === question.id) {
+                                        $nextTick(() => calculatePosition());
+                                    }
+                                });
+                                
+                                // Also recalculate on window resize
+                                window.addEventListener('resize', () => {
+                                    if (showQuestionTypes === question.id) {
+                                        calculatePosition();
+                                    }
+                                });
+                             "
+                             @dropdown-shown.window="
+                                if ($event.detail === question.id) {
+                                    $nextTick(() => calculatePosition());
+                                }
+                             "
+                             class="question-type-dropdown absolute left-0"
+                             :class="{
+                                'bottom-full mb-2': dropdownPosition === 'above',
+                                'top-full mt-2': dropdownPosition === 'below'
+                             }">
                             
                             <div class="question-type-dropdown-content">
                                 <!-- Recently Used (if available) -->

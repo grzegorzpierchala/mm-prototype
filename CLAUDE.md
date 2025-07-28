@@ -32,6 +32,7 @@ This is a **high-fidelity prototype** focused on:
 **WORKFLOW INTEGRATION**:
 1. **Capture Phase** (When task is requested):
    - Create `.claude/work-log/YYYY-MM-DD-HH-MM-[descriptive-task-name].md`
+   - Use Bash tool to get current date and time to make it's the same as user system
    - Document: Context, User Request, Initial Assessment
    - Enter plan mode if needed for complex tasks
    
