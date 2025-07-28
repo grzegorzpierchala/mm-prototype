@@ -189,5 +189,97 @@ Alpine.store('survey', {
     
     question.settings.scalePoints = question.settings.scalePoints.filter(col => col.id !== columnId)
     Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  // Priority Grid management methods
+  addPriorityGridItem(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || question.type !== 'priority_grid') return
+    
+    const newItem = {
+      id: `opt_${Date.now()}`,
+      text: `Item ${question.options.length + 1}`
+    }
+    
+    question.options.push(newItem)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removePriorityGridItem(questionId, itemId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.options || question.options.length <= 1) return
+    
+    question.options = question.options.filter(item => item.id !== itemId)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  // Side by Side management methods
+  addSideBySideColumn(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || question.type !== 'side_by_side') return
+    
+    if (!question.settings.columns) {
+      question.settings.columns = []
+    }
+    
+    const newColumn = {
+      id: `col_${Date.now()}`,
+      text: `Column ${question.settings.columns.length + 1}`,
+      type: 'text',
+      options: ['Option 1', 'Option 2', 'Option 3']
+    }
+    
+    question.settings.columns.push(newColumn)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removeSideBySideColumn(questionId, columnId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.settings.columns || question.settings.columns.length <= 1) return
+    
+    question.settings.columns = question.settings.columns.filter(col => col.id !== columnId)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  updateSideBySideColumnType(questionId, columnId, newType) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.settings.columns) return
+    
+    const column = question.settings.columns.find(col => col.id === columnId)
+    if (!column) return
+    
+    column.type = newType
+    
+    // Reset options if changing to a type that needs options
+    if (['radio', 'checkbox', 'select'].includes(newType) && !column.options) {
+      column.options = ['Option 1', 'Option 2', 'Option 3']
+    }
+    
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  addSideBySideRow(questionId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || question.type !== 'side_by_side') return
+    
+    if (!question.settings.rows) {
+      question.settings.rows = []
+    }
+    
+    const newRow = {
+      id: `row_${Date.now()}`,
+      text: `Question ${question.settings.rows.length + 1}`
+    }
+    
+    question.settings.rows.push(newRow)
+    Alpine.store('ui').debouncedAutoSave()
+  },
+  
+  removeSideBySideRow(questionId, rowId) {
+    const question = this.questions.find(q => q.id === questionId)
+    if (!question || !question.settings.rows || question.settings.rows.length <= 1) return
+    
+    question.settings.rows = question.settings.rows.filter(row => row.id !== rowId)
+    Alpine.store('ui').debouncedAutoSave()
   }
 })

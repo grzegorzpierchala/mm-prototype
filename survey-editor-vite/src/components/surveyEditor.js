@@ -50,6 +50,20 @@ export default function surveyEditor() {
               { id: `opt_${Date.now()}_1`, text: 'Option 1' },
               { id: `opt_${Date.now()}_2`, text: 'Option 2' }
             ] 
+          : type === 'priority_grid'
+          ? [
+              { id: `opt_${Date.now()}_1`, text: 'Item 1' },
+              { id: `opt_${Date.now()}_2`, text: 'Item 2' },
+              { id: `opt_${Date.now()}_3`, text: 'Item 3' },
+              { id: `opt_${Date.now()}_4`, text: 'Item 4' }
+            ]
+          : type === 'ranking'
+          ? [
+              { id: `opt_${Date.now()}_1`, text: 'Option 1' },
+              { id: `opt_${Date.now()}_2`, text: 'Option 2' },
+              { id: `opt_${Date.now()}_3`, text: 'Option 3' },
+              { id: `opt_${Date.now()}_4`, text: 'Option 4' }
+            ]
           : [],
         settings: this.getDefaultSettings(type),
         validation: this.getDefaultValidation(type)
@@ -273,9 +287,18 @@ export default function surveyEditor() {
           analysisPreview: false
         },
         side_by_side: {
-          columns: [],
+          columns: [
+            { id: 'col_1', text: 'Satisfaction', type: 'radio', options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied'] },
+            { id: 'col_2', text: 'Importance', type: 'scale', max: 5 },
+            { id: 'col_3', text: 'Comments', type: 'text', placeholder: 'Additional feedback...' }
+          ],
+          rows: [
+            { id: 'row_1', text: 'Product Quality' },
+            { id: 'row_2', text: 'Customer Service' },
+            { id: 'row_3', text: 'Delivery Speed' },
+            { id: 'row_4', text: 'Price Value' }
+          ],
           sharedHeaders: true,
-          columnTypes: [], // text, radio, checkbox, dropdown, number
           responsiveDesign: true,
           exportFormat: 'table'
         },

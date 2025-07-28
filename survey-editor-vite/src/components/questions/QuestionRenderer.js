@@ -1766,62 +1766,207 @@ export function QuestionRenderer() {
             <template x-if="question.type === 'matrix'">
               <div x-data="{
                 responses: $store.validation.responses[question.id] || {},
+                matrixType: question.settings.matrixType || 'likert',
+                answerType: question.settings.answerType || 'single',
+                scalePoints: question.settings.scalePoints || [],
+                statements: question.settings.statements || [],
                 
-                updateResponse(rowId, columnId) {
+                updateResponse(rowId, value) {
                   if (!this.responses[rowId]) this.responses[rowId] = {}
                   
-                  if (question.settings.multipleAnswers) {
-                    this.responses[rowId][columnId] = !this.responses[rowId][columnId]
+                  if (this.matrixType === 'text_entry') {
+                    this.responses[rowId] = value
+                  } else if (this.matrixType === 'constant_sum') {
+                    this.responses[rowId] = value
+                  } else if (this.answerType === 'multiple') {
+                    if (!this.responses[rowId][value]) {
+                      this.responses[rowId][value] = true
+                    } else {
+                      delete this.responses[rowId][value]
+                    }
                   } else {
-                    this.responses[rowId] = { [columnId]: true }
+                    this.responses[rowId] = value
                   }
                   
                   $store.validation.updateResponse(question.id, this.responses)
                 },
                 
-                isSelected(rowId, columnId) {
-                  return this.responses[rowId] && this.responses[rowId][columnId]
+                isSelected(rowId, value) {
+                  if (this.answerType === 'multiple') {
+                    return this.responses[rowId] && this.responses[rowId][value]
+                  }
+                  return this.responses[rowId] === value
+                },
+                
+                getResponse(rowId) {
+                  return this.responses[rowId] || (this.matrixType === 'constant_sum' ? {} : '')
+                },
+                
+                get totalSum() {
+                  if (this.matrixType !== 'constant_sum') return 0
+                  return Object.values(this.responses).reduce((sum, row) => {
+                    return sum + Object.values(row || {}).reduce((rowSum, val) => rowSum + (parseInt(val) || 0), 0)
+                  }, 0)
                 },
                 
                 get validation() {
                   return $store.validation.getValidation(question.id)
                 }
               }">
-                <div class="overflow-x-auto">
+                <!-- Matrix Type Label -->
+                <div class="mb-4 flex items-center justify-between">
+                  <span class="text-sm text-gray-500">
+                    <span x-text="{
+                      'likert': 'Likert Scale Matrix',
+                      'bipolar': 'Bipolar Matrix',
+                      'rank_order': 'Rank Order Matrix',
+                      'constant_sum': 'Constant Sum Matrix',
+                      'text_entry': 'Text Entry Matrix',
+                      'max_diff': 'MaxDiff Matrix',
+                      'profile': 'Profile Matrix'
+                    }[matrixType] || 'Matrix Question'"></span>
+                  </span>
+                  <span x-show="matrixType === 'constant_sum'" class="text-sm font-medium"
+                        :class="totalSum === 100 ? 'text-green-600' : 'text-red-600'">
+                    Total: <span x-text="totalSum"></span>/100
+                  </span>
+                </div>
+                
+                <!-- Enhanced Matrix Table -->
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
                   <table class="w-full border-collapse">
-                    <thead>
+                    <thead class="bg-gray-50">
                       <tr>
-                        <th class="text-left p-3 font-medium text-gray-700"></th>
-                        <template x-for="column in question.settings.columns" :key="column.id">
-                          <th class="text-center p-3 font-medium text-gray-700 min-w-[100px]" x-text="column.text"></th>
+                        <th class="text-left p-4 font-medium text-gray-700 border-b border-r border-gray-200 sticky left-0 bg-gray-50 z-10">
+                          <!-- Empty cell for row headers -->
+                        </th>
+                        <template x-for="column in scalePoints" :key="column.id">
+                          <th class="text-center p-4 font-medium text-gray-700 border-b border-gray-200 min-w-[120px]">
+                            <div class="flex flex-col items-center">
+                              <span x-text="column.text"></span>
+                              <span x-show="column.value" class="text-xs text-gray-500 mt-1" x-text="'(' + column.value + ')'"></span>
+                            </div>
+                          </th>
                         </template>
                       </tr>
                     </thead>
                     <tbody>
-                      <template x-for="(row, index) in question.settings.rows" :key="row.id">
-                        <tr :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'">
-                          <td class="p-3 font-medium text-gray-700" x-text="row.text"></td>
-                          <template x-for="column in question.settings.columns" :key="column.id">
-                            <td class="text-center p-3">
-                              <button @click="updateResponse(row.id, column.id)"
-                                      :disabled="$store.ui.activeTab === 'build'"
-                                      class="w-5 h-5 rounded border-2 transition-all"
-                                      :class="isSelected(row.id, column.id) 
-                                        ? 'bg-blue-500 border-blue-500' 
-                                        : 'bg-white border-gray-300 hover:border-gray-400'">
-                                <svg x-show="isSelected(row.id, column.id)" 
-                                     class="w-3 h-3 text-white mx-auto" 
-                                     fill="currentColor" 
-                                     viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                              </button>
+                      <template x-for="(statement, index) in statements" :key="statement.id">
+                        <tr class="hover:bg-gray-50 transition-colors group"
+                            :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'">
+                          <!-- Row Header -->
+                          <td class="p-4 font-medium text-gray-700 border-r border-gray-200 sticky left-0 z-10"
+                              :class="index % 2 === 0 ? 'bg-white group-hover:bg-gray-50' : 'bg-gray-50/50 group-hover:bg-gray-50'">
+                            <div class="pr-4">
+                              <span x-text="statement.text"></span>
+                              <span x-show="statement.required" class="text-red-500 ml-1">*</span>
+                            </div>
+                          </td>
+                          
+                          <!-- Matrix Cells -->
+                          <template x-for="column in scalePoints" :key="column.id">
+                            <td class="text-center p-4 border-gray-100"
+                                :class="$el === $el.parentElement.lastElementChild ? '' : 'border-r'">
+                              <!-- Single/Multiple Choice Radio/Checkbox -->
+                              <template x-if="matrixType === 'likert' || matrixType === 'bipolar'">
+                                <label class="flex items-center justify-center cursor-pointer">
+                                  <input :type="answerType === 'multiple' ? 'checkbox' : 'radio'"
+                                         :name="'matrix_' + question.id + '_' + statement.id"
+                                         :value="column.id"
+                                         :checked="isSelected(statement.id, column.id)"
+                                         @change="updateResponse(statement.id, column.id)"
+                                         :disabled="$store.ui.activeTab === 'build'"
+                                         class="w-5 h-5 text-blue-600 transition-all cursor-pointer"
+                                         :class="answerType === 'multiple' ? 'rounded' : ''">
+                                </label>
+                              </template>
+                              
+                              <!-- Rank Order -->
+                              <template x-if="matrixType === 'rank_order'">
+                                <select :value="getResponse(statement.id)"
+                                        @change="updateResponse(statement.id, $event.target.value)"
+                                        :disabled="$store.ui.activeTab === 'build'"
+                                        class="w-16 px-2 py-1 border border-gray-200 rounded text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                                  <option value="">-</option>
+                                  <template x-for="i in scalePoints.length" :key="i">
+                                    <option :value="i" x-text="i"></option>
+                                  </template>
+                                </select>
+                              </template>
+                              
+                              <!-- Constant Sum -->
+                              <template x-if="matrixType === 'constant_sum'">
+                                <div class="relative">
+                                  <input type="number"
+                                         :value="getResponse(statement.id)[column.id] || ''"
+                                         @input="(() => {
+                                           const val = parseInt($event.target.value) || 0
+                                           const row = getResponse(statement.id)
+                                           row[column.id] = val
+                                           updateResponse(statement.id, row)
+                                         })()"
+                                         min="0" max="100"
+                                         :disabled="$store.ui.activeTab === 'build'"
+                                         class="w-20 px-2 py-1 pr-6 border border-gray-200 rounded text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                                  <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">%</span>
+                                </div>
+                              </template>
+                              
+                              <!-- Text Entry -->
+                              <template x-if="matrixType === 'text_entry'">
+                                <input type="text"
+                                       :value="getResponse(statement.id)"
+                                       @input="updateResponse(statement.id, $event.target.value)"
+                                       :placeholder="column.placeholder || '...'"
+                                       :disabled="$store.ui.activeTab === 'build'"
+                                       class="w-full px-2 py-1 border border-gray-200 rounded focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm">
+                              </template>
+                              
+                              <!-- MaxDiff Best/Worst -->
+                              <template x-if="matrixType === 'max_diff'">
+                                <div class="flex flex-col space-y-2">
+                                  <label class="flex items-center justify-center">
+                                    <input type="radio"
+                                           :name="'matrix_best_' + question.id + '_' + index"
+                                           :value="column.id"
+                                           :checked="getResponse(statement.id).best === column.id"
+                                           @change="(() => {
+                                             const current = getResponse(statement.id)
+                                             updateResponse(statement.id, {...current, best: column.id})
+                                           })()"
+                                           :disabled="$store.ui.activeTab === 'build'"
+                                           class="w-4 h-4 text-green-600">
+                                    <span class="ml-1 text-xs text-green-600">Best</span>
+                                  </label>
+                                  <label class="flex items-center justify-center">
+                                    <input type="radio"
+                                           :name="'matrix_worst_' + question.id + '_' + index"
+                                           :value="column.id"
+                                           :checked="getResponse(statement.id).worst === column.id"
+                                           @change="(() => {
+                                             const current = getResponse(statement.id)
+                                             updateResponse(statement.id, {...current, worst: column.id})
+                                           })()"
+                                           :disabled="$store.ui.activeTab === 'build'"
+                                           class="w-4 h-4 text-red-600">
+                                    <span class="ml-1 text-xs text-red-600">Worst</span>
+                                  </label>
+                                </div>
+                              </template>
                             </td>
                           </template>
                         </tr>
                       </template>
                     </tbody>
                   </table>
+                </div>
+                
+                <!-- Mobile View Notice -->
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700 md:hidden">
+                  <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                  Matrix questions are best viewed on a larger screen for optimal experience.
                 </div>
                 
                 <!-- Validation Errors -->
@@ -1838,13 +1983,33 @@ export function QuestionRenderer() {
               <div x-data="{
                 items: question.options.map((opt, idx) => ({ ...opt, order: idx })),
                 draggedItem: null,
+                draggedOverItem: null,
                 
-                handleDragStart(item) {
+                handleDragStart(e, item) {
                   this.draggedItem = item
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.target.classList.add('dragging')
+                },
+                
+                handleDragEnd(e) {
+                  e.target.classList.remove('dragging')
+                  this.draggedItem = null
+                  this.draggedOverItem = null
                 },
                 
                 handleDragOver(e) {
                   e.preventDefault()
+                  e.dataTransfer.dropEffect = 'move'
+                },
+                
+                handleDragEnter(item) {
+                  if (this.draggedItem && this.draggedItem.id !== item.id) {
+                    this.draggedOverItem = item
+                  }
+                },
+                
+                handleDragLeave() {
+                  this.draggedOverItem = null
                 },
                 
                 handleDrop(e, targetItem) {
@@ -1860,7 +2025,27 @@ export function QuestionRenderer() {
                   
                   this.items = newItems.map((item, idx) => ({ ...item, order: idx }))
                   this.updateResponse()
-                  this.draggedItem = null
+                  this.draggedOverItem = null
+                },
+                
+                moveUp(index) {
+                  if (index === 0) return
+                  const newItems = [...this.items]
+                  const temp = newItems[index]
+                  newItems[index] = newItems[index - 1]
+                  newItems[index - 1] = temp
+                  this.items = newItems.map((item, idx) => ({ ...item, order: idx }))
+                  this.updateResponse()
+                },
+                
+                moveDown(index) {
+                  if (index === this.items.length - 1) return
+                  const newItems = [...this.items]
+                  const temp = newItems[index]
+                  newItems[index] = newItems[index + 1]
+                  newItems[index + 1] = temp
+                  this.items = newItems.map((item, idx) => ({ ...item, order: idx }))
+                  this.updateResponse()
                 },
                 
                 updateResponse() {
@@ -1873,43 +2058,81 @@ export function QuestionRenderer() {
                 }
               }" 
               x-init="updateResponse()">
-                <div class="space-y-2">
+                <div class="space-y-3">
+                  <!-- Instructions -->
+                  <p class="text-sm text-gray-600 italic">Drag items to reorder or use the arrow buttons</p>
+                  
+                  <!-- Ranking Items -->
                   <template x-for="(item, index) in items" :key="item.id">
                     <div draggable="true"
-                         @dragstart="handleDragStart(item)"
+                         @dragstart="$store.ui.activeTab !== 'build' && handleDragStart($event, item)"
+                         @dragend="handleDragEnd($event)"
                          @dragover="handleDragOver($event)"
+                         @dragenter="handleDragEnter(item)"
+                         @dragleave="handleDragLeave()"
                          @drop="handleDrop($event, item)"
-                         class="flex items-center p-4 bg-white border border-gray-200 rounded-lg cursor-move hover:shadow-sm transition-all"
-                         :class="draggedItem && draggedItem.id === item.id ? 'opacity-50' : ''">
-                      <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-medium text-sm mr-3"
+                         class="group flex items-center p-4 bg-white border-2 rounded-lg transition-all duration-200"
+                         :class="{
+                           'border-gray-200 hover:border-gray-300 hover:shadow-md cursor-move': $store.ui.activeTab !== 'build',
+                           'border-gray-200': $store.ui.activeTab === 'build',
+                           'opacity-50 transform scale-95': draggedItem && draggedItem.id === item.id,
+                           'border-blue-400 bg-blue-50': draggedOverItem && draggedOverItem.id === item.id
+                         }">
+                      <!-- Rank Number -->
+                      <span class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mr-4 transition-colors"
+                            :class="index === 0 ? 'bg-yellow-100 text-yellow-700' : index === 1 ? 'bg-gray-100 text-gray-700' : index === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-600'"
                             x-text="index + 1"></span>
-                      <span class="flex-grow" x-text="item.text"></span>
-                      <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      
+                      <!-- Item Text -->
+                      <span class="flex-grow text-gray-800 font-medium" x-text="item.text"></span>
+                      
+                      <!-- Arrow Buttons -->
+                      <div class="flex items-center gap-1 ml-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                           x-show="$store.ui.activeTab !== 'build'">
+                        <button @click="moveUp(index)"
+                                :disabled="index === 0"
+                                class="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Move up">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                          </svg>
+                        </button>
+                        <button @click="moveDown(index)"
+                                :disabled="index === items.length - 1"
+                                class="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Move down">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      
+                      <!-- Drag Handle -->
+                      <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                       </svg>
                     </div>
                   </template>
-                </div>
-                
-                <p class="mt-3 text-sm text-gray-500">Drag items to rank them from most to least important</p>
-                
-                <!-- Validation Errors -->
-                <div x-show="validation.errors.length > 0 && $store.validation.showErrors"
-                     x-transition
-                     class="mt-2 text-sm text-red-600">
-                  <p x-text="validation.errors[0]"></p>
+                  
+                  <!-- Validation Errors -->
+                  <div x-show="validation.errors.length > 0 && $store.validation.showErrors"
+                       x-transition
+                       class="mt-2 text-sm text-red-600">
+                    <p x-text="validation.errors[0]"></p>
+                  </div>
                 </div>
               </div>
             </template>
             
-            <!-- Sum 100 -->
-            <template x-if="question.type === 'sum_100'">
+            <!-- Constant Sum -->
+            <template x-if="question.type === 'constant_sum'">
               <div x-data="{
                 responses: $store.validation.responses[question.id] || {},
+                targetTotal: question.settings?.total || 100,
                 
                 updateValue(optionId, value) {
                   const numValue = parseInt(value) || 0
-                  this.responses[optionId] = Math.max(0, Math.min(100, numValue))
+                  this.responses[optionId] = Math.max(0, Math.min(this.targetTotal, numValue))
                   $store.validation.updateResponse(question.id, this.responses)
                 },
                 
@@ -1917,52 +2140,76 @@ export function QuestionRenderer() {
                   return Object.values(this.responses).reduce((sum, val) => sum + (val || 0), 0)
                 },
                 
+                get remaining() {
+                  return this.targetTotal - this.total
+                },
+                
+                getPercentage(value) {
+                  return this.targetTotal > 0 ? (value / this.targetTotal) * 100 : 0
+                },
+                
                 get validation() {
                   return $store.validation.getValidation(question.id)
                 }
               }" x-init="question.options.forEach(opt => { if (!responses[opt.id]) responses[opt.id] = 0 })">
-                <div class="space-y-3">
+                <div class="space-y-4">
+                  <!-- Total Display -->
+                  <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm font-medium text-gray-700">Total:</span>
+                      <span class="text-lg font-bold" 
+                            :class="total === targetTotal ? 'text-green-600' : total > targetTotal ? 'text-red-600' : 'text-gray-900'">
+                        <span x-text="total"></span><span x-text="question.settings?.symbol || '%'"></span>
+                      </span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="h-2 rounded-full transition-all duration-300"
+                           :class="total === targetTotal ? 'bg-green-500' : total > targetTotal ? 'bg-red-500' : 'bg-blue-500'"
+                           :style="'width: ' + Math.min(100, (total / targetTotal) * 100) + '%'"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                      <template x-if="total < targetTotal">
+                        <span>Please add <span x-text="remaining"></span><span x-text="question.settings?.symbol || '%'"></span></span>
+                      </template>
+                      <template x-if="total > targetTotal">
+                        <span>Please remove <span x-text="total - targetTotal"></span><span x-text="question.settings?.symbol || '%'"></span></span>
+                      </template>
+                      <template x-if="total === targetTotal">
+                        <span class="text-green-600">Perfect! Total equals <span x-text="targetTotal"></span><span x-text="question.settings?.symbol || '%'"></span></span>
+                      </template>
+                    </p>
+                  </div>
+                  
+                  <!-- Options with Visual Bars -->
                   <template x-for="option in question.options" :key="option.id">
-                    <div class="flex items-center gap-3">
-                      <label class="flex-grow font-medium text-gray-700" x-text="option.text"></label>
-                      <div class="flex items-center gap-2">
-                        <input type="number"
-                               :value="responses[option.id] || 0"
-                               @input="updateValue(option.id, $event.target.value)"
-                               min="0"
-                               max="100"
-                               :disabled="$store.ui.activeTab === 'build'"
-                               class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-                        <span class="text-gray-500">%</span>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-3">
+                        <label class="flex-grow font-medium text-gray-700" x-text="option.text"></label>
+                        <div class="flex items-center gap-2">
+                          <input type="number"
+                                 :value="responses[option.id] || 0"
+                                 @input="updateValue(option.id, $event.target.value)"
+                                 min="0"
+                                 :max="targetTotal"
+                                 :disabled="$store.ui.activeTab === 'build'"
+                                 class="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                          <span class="text-gray-500" x-text="question.settings?.symbol || '%'"></span>
+                        </div>
+                      </div>
+                      <!-- Visual Bar -->
+                      <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                             :style="'width: ' + getPercentage(responses[option.id] || 0) + '%'"></div>
                       </div>
                     </div>
                   </template>
-                </div>
-                
-                <!-- Total Display -->
-                <div class="mt-4 p-3 rounded-lg transition-all"
-                     :class="total === 100 ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'">
-                  <div class="flex items-center justify-between">
-                    <span class="font-medium"
-                          :class="total === 100 ? 'text-green-700' : 'text-orange-700'">
-                      Total:
-                    </span>
-                    <span class="font-bold text-lg"
-                          :class="total === 100 ? 'text-green-700' : 'text-orange-700'">
-                      <span x-text="total"></span>%
-                    </span>
+                  
+                  <!-- Validation Errors -->
+                  <div x-show="validation.errors.length > 0 && $store.validation.showErrors"
+                       x-transition
+                       class="mt-2 text-sm text-red-600">
+                    <p x-text="validation.errors[0]"></p>
                   </div>
-                  <p x-show="total !== 100" class="text-sm mt-1"
-                     :class="total > 100 ? 'text-orange-600' : 'text-orange-600'">
-                    <span x-text="total > 100 ? 'Please reduce by ' + (total - 100) + '%' : 'Please add ' + (100 - total) + '%'"></span>
-                  </p>
-                </div>
-                
-                <!-- Validation Errors -->
-                <div x-show="validation.errors.length > 0 && $store.validation.showErrors"
-                     x-transition
-                     class="mt-2 text-sm text-red-600">
-                  <p x-text="validation.errors[0]"></p>
                 </div>
               </div>
             </template>
@@ -2056,63 +2303,190 @@ export function QuestionRenderer() {
             <template x-if="question.type === 'side_by_side'">
               <div x-data="{
                 responses: $store.validation.responses[question.id] || {},
+                columns: question.settings.columns || [
+                  { id: 'col_1', text: 'Column 1', type: 'text', options: [] },
+                  { id: 'col_2', text: 'Column 2', type: 'radio', options: ['Yes', 'No', 'Maybe'] }
+                ],
+                rows: question.settings.rows || [
+                  { id: 'row_1', text: 'Question 1' },
+                  { id: 'row_2', text: 'Question 2' },
+                  { id: 'row_3', text: 'Question 3' }
+                ],
                 
-                updateResponse(questionId, value) {
-                  this.responses[questionId] = value
+                updateResponse(rowId, colId, value) {
+                  if (!this.responses[rowId]) this.responses[rowId] = {}
+                  this.responses[rowId][colId] = value
                   $store.validation.updateResponse(question.id, this.responses)
+                },
+                
+                getResponse(rowId, colId) {
+                  return this.responses[rowId]?.[colId] || ''
                 },
                 
                 get validation() {
                   return $store.validation.getValidation(question.id)
                 }
               }">
-                <div class="grid md:grid-cols-2 gap-6">
-                  <template x-for="subQuestion in question.settings.questions" :key="subQuestion.id">
-                    <div class="space-y-2">
-                      <label class="block font-medium text-gray-700" x-text="subQuestion.text"></label>
-                      
-                      <!-- Text Input Type -->
-                      <template x-if="subQuestion.type === 'text'">
-                        <input type="text"
-                               :value="responses[subQuestion.id] || ''"
-                               @input="updateResponse(subQuestion.id, $event.target.value)"
-                               :placeholder="subQuestion.placeholder"
-                               :disabled="$store.ui.activeTab === 'build'"
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-                      </template>
-                      
-                      <!-- Select Type -->
-                      <template x-if="subQuestion.type === 'select'">
-                        <select :value="responses[subQuestion.id] || ''"
-                                @change="updateResponse(subQuestion.id, $event.target.value)"
-                                :disabled="$store.ui.activeTab === 'build'"
-                                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-                          <option value="">Choose...</option>
-                          <template x-for="option in subQuestion.options" :key="option">
-                            <option :value="option" x-text="option"></option>
+                <!-- Enhanced Side by Side Table -->
+                <div class="overflow-x-auto">
+                  <table class="w-full border-collapse">
+                    <!-- Table Header -->
+                    <thead>
+                      <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-3 px-4 font-medium text-gray-700">
+                          <!-- Empty cell for row headers -->
+                        </th>
+                        <template x-for="column in columns" :key="column.id">
+                          <th class="text-center py-3 px-4 font-medium text-gray-700 min-w-[150px]">
+                            <div class="flex flex-col items-center">
+                              <span x-text="column.text"></span>
+                              <span class="text-xs text-gray-500 mt-1" x-text="{
+                                text: 'Text Input',
+                                number: 'Number',
+                                select: 'Dropdown',
+                                radio: 'Radio Buttons',
+                                checkbox: 'Checkboxes',
+                                scale: 'Scale',
+                                star: 'Star Rating'
+                              }[column.type] || column.type"></span>
+                            </div>
+                          </th>
+                        </template>
+                      </tr>
+                    </thead>
+                    
+                    <!-- Table Body -->
+                    <tbody>
+                      <template x-for="(row, rowIndex) in rows" :key="row.id">
+                        <tr class="border-b hover:bg-gray-50 transition-colors">
+                          <!-- Row Header -->
+                          <td class="py-4 px-4 font-medium text-gray-700 text-left" x-text="row.text"></td>
+                          
+                          <!-- Column Cells -->
+                          <template x-for="column in columns" :key="column.id">
+                            <td class="py-4 px-4 text-center">
+                              <!-- Text Input Type -->
+                              <template x-if="column.type === 'text'">
+                                <input type="text"
+                                       :value="getResponse(row.id, column.id)"
+                                       @input="updateResponse(row.id, column.id, $event.target.value)"
+                                       :placeholder="column.placeholder || 'Enter text...'"
+                                       :disabled="$store.ui.activeTab === 'build'"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm">
+                              </template>
+                              
+                              <!-- Number Type -->
+                              <template x-if="column.type === 'number'">
+                                <input type="number"
+                                       :value="getResponse(row.id, column.id)"
+                                       @input="updateResponse(row.id, column.id, $event.target.value)"
+                                       :min="column.min" :max="column.max"
+                                       :disabled="$store.ui.activeTab === 'build'"
+                                       class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm text-center">
+                              </template>
+                              
+                              <!-- Select Type -->
+                              <template x-if="column.type === 'select'">
+                                <select :value="getResponse(row.id, column.id)"
+                                        @change="updateResponse(row.id, column.id, $event.target.value)"
+                                        :disabled="$store.ui.activeTab === 'build'"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm">
+                                  <option value="">Choose...</option>
+                                  <template x-for="option in column.options" :key="option">
+                                    <option :value="option" x-text="option"></option>
+                                  </template>
+                                </select>
+                              </template>
+                              
+                              <!-- Radio Type -->
+                              <template x-if="column.type === 'radio'">
+                                <div class="flex justify-center space-x-3">
+                                  <template x-for="option in column.options" :key="option">
+                                    <label class="flex items-center cursor-pointer">
+                                      <input type="radio"
+                                             :name="'side_by_side_' + question.id + '_' + row.id + '_' + column.id"
+                                             :value="option"
+                                             :checked="getResponse(row.id, column.id) === option"
+                                             @change="updateResponse(row.id, column.id, option)"
+                                             :disabled="$store.ui.activeTab === 'build'"
+                                             class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                      <span class="ml-1 text-sm" x-text="option"></span>
+                                    </label>
+                                  </template>
+                                </div>
+                              </template>
+                              
+                              <!-- Checkbox Type -->
+                              <template x-if="column.type === 'checkbox'">
+                                <div class="flex justify-center space-x-3">
+                                  <template x-for="option in column.options" :key="option">
+                                    <label class="flex items-center cursor-pointer">
+                                      <input type="checkbox"
+                                             :value="option"
+                                             :checked="(getResponse(row.id, column.id) || []).includes(option)"
+                                             @change="() => {
+                                               let current = getResponse(row.id, column.id) || []
+                                               if ($event.target.checked) {
+                                                 updateResponse(row.id, column.id, [...current, option])
+                                               } else {
+                                                 updateResponse(row.id, column.id, current.filter(v => v !== option))
+                                               }
+                                             }"
+                                             :disabled="$store.ui.activeTab === 'build'"
+                                             class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                      <span class="ml-1 text-sm" x-text="option"></span>
+                                    </label>
+                                  </template>
+                                </div>
+                              </template>
+                              
+                              <!-- Scale Type -->
+                              <template x-if="column.type === 'scale'">
+                                <div class="flex justify-center space-x-1">
+                                  <template x-for="i in (column.max || 5)" :key="i">
+                                    <button type="button"
+                                            @click="updateResponse(row.id, column.id, i)"
+                                            :disabled="$store.ui.activeTab === 'build'"
+                                            class="w-8 h-8 rounded-lg font-medium text-sm transition-all"
+                                            :class="getResponse(row.id, column.id) === i 
+                                              ? 'bg-blue-600 text-white'
+                                              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'">
+                                      <span x-text="i"></span>
+                                    </button>
+                                  </template>
+                                </div>
+                              </template>
+                              
+                              <!-- Star Rating Type -->
+                              <template x-if="column.type === 'star'">
+                                <div class="flex justify-center space-x-1">
+                                  <template x-for="i in (column.max || 5)" :key="i">
+                                    <button type="button"
+                                            @click="updateResponse(row.id, column.id, i)"
+                                            :disabled="$store.ui.activeTab === 'build'"
+                                            class="text-2xl transition-all"
+                                            :class="i <= (getResponse(row.id, column.id) || 0)
+                                              ? 'text-yellow-400'
+                                              : 'text-gray-300 hover:text-yellow-300'">
+                                      ⭐
+                                    </button>
+                                  </template>
+                                </div>
+                              </template>
+                            </td>
                           </template>
-                        </select>
+                        </tr>
                       </template>
-                      
-                      <!-- Radio Type -->
-                      <template x-if="subQuestion.type === 'radio'">
-                        <div class="space-y-2">
-                          <template x-for="option in subQuestion.options" :key="option">
-                            <label class="flex items-center">
-                              <input type="radio"
-                                     :name="'side_by_side_' + question.id + '_' + subQuestion.id"
-                                     :value="option"
-                                     :checked="responses[subQuestion.id] === option"
-                                     @change="updateResponse(subQuestion.id, option)"
-                                     :disabled="$store.ui.activeTab === 'build'"
-                                     class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                              <span class="ml-2" x-text="option"></span>
-                            </label>
-                          </template>
-                        </div>
-                      </template>
-                    </div>
-                  </template>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <!-- Mobile View Notice -->
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700 md:hidden">
+                  <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                  For the best experience, view this table on a larger screen.
                 </div>
                 
                 <!-- Validation Errors -->
@@ -2176,8 +2550,8 @@ export function QuestionRenderer() {
               </div>
             </template>
             
-            <!-- Numeric -->
-            <template x-if="question.type === 'numeric'">
+            <!-- Number -->
+            <template x-if="question.type === 'number'">
               <div x-data="{
                 response: $store.validation.responses[question.id] || '',
                 focused: false,
@@ -2695,8 +3069,8 @@ export function QuestionRenderer() {
               </div>
             </template>
             
-            <!-- Image Select -->
-            <template x-if="question.type === 'image_select'">
+            <!-- Image Choice -->
+            <template x-if="question.type === 'image_choice'">
               <div x-data="{
                 selected: $store.validation.responses[question.id] || (question.settings.multipleSelection ? [] : null),
                 
@@ -3011,8 +3385,8 @@ export function QuestionRenderer() {
               </div>
             </template>
             
-            <!-- Video Record -->
-            <template x-if="question.type === 'video_record'">
+            <!-- Video Response -->
+            <template x-if="question.type === 'video_response'">
               <div x-data="{
                 isRecording: false,
                 hasRecording: false,
@@ -3128,8 +3502,8 @@ export function QuestionRenderer() {
               </div>
             </template>
             
-            <!-- Audio Record -->
-            <template x-if="question.type === 'audio_record'">
+            <!-- Audio Response -->
+            <template x-if="question.type === 'audio_response'">
               <div x-data="{
                 isRecording: false,
                 hasRecording: false,
@@ -3596,8 +3970,124 @@ export function QuestionRenderer() {
               </div>
             </template>
             
+            <!-- Priority Grid -->
+            <template x-if="question.type === 'priority_grid'">
+              <div x-data="{
+                items: question.options || [],
+                placedItems: $store.validation.responses[question.id] || {},
+                draggedItem: null,
+                
+                startDrag(itemId) {
+                  this.draggedItem = itemId
+                },
+                
+                handleDrop(e) {
+                  if (!this.draggedItem) return
+                  
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const x = Math.round(((e.clientX - rect.left) / rect.width) * 100)
+                  const y = Math.round(((e.clientY - rect.top) / rect.height) * 100)
+                  
+                  this.placedItems[this.draggedItem] = { x, y }
+                  $store.validation.updateResponse(question.id, this.placedItems)
+                  this.draggedItem = null
+                },
+                
+                removeItem(itemId) {
+                  delete this.placedItems[itemId]
+                  $store.validation.updateResponse(question.id, this.placedItems)
+                },
+                
+                getQuadrant(x, y) {
+                  if (x >= 50 && y < 50) return 'High Priority, High Impact'
+                  if (x < 50 && y < 50) return 'Low Priority, High Impact'
+                  if (x < 50 && y >= 50) return 'Low Priority, Low Impact'
+                  return 'High Priority, Low Impact'
+                },
+                
+                get validation() {
+                  return $store.validation.getValidation(question.id)
+                }
+              }">
+                <div class="space-y-4">
+                  <!-- Grid -->
+                  <div class="relative bg-gray-50 rounded-lg overflow-hidden"
+                       style="padding-bottom: 100%;"
+                       @drop.prevent="$store.ui.activeTab !== 'build' && handleDrop($event)"
+                       @dragover.prevent>
+                    <div class="absolute inset-0 p-4">
+                      <!-- Grid Background -->
+                      <div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+                        <div class="border-r border-b border-gray-300 p-2">
+                          <span class="text-xs text-gray-500">Low Priority<br>High Impact</span>
+                        </div>
+                        <div class="border-b border-gray-300 p-2">
+                          <span class="text-xs text-gray-500">High Priority<br>High Impact</span>
+                        </div>
+                        <div class="border-r border-gray-300 p-2">
+                          <span class="text-xs text-gray-500">Low Priority<br>Low Impact</span>
+                        </div>
+                        <div class="p-2">
+                          <span class="text-xs text-gray-500">High Priority<br>Low Impact</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Axis Labels -->
+                      <div class="absolute left-1/2 bottom-2 transform -translate-x-1/2">
+                        <span class="text-sm font-medium text-gray-600" x-text="question.settings?.xAxisLabel || 'Priority →'"></span>
+                      </div>
+                      <div class="absolute left-2 top-1/2 transform -translate-y-1/2 -rotate-90">
+                        <span class="text-sm font-medium text-gray-600" x-text="question.settings?.yAxisLabel || 'Impact →'"></span>
+                      </div>
+                      
+                      <!-- Placed Items -->
+                      <template x-for="(position, itemId) in placedItems" :key="itemId">
+                        <div class="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-move"
+                             :style="'left: ' + position.x + '%; top: ' + position.y + '%;'"
+                             draggable="true"
+                             @dragstart="$store.ui.activeTab !== 'build' && startDrag(itemId)">
+                          <div class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-shadow">
+                            <span x-text="items.find(i => i.id === itemId)?.text || 'Item'"></span>
+                            <button @click.stop="removeItem(itemId)"
+                                    class="ml-2 text-indigo-200 hover:text-white"
+                                    x-show="$store.ui.activeTab !== 'build'">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- Unplaced Items -->
+                  <div class="border-t pt-4">
+                    <p class="text-sm text-gray-600 mb-2">Drag items to place them on the grid:</p>
+                    <div class="flex flex-wrap gap-2">
+                      <template x-for="item in items" :key="item.id">
+                        <div x-show="!placedItems[item.id]"
+                             draggable="true"
+                             @dragstart="$store.ui.activeTab !== 'build' && startDrag(item.id)"
+                             class="bg-gray-200 px-3 py-1 rounded-full text-sm font-medium cursor-move hover:bg-gray-300 transition-colors">
+                          <span x-text="item.text"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- Validation Errors -->
+                  <div x-show="validation.errors.length > 0 && $store.validation.showErrors"
+                       x-transition
+                       class="mt-2 text-sm text-red-600">
+                    <p x-text="validation.errors[0]"></p>
+                  </div>
+                </div>
+              </div>
+            </template>
+            
             <!-- Placeholder for other question types -->
-            <template x-if="!['text_input', 'long_text', 'multiple_choice', 'checkbox', 'dropdown', 'yes_no', 'star_rating', 'number_scale', 'nps', 'likert', 'slider', 'emoji_scale', 'matrix', 'ranking', 'sum_100', 'max_diff', 'side_by_side', 'groups', 'numeric', 'email', 'phone', 'url', 'date', 'time', 'file_upload', 'image_select', 'signature', 'drawing', 'video_record', 'audio_record', 'heat_map', 'hot_spot', 'map_location', 'card_sort'].includes(question.type)">
+            <template x-if="!['text_input', 'long_text', 'multiple_choice', 'checkbox', 'dropdown', 'yes_no', 'star_rating', 'number_scale', 'nps', 'likert', 'slider', 'emoji_scale', 'matrix', 'ranking', 'constant_sum', 'max_diff', 'side_by_side', 'groups', 'number', 'email', 'phone', 'url', 'date', 'time', 'file_upload', 'image_choice', 'signature', 'drawing', 'video_response', 'audio_response', 'heat_map', 'hot_spot', 'map_location', 'card_sort', 'priority_grid'].includes(question.type)">
               <div class="p-8 bg-gray-50 rounded-lg text-center text-gray-500">
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>

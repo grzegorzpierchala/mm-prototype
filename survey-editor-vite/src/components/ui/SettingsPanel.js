@@ -679,6 +679,449 @@ export function SettingsPanel() {
                   </div>
                 </div>
               </template>
+              
+              <!-- Priority Grid Display Settings -->
+              <template x-if="question.type === 'priority_grid'">
+                <div class="space-y-6">
+                  <!-- Grid Configuration -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Grid Configuration</h4>
+                    
+                    <!-- Axis Labels -->
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">X-Axis Label</label>
+                        <input type="text"
+                               x-model="question.settings.xAxisLabel"
+                               @input="$store.ui.debouncedAutoSave()"
+                               placeholder="e.g., Importance"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Y-Axis Label</label>
+                        <input type="text"
+                               x-model="question.settings.yAxisLabel"
+                               @input="$store.ui.debouncedAutoSave()"
+                               placeholder="e.g., Performance"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Quadrant Labels -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Quadrant Labels</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="text-xs text-gray-500">Top Left</label>
+                        <input type="text"
+                               x-model="question.settings.quadrantLabels[0]"
+                               @input="$store.ui.debouncedAutoSave()"
+                               class="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                      <div>
+                        <label class="text-xs text-gray-500">Top Right</label>
+                        <input type="text"
+                               x-model="question.settings.quadrantLabels[2]"
+                               @input="$store.ui.debouncedAutoSave()"
+                               class="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                      <div>
+                        <label class="text-xs text-gray-500">Bottom Left</label>
+                        <input type="text"
+                               x-model="question.settings.quadrantLabels[1]"
+                               @input="$store.ui.debouncedAutoSave()"
+                               class="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                      <div>
+                        <label class="text-xs text-gray-500">Bottom Right</label>
+                        <input type="text"
+                               x-model="question.settings.quadrantLabels[3]"
+                               @input="$store.ui.debouncedAutoSave()"
+                               class="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Grid Items -->
+                  <div class="settings-section">
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="settings-section-title mb-0">Items</h4>
+                      <button @click="$store.survey.addPriorityGridItem(question.id)"
+                              class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        + Add Item
+                      </button>
+                    </div>
+                    <div class="space-y-2">
+                      <template x-for="(item, index) in question.options" :key="item.id">
+                        <div class="flex items-center gap-2">
+                          <input type="text"
+                                 x-model="item.text"
+                                 @input="$store.ui.debouncedAutoSave()"
+                                 class="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent"
+                                 :placeholder="'Item ' + (index + 1)">
+                          <button @click="$store.survey.removePriorityGridItem(question.id, item.id)"
+                                  x-show="question.options.length > 1"
+                                  class="p-1 hover:bg-gray-100 rounded transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- Grid Options -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Grid Options</h4>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Show Grid Guides</div>
+                          <div class="text-xs text-gray-500">Display grid lines to help positioning</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.showGuides"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Snap to Grid</div>
+                          <div class="text-xs text-gray-500">Items snap to grid intersections</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.snapToGrid"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              
+              <!-- Side by Side Display Settings -->
+              <template x-if="question.type === 'side_by_side'">
+                <div class="space-y-6">
+                  <!-- Columns Configuration -->
+                  <div class="settings-section">
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="settings-section-title mb-0">Columns</h4>
+                      <button @click="$store.survey.addSideBySideColumn(question.id)"
+                              class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        + Add Column
+                      </button>
+                    </div>
+                    <div class="space-y-3">
+                      <template x-for="(column, index) in question.settings.columns" :key="column.id">
+                        <div class="border border-gray-200 rounded-lg p-3 space-y-3">
+                          <div class="flex items-start justify-between">
+                            <input type="text"
+                                   x-model="column.text"
+                                   @input="$store.ui.debouncedAutoSave()"
+                                   placeholder="Column header"
+                                   class="flex-1 px-3 py-1.5 text-sm font-medium border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                            <button @click="$store.survey.removeSideBySideColumn(question.id, column.id)"
+                                    x-show="question.settings.columns.length > 1"
+                                    class="ml-2 p-1 hover:bg-gray-100 rounded transition-colors">
+                              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Column Type</label>
+                            <select x-model="column.type"
+                                    @change="$store.survey.updateSideBySideColumnType(question.id, column.id, $event.target.value)"
+                                    class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                              <option value="text">Text Input</option>
+                              <option value="number">Number</option>
+                              <option value="select">Dropdown</option>
+                              <option value="radio">Radio Buttons</option>
+                              <option value="checkbox">Checkboxes</option>
+                              <option value="scale">Scale (1-5)</option>
+                              <option value="star">Star Rating</option>
+                            </select>
+                          </div>
+                          
+                          <!-- Options for radio/checkbox/select -->
+                          <template x-if="['radio', 'checkbox', 'select'].includes(column.type)">
+                            <div>
+                              <label class="block text-xs font-medium text-gray-700 mb-1">Options</label>
+                              <div class="space-y-1">
+                                <template x-for="(option, optIndex) in column.options" :key="optIndex">
+                                  <div class="flex items-center gap-1">
+                                    <input type="text"
+                                           x-model="column.options[optIndex]"
+                                           @input="$store.ui.debouncedAutoSave()"
+                                           class="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                    <button @click="column.options.splice(optIndex, 1); $store.ui.debouncedAutoSave()"
+                                            x-show="column.options.length > 1"
+                                            class="p-0.5 hover:bg-gray-100 rounded">
+                                      <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </template>
+                                <button @click="column.options.push('Option ' + (column.options.length + 1)); $store.ui.debouncedAutoSave()"
+                                        class="text-xs text-blue-600 hover:text-blue-700">
+                                  + Add Option
+                                </button>
+                              </div>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                  
+                  <!-- Rows Configuration -->
+                  <div class="settings-section">
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="settings-section-title mb-0">Rows</h4>
+                      <button @click="$store.survey.addSideBySideRow(question.id)"
+                              class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        + Add Row
+                      </button>
+                    </div>
+                    <div class="space-y-2">
+                      <template x-for="(row, index) in question.settings.rows" :key="row.id">
+                        <div class="flex items-center gap-2">
+                          <input type="text"
+                                 x-model="row.text"
+                                 @input="$store.ui.debouncedAutoSave()"
+                                 class="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent"
+                                 :placeholder="'Row ' + (index + 1)">
+                          <button @click="$store.survey.removeSideBySideRow(question.id, row.id)"
+                                  x-show="question.settings.rows.length > 1"
+                                  class="p-1 hover:bg-gray-100 rounded transition-colors">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              
+              <!-- Constant Sum Display Settings -->
+              <template x-if="question.type === 'constant_sum'">
+                <div class="space-y-6">
+                  <!-- Sum Configuration -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Sum Configuration</h4>
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Sum</label>
+                        <input type="number"
+                               x-model.number="question.settings.total"
+                               @input="$store.ui.debouncedAutoSave()"
+                               min="1"
+                               placeholder="100"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                      </div>
+                      
+                      <div class="grid grid-cols-2 gap-3">
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Min per item</label>
+                          <input type="number"
+                                 x-model.number="question.settings.minPerItem"
+                                 @input="$store.ui.debouncedAutoSave()"
+                                 min="0"
+                                 placeholder="0"
+                                 class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Max per item</label>
+                          <input type="number"
+                                 x-model.number="question.settings.maxPerItem"
+                                 @input="$store.ui.debouncedAutoSave()"
+                                 min="1"
+                                 placeholder="No limit"
+                                 class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Visual Options -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Visual Options</h4>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Show Visual Bars</div>
+                          <div class="text-xs text-gray-500">Display progress bars for each item</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.visualBars"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Show Total Box</div>
+                          <div class="text-xs text-gray-500">Display running total</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.showTotalBox"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Number Format -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Number Format</h4>
+                    <div class="space-y-3">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Decimal Places</label>
+                        <select x-model.number="question.settings.decimals"
+                                @change="$store.ui.debouncedAutoSave()"
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                          <option value="0">0 (whole numbers)</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                        </select>
+                      </div>
+                      
+                      <div class="grid grid-cols-2 gap-3">
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Symbol</label>
+                          <input type="text"
+                                 x-model="question.settings.symbol"
+                                 @input="$store.ui.debouncedAutoSave()"
+                                 placeholder="e.g., $, %"
+                                 maxlength="3"
+                                 class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                        <div>
+                          <label class="block text-xs font-medium text-gray-700 mb-1">Position</label>
+                          <select x-model="question.settings.symbolPosition"
+                                  @change="$store.ui.debouncedAutoSave()"
+                                  class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="before">Before</option>
+                            <option value="after">After</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              
+              <!-- Ranking Display Settings -->
+              <template x-if="question.type === 'ranking'">
+                <div class="space-y-6">
+                  <!-- Ranking Method -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Ranking Method</h4>
+                    <div class="space-y-3">
+                      <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="radio" 
+                               x-model="question.settings.rankingMethod"
+                               value="drag_drop"
+                               @change="$store.ui.debouncedAutoSave()"
+                               class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <div>
+                          <span class="text-sm font-medium text-gray-900">Drag and Drop</span>
+                          <p class="text-xs text-gray-500">Users drag items to reorder</p>
+                        </div>
+                      </label>
+                      <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="radio" 
+                               x-model="question.settings.rankingMethod"
+                               value="number_input"
+                               @change="$store.ui.debouncedAutoSave()"
+                               class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                        <div>
+                          <span class="text-sm font-medium text-gray-900">Number Input</span>
+                          <p class="text-xs text-gray-500">Users enter rank numbers</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Visual Options -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Visual Options</h4>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Show Rank Numbers</div>
+                          <div class="text-xs text-gray-500">Display rank position numbers</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.showNumbers"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Visual Feedback</div>
+                          <div class="text-xs text-gray-500">Enhance drag/drop with visual cues</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.visualFeedback"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Ranking Rules -->
+                  <div class="settings-section">
+                    <h4 class="settings-section-title">Ranking Rules</h4>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Force All Ranked</div>
+                          <div class="text-xs text-gray-500">Require all items to be ranked</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.forceAllRanked"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <div class="text-sm font-medium text-gray-700">Allow Ties</div>
+                          <div class="text-xs text-gray-500">Multiple items can share the same rank</div>
+                        </div>
+                        <label class="toggle-switch toggle-switch-sm">
+                          <input type="checkbox" 
+                                 x-model="question.settings.allowTies"
+                                 @change="$store.ui.debouncedAutoSave()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
             </div>
             
             <!-- Validation Tab -->
