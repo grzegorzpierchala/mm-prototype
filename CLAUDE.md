@@ -52,7 +52,8 @@ This is a **high-fidelity prototype** focused on:
 4. **Completion Phase** (After implementation):
    - Final summary of all changes
    - List of affected files
-   - Testing performed
+   - Testing performed by qa-playwright-tester agent
+   - Apply/Fix any feedback provided by qa-playwright-tester agent
    - Next steps or follow-up items
 
 ### Work Log Template
