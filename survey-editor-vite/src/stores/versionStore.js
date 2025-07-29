@@ -14,10 +14,32 @@ Alpine.store('versions', {
       author: 'You',
       message: 'Added demographic questions and improved flow',
       changes: [
-        { type: 'added', item: 'question', text: 'Added age range question (Q5)' },
-        { type: 'modified', item: 'question', text: 'Updated wording for satisfaction scale (Q1)' },
-        { type: 'added', item: 'question', text: 'Added visit frequency question (Q6)' },
-        { type: 'modified', item: 'settings', text: 'Enabled progress bar' }
+        { 
+          type: 'added', 
+          item: 'question', 
+          text: 'Added age range question (Q5)',
+          id: 'change-1'
+        },
+        { 
+          type: 'modified', 
+          item: 'question', 
+          text: 'Updated satisfaction scale from 3 points to 5 points (Q1)',
+          oldText: 'Satisfied, Maybe, Dissatisfied',
+          newText: 'Very Satisfied, Satisfied, Neutral, Dissatisfied, Very Dissatisfied',
+          id: 'change-2'
+        },
+        { 
+          type: 'added', 
+          item: 'question', 
+          text: 'Added visit frequency question (Q6)',
+          id: 'change-3'
+        },
+        { 
+          type: 'modified', 
+          item: 'settings', 
+          text: 'Enabled progress bar',
+          id: 'change-4'
+        }
       ],
       stats: {
         questions: 6,
@@ -32,9 +54,26 @@ Alpine.store('versions', {
       author: 'Sarah Chen',
       message: 'Legal compliance updates',
       changes: [
-        { type: 'added', item: 'text', text: 'Added GDPR consent notice' },
-        { type: 'modified', item: 'question', text: 'Made email optional (Q4)' },
-        { type: 'removed', item: 'question', text: 'Removed phone number field' }
+        { 
+          type: 'added', 
+          item: 'text', 
+          text: 'Added GDPR consent notice to survey introduction',
+          id: 'change-5'
+        },
+        { 
+          type: 'modified', 
+          item: 'question', 
+          text: 'Made email field optional instead of required (Q4)',
+          oldText: 'Email (required)',
+          newText: 'Email (optional)',
+          id: 'change-6'
+        },
+        { 
+          type: 'removed', 
+          item: 'question', 
+          text: 'Removed phone number field - too sensitive for initial survey',
+          id: 'change-7'
+        }
       ],
       stats: {
         questions: 4,
@@ -64,6 +103,8 @@ Alpine.store('versions', {
   compareMode: false,
   compareVersion: null,
   showVisualDiff: false,
+  selectedVersion: null,
+  hoveredChange: null,
   
   // Actions
   getVersion(versionId) {
@@ -132,5 +173,32 @@ Alpine.store('versions', {
     }
     
     return summary
+  },
+  
+  // Helper methods for visual diff
+  isQuestionNew(questionId) {
+    if (!this.selectedVersion) return false
+    const version = this.getVersion(this.selectedVersion)
+    if (!version) return false
+    
+    // Check if this question was added after the selected version
+    return version.changes.some(c => 
+      c.type === 'added' && 
+      c.item === 'question' && 
+      c.text.includes(questionId)
+    )
+  },
+  
+  isQuestionModified(questionId) {
+    if (!this.selectedVersion) return false
+    const version = this.getVersion(this.selectedVersion)
+    if (!version) return false
+    
+    // Check if this question was modified after the selected version
+    return version.changes.some(c => 
+      c.type === 'modified' && 
+      c.item === 'question' && 
+      c.text.includes(questionId)
+    )
   }
 })

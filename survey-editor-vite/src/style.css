@@ -891,8 +891,8 @@ select option {
 }
 
 .version-history-panel.expanded {
-  width: 80%;
-  max-width: 1200px;
+  width: 90vw;
+  max-width: 1400px;
 }
 
 .version-item {
@@ -902,13 +902,8 @@ select option {
   transition: all 0.2s ease;
 }
 
-.version-item:hover {
+.version-item:hover .version-content {
   background: #F9FAFB;
-  margin: 0 -24px;
-  padding-left: 56px;
-  padding-right: 24px;
-  padding-top: 12px;
-  padding-bottom: 12px;
   border-radius: 8px;
 }
 
@@ -1045,6 +1040,43 @@ select option {
 .change-preview-after {
   background: #D1FAE5;
   color: #065F46;
+}
+
+/* Inline diff styles */
+.diff-added {
+  background: #d1fae5;
+  color: #065f46;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.diff-removed {
+  background: #fee2e2;
+  color: #991b1b;
+  text-decoration: line-through;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+/* Version comparison toggle */
+.version-comparison-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.version-comparison-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 /* AI Assistant Styles */

@@ -28,37 +28,28 @@ export function VersionHistory() {
           </button>
         </div>
         
-        <!-- Compare Mode Toggle -->
-        <div x-show="$store.versions.selectedVersion && !$store.versions.compareMode" 
-             class="version-comparison-toggle">
+        <!-- Visual Comparison Toggle -->
+        <div class="version-comparison-toggle">
           <input type="checkbox" 
-                 id="compareToggle"
-                 @change="$store.versions.toggleCompareMode($store.versions.selectedVersion)">
-          <label for="compareToggle" class="text-sm font-medium text-gray-700">
-            Compare with current version
+                 id="showVisualDiff" 
+                 x-model="$store.versions.showVisualDiff"
+                 @change="if($event.target.checked && !$store.versions.selectedVersion) { 
+                   alert('Please select a version to compare first'); 
+                   $event.target.checked = false; 
+                   $store.versions.showVisualDiff = false;
+                 }">
+          <label for="showVisualDiff" class="text-gray-700 select-none cursor-pointer">
+            Show changes in preview
           </label>
-        </div>
-        
-        <!-- Visual Diff Toggle -->
-        <div x-show="$store.versions.compareMode" 
-             class="version-comparison-toggle">
-          <input type="checkbox" 
-                 id="visualDiffToggle"
-                 x-model="$store.versions.showVisualDiff">
-          <label for="visualDiffToggle" class="text-sm font-medium text-gray-700">
-            Show visual differences
-          </label>
-          <button @click="$store.versions.toggleCompareMode()"
-                  class="ml-auto text-sm text-indigo-600 hover:text-indigo-700">
-            Exit comparison
-          </button>
         </div>
       </div>
       
-      <!-- Content -->
-      <div class="flex-1 overflow-y-auto">
-        <!-- Normal Mode - Version List -->
-        <div x-show="!$store.versions.compareMode" class="p-6">
+      <!-- Main Content Area -->
+      <div class="flex-1 flex overflow-hidden">
+        <!-- Version Timeline (Always visible, width changes based on showVisualDiff) -->
+        <div class="overflow-y-auto p-6 relative" 
+             :class="$store.versions.showVisualDiff ? 'w-96 border-r border-gray-200' : 'flex-1'"
+             style="padding-bottom: 200px; overflow-x: visible;">
           <div class="space-y-6">
             <template x-for="version in $store.versions.history" :key="version.id">
               <div class="version-item" 
@@ -69,6 +60,7 @@ export function VersionHistory() {
                 
                 <!-- Version Content -->
                 <div class="flex-1">
+                  <div class="version-content p-4 -mx-4">
                   <div class="flex items-start justify-between mb-2">
                     <div>
                       <h3 class="font-medium text-gray-900">
@@ -120,18 +112,43 @@ export function VersionHistory() {
                   <div x-show="$store.versions.selectedVersion === version.id" 
                        x-transition
                        class="space-y-2">
-                    <template x-for="change in version.changes" :key="change.text">
-                      <div class="change-item"
+                    <template x-for="(change, index) in version.changes" :key="change.text">
+                      <div class="change-item relative cursor-pointer"
                            :class="{
                              'change-added': change.type === 'added',
                              'change-modified': change.type === 'modified',
                              'change-removed': change.type === 'removed'
                            }"
-                           @mouseenter="$store.versions.hoveredChange = change"
+                           @mouseenter="$store.versions.hoveredChange = change.id || change.text"
                            @mouseleave="$store.versions.hoveredChange = null">
-                        <span class="font-medium" x-text="change.type.charAt(0).toUpperCase() + change.type.slice(1)"></span>
-                        <span x-text="change.item"></span>:
+                        <span class="font-medium">
+                          <span x-text="change.type === 'added' ? '+' : change.type === 'modified' ? '~' : '-'"></span>
+                          <span x-text="change.type.charAt(0).toUpperCase() + change.type.slice(1)"></span>:
+                        </span>
                         <span x-text="change.text"></span>
+                        
+                        <!-- Hover Preview -->
+                        <div x-show="$store.versions.hoveredChange === (change.id || change.text)" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100"
+                             class="change-preview-tooltip show absolute left-0 top-full mt-1 w-64 z-[100]">
+                          <h4 class="font-medium text-sm mb-2">Preview:</h4>
+                          <div x-show="change.type === 'modified' && change.oldText">
+                            <div class="change-preview-before">
+                              <p class="text-sm" x-text="change.oldText || 'Previous value'"></p>
+                            </div>
+                            <div class="text-center text-gray-400 text-xs my-1">↓</div>
+                            <div class="change-preview-after">
+                              <p class="text-sm" x-text="change.newText || change.text"></p>
+                            </div>
+                          </div>
+                          <div x-show="change.type !== 'modified' || !change.oldText">
+                            <div :class="change.type === 'added' ? 'change-preview-after' : 'change-preview-before'">
+                              <p class="text-sm" x-text="change.text"></p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </template>
                     
@@ -147,118 +164,152 @@ export function VersionHistory() {
                       </button>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </template>
           </div>
         </div>
         
-        <!-- Compare Mode - Side by Side -->
-        <div x-show="$store.versions.compareMode" class="p-6">
-          <div class="version-preview-container">
-            <!-- Left Side - Selected Version -->
-            <div class="version-preview-pane">
-              <div class="version-preview-header">
-                <h3 class="font-medium">
-                  Version <span x-text="$store.versions.getVersion($store.versions.compareVersion)?.version"></span>
-                </h3>
-                <p class="text-sm text-gray-500" 
-                   x-text="new Date($store.versions.getVersion($store.versions.compareVersion)?.timestamp).toLocaleDateString()">
-                </p>
-              </div>
-              <div class="p-4">
-                <!-- Preview of selected version questions -->
-                <div class="space-y-4">
-                  <template x-for="(change, index) in $store.versions.getVersion($store.versions.compareVersion)?.changes" :key="index">
-                    <div x-show="change.item === 'question'"
-                         class="p-4 border rounded-lg"
-                         :class="{
-                           'diff-highlight-removed': change.type === 'removed' && $store.versions.showVisualDiff,
-                           'diff-highlight-modified': change.type === 'modified' && $store.versions.showVisualDiff
-                         }">
-                      <p class="font-medium" x-text="change.text"></p>
-                    </div>
-                  </template>
-                </div>
+        <!-- Visual Diff Preview -->
+        <div x-show="$store.versions.showVisualDiff" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             class="flex-1 bg-gray-50 p-6">
+          <div x-show="$store.versions.selectedVersion" class="h-full">
+            <!-- Preview Header -->
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-gray-900">Visual Comparison</h3>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Added</span>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">Modified</span>
+                <span class="px-2 py-1 bg-red-100 text-red-700 rounded">Removed</span>
               </div>
             </div>
             
-            <!-- Right Side - Current Version -->
-            <div class="version-preview-pane">
-              <div class="version-preview-header">
-                <h3 class="font-medium">Current Version</h3>
-                <p class="text-sm text-gray-500">Now</p>
+            <!-- Split Screen Preview -->
+            <div class="version-preview-container">
+              <!-- Current Version -->
+              <div class="version-preview-pane">
+                <div class="version-preview-header">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">Current Version</span>
+                    <span class="text-sm text-gray-500" x-text="'v' + $store.versions.currentVersion"></span>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <!-- Survey Preview -->
+                  <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900" x-text="$store.survey.title"></h1>
+                    <p class="mt-2 text-gray-600" x-text="$store.survey.description"></p>
+                  </div>
+                  
+                  <!-- Questions with diff indicators -->
+                  <div class="space-y-4">
+                    <template x-for="question in $store.survey.questions" :key="question.id">
+                      <div class="p-4 bg-white rounded-lg border border-gray-200"
+                           :class="{
+                             'diff-highlight-added': $store.versions.isQuestionNew && $store.versions.isQuestionNew(question.id),
+                             'diff-highlight-modified': $store.versions.isQuestionModified && $store.versions.isQuestionModified(question.id)
+                           }">
+                        <h3 class="font-medium mb-3">
+                          <span x-text="question.questionNumber"></span>: 
+                          <span x-text="question.text"></span>
+                        </h3>
+                        
+                        <!-- Question type specific preview -->
+                        <div x-show="question.type === 'multiple_choice'" class="space-y-2">
+                          <template x-for="option in question.options" :key="option.id">
+                            <label class="flex items-center">
+                              <input type="radio" :name="'preview-' + question.id" class="mr-2"> 
+                              <span x-text="option.text"></span>
+                            </label>
+                          </template>
+                        </div>
+                        
+                        <div x-show="question.type === 'text_input'">
+                          <textarea class="w-full p-2 border border-gray-200 rounded" 
+                                    :placeholder="question.settings.placeholder"
+                                    :rows="question.settings.rows || 4"></textarea>
+                        </div>
+                        
+                        <div x-show="question.type === 'rating'">
+                          <div class="flex gap-2">
+                            <template x-for="i in 5">
+                              <button class="p-2 border border-gray-200 rounded hover:bg-gray-50" x-text="i"></button>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
               </div>
-              <div class="p-4">
-                <!-- Preview of current questions -->
-                <div class="space-y-4">
-                  <template x-for="question in $store.survey.questions" :key="question.id">
-                    <div class="p-4 border rounded-lg"
-                         :class="{
-                           'diff-highlight-added': $store.versions.showVisualDiff
-                         }">
-                      <p class="font-medium">
-                        <span x-text="question.questionNumber"></span>:
-                        <span x-text="question.text"></span>
-                      </p>
+              
+              <!-- Selected Version -->
+              <div class="version-preview-pane">
+                <div class="version-preview-header">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">
+                      Version <span x-text="$store.versions.getVersion($store.versions.selectedVersion)?.version"></span>
+                    </span>
+                    <span class="text-sm text-gray-500" 
+                          x-text="new Date($store.versions.getVersion($store.versions.selectedVersion)?.timestamp).toLocaleString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                          })">
+                    </span>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <!-- Survey Preview - Previous Version -->
+                  <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900"
+                        :class="{ 'diff-highlight-modified': $store.versions.getVersion($store.versions.selectedVersion)?.changes.some(c => c.item === 'title') }">
+                      <span x-text="$store.versions.getVersion($store.versions.selectedVersion)?.surveySnapshot?.title || 'Customer Satisfaction Survey'"></span>
+                    </h1>
+                    <p class="mt-2 text-gray-600" 
+                       x-text="$store.versions.getVersion($store.versions.selectedVersion)?.surveySnapshot?.description || 'Help us improve your experience'"></p>
+                  </div>
+                  
+                  <!-- Questions from snapshot or recreated from changes -->
+                  <div class="space-y-4">
+                    <div class="p-4 bg-white rounded-lg border border-gray-200 diff-highlight-removed"
+                         x-show="$store.versions.getVersion($store.versions.selectedVersion)?.changes.some(c => c.type === 'removed')">
+                      <h3 class="font-medium mb-3">Q2: Previous question that was removed</h3>
+                      <p class="text-sm text-gray-600">This question has been removed in the current version</p>
                     </div>
-                  </template>
+                    
+                    <template x-for="change in $store.versions.getVersion($store.versions.selectedVersion)?.changes.filter(c => c.item === 'question')" :key="change.text">
+                      <div class="p-4 bg-white rounded-lg border border-gray-200"
+                           :class="{
+                             'diff-highlight-modified': change.type === 'modified',
+                             'diff-highlight-removed': change.type === 'removed'
+                           }">
+                        <h3 class="font-medium mb-3" x-text="change.text"></h3>
+                        <p class="text-sm text-gray-600" x-text="'Change type: ' + change.type"></p>
+                      </div>
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <!-- Diff Summary -->
-          <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 class="font-medium text-gray-900 mb-2">Summary of changes</h4>
-            <div class="space-y-1 text-sm">
-              <p class="text-green-600">
-                <span class="font-medium">+</span> 
-                <span x-text="$store.versions.getChangesSummary($store.versions.compareVersion)?.added || 0"></span> additions
-              </p>
-              <p class="text-blue-600">
-                <span class="font-medium">~</span> 
-                <span x-text="$store.versions.getChangesSummary($store.versions.compareVersion)?.modified || 0"></span> modifications
-              </p>
-              <p class="text-red-600">
-                <span class="font-medium">-</span> 
-                <span x-text="$store.versions.getChangesSummary($store.versions.compareVersion)?.removed || 0"></span> deletions
-              </p>
+          <!-- No Version Selected -->
+          <div x-show="!$store.versions.selectedVersion" class="h-full flex items-center justify-center">
+            <div class="text-center">
+              <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="text-gray-500">Select a version from the timeline to preview changes</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Change Preview Tooltip -->
-    <div x-show="$store.versions.hoveredChange"
-         x-transition
-         class="change-preview-tooltip"
-         :class="{ 'show': $store.versions.hoveredChange }"
-         :style="{ 
-           position: 'fixed',
-           top: '50%',
-           left: '50%',
-           transform: 'translate(-50%, -50%)'
-         }">
-      <template x-if="$store.versions.hoveredChange">
-        <div>
-          <h4 class="font-medium text-sm mb-2" x-text="$store.versions.hoveredChange?.type === 'modified' ? 'Changes:' : $store.versions.hoveredChange?.type"></h4>
-          <div x-show="$store.versions.hoveredChange?.type === 'modified'">
-            <div class="change-preview-before">
-              <span class="text-xs font-medium">Before:</span>
-              <p class="text-sm">Previous question text would be shown here</p>
-            </div>
-            <div class="change-preview-after">
-              <span class="text-xs font-medium">After:</span>
-              <p class="text-sm" x-text="$store.versions.hoveredChange?.text"></p>
-            </div>
-          </div>
-          <div x-show="$store.versions.hoveredChange?.type !== 'modified'">
-            <p class="text-sm" x-text="$store.versions.hoveredChange?.text"></p>
-          </div>
-        </div>
-      </template>
     </div>
   `
 }
