@@ -43,11 +43,15 @@ This is a **high-fidelity prototype** focused on:
    
 3. **Implementation Phase** (During work):
    - Keep TodoWrite tasks synchronized with progress
+   - **CRITICAL**: Check if task involves UI/UX work
+     - If YES → Delegate to ui-ux-designer agent
+     - If NO → Proceed with direct implementation
    - Update work log file after EACH significant action:
      - Commands run and their output
      - Files created/modified with line numbers
      - Decisions made and reasoning
      - Problems encountered and solutions
+     - Agent delegations and their results
    
 4. **Completion Phase** (After implementation):
    - Final summary of all changes
@@ -55,6 +59,13 @@ This is a **high-fidelity prototype** focused on:
    - Testing performed by qa-playwright-tester agent
    - Apply/Fix any feedback provided by qa-playwright-tester agent
    - Next steps or follow-up items
+   
+### Agent Collaboration Workflow
+For UI/UX tasks, follow this sequence:
+1. **ui-ux-designer** → Creates/improves the UI
+2. **qa-playwright-tester** → Tests the implementation
+3. **ui-ux-designer** → Fixes any UI issues found
+4. **qa-playwright-tester** → Verifies the fixes
 
 ### Work Log Template
 ```markdown
@@ -95,6 +106,65 @@ This is a **high-fidelity prototype** focused on:
 - I MUST use both TodoWrite (for active tracking) AND work log files (for audit trail)
 - If I forget, I should immediately stop and create the documentation
 - Work logs are permanent records - never delete, only update status
+
+## Agent Delegation (CRITICAL)
+
+### UI/UX Work Delegation
+ALL user interface and user experience related tasks MUST be delegated to the `ui-ux-designer` agent. This includes:
+
+**When to Use ui-ux-designer Agent:**
+- Creating new UI components or screens
+- Improving existing layouts or user interfaces
+- Implementing responsive designs
+- Ensuring accessibility standards
+- Applying design system patterns
+- Creating or modifying visual elements
+- Improving user flows or interactions
+- Implementing hover states, transitions, or animations
+- Working with the ultrathin design aesthetic
+- Any task involving Tailwind CSS styling
+
+**Delegation Process:**
+1. Identify if the task involves UI/UX work
+2. Use the Task tool with `subagent_type: "ui-ux-designer"`
+3. Provide clear context about the design requirements
+4. Let the agent handle implementation following design system guidelines
+5. Review and test the implementation with qa-playwright-tester
+
+**Example Delegations:**
+
+1. **Creating New Component:**
+```
+Task(
+  description="Create settings panel for survey options",
+  prompt="Design and implement a settings panel for configuring survey options following our ultrathin design system",
+  subagent_type="ui-ux-designer"
+)
+```
+
+2. **Improving Existing UI:**
+```
+Task(
+  description="Improve question card layout",
+  prompt="The question cards need better spacing and visual hierarchy. Improve the layout following our design system guidelines",
+  subagent_type="ui-ux-designer"
+)
+```
+
+3. **Fixing UI Issues:**
+```
+Task(
+  description="Fix hover state issues",
+  prompt="Fix the hover states on version items that are causing layout shifts. Ensure smooth transitions without content jumping",
+  subagent_type="ui-ux-designer"
+)
+```
+
+**DO NOT attempt to:**
+- Write CSS or Tailwind classes directly
+- Create UI components without delegation
+- Make visual design decisions independently
+- Implement animations or transitions manually
 
 ## Project Overview
 
