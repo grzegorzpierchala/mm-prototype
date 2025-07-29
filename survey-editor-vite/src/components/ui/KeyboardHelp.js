@@ -3,6 +3,7 @@ export function KeyboardHelp() {
   return `
     <!-- Keyboard Shortcuts Help Modal -->
     <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+         x-data
          x-show="$store.ui.showKeyboardHelp"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -11,7 +12,8 @@ export function KeyboardHelp() {
          x-transition:leave-start="opacity-1"
          x-transition:leave-end="opacity-0"
          @click.away="$store.ui.showKeyboardHelp = false"
-         @keydown.escape="$store.ui.showKeyboardHelp = false">
+         @keydown.escape="$store.ui.showKeyboardHelp = false"
+         style="display: none">
       
       <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
            x-show="$store.ui.showKeyboardHelp"

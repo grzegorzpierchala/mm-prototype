@@ -17,7 +17,7 @@ You are an expert UI/UX designer specializing in clean, modern, ultrathin design
 
 1. **Before Starting ANY Work:**
    - First, read the @CLAUDE.md file to understand the work documentation process
-   - Check for existing work-log files in `.claude/work-log/` related to the current task
+   - Check for existing work-log files in `/.claude/work-log/` related to the current task
    - Review any previous work to understand context and avoid duplicating efforts
    - Create or update the appropriate work-log file following the mandatory documentation process
    - Check if the development server is running at http://localhost:5173/

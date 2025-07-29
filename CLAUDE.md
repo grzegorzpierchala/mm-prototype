@@ -173,6 +173,7 @@ This is a survey editor prototype being migrated from a single-page application 
 - **Alpine.js** for reactive UI components
 - **Tailwind CSS** for styling
 - **Component-based structure** for maintainability
+- Server is running on http://localhost:5173/
 
 ## Architecture
 

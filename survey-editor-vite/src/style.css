@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Alpine.js x-cloak directive */
+[x-cloak] { 
+  display: none !important; 
+}
+
 /* Global focus fix - prevent browser default black outline */
 @layer base {
   input,
@@ -249,6 +254,20 @@ body {
   display: inline-block;
   width: 44px;
   height: 24px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-switch-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
 }
 
 .toggle-switch input[type="checkbox"] {
@@ -874,7 +893,7 @@ select option {
   position: fixed;
   right: 0;
   top: 0;
-  width: 480px;
+  width: 520px;
   height: 100%;
   background: white;
   border-left: 1px solid #E5E7EB;
@@ -883,7 +902,8 @@ select option {
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.6;
 }
 
 .version-history-panel.open {
@@ -891,20 +911,34 @@ select option {
 }
 
 .version-history-panel.expanded {
-  width: 90vw;
-  max-width: 1400px;
+  width: calc(100vw - 60px);
+  max-width: calc(100vw - 60px); /* Remove max-width constraint for full width */
+}
+/* Synchronized scrolling containers */
+.version-preview-content {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  background: #FAFBFC;
+  line-height: 1.6; /* Better readability */
 }
 
 .version-item {
   position: relative;
-  padding-left: 32px;
+  padding-left: 40px;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin-bottom: 24px;
 }
 
 .version-item:hover .version-content {
-  background: #F9FAFB;
-  border-radius: 8px;
+  background: #F3F4F6;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.version-content {
+  transition: all 0.2s ease;
 }
 
 .version-item.current {
@@ -939,11 +973,13 @@ select option {
 }
 
 .change-item {
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.8;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin-bottom: 12px;
 }
 
 .change-item:hover {
@@ -975,47 +1011,91 @@ select option {
 .version-preview-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  height: 100%;
+  height: calc(100% - 120px); /* More space for header */
+  gap: 24px; /* Always have gap for readability */
+  padding: 0 24px; /* Add horizontal padding */
+}
+
+.version-preview-container.gap-6 {
+  gap: 32px;
 }
 
 .version-preview-pane {
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  min-height: 600px; /* Ensure minimum height */
 }
 
 .version-preview-header {
-  padding: 16px;
   background: #F9FAFB;
   border-bottom: 1px solid #E5E7EB;
+  flex-shrink: 0;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
 }
 
 .diff-highlight-added {
   background: #D1FAE5 !important;
   border-color: #10B981 !important;
+  position: relative;
+}
+.diff-highlight-added::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #10B981;
+  border-radius: 4px 0 0 4px;
 }
 
 .diff-highlight-modified {
-  background: #FEF3C7 !important;
-  border-color: #F59E0B !important;
+  background: #DBEAFE !important;
+  border-color: #3B82F6 !important;
+  position: relative;
+}
+.diff-highlight-modified::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #3B82F6;
+  border-radius: 4px 0 0 4px;
 }
 
 .diff-highlight-removed {
   background: #FEE2E2 !important;
   border-color: #EF4444 !important;
-  opacity: 0.6;
+  opacity: 0.7;
+  position: relative;
+}
+.diff-highlight-removed::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #EF4444;
+  border-radius: 4px 0 0 4px;
 }
 
 .change-preview-tooltip {
   background: white;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-width: 480px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -1027,9 +1107,11 @@ select option {
 
 .change-preview-before,
 .change-preview-after {
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .change-preview-before {

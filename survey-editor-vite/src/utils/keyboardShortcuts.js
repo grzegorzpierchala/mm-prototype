@@ -120,6 +120,11 @@ export function initKeyboardShortcuts() {
   
   // Register keyboard event listener
   document.addEventListener('keydown', (e) => {
+    // Skip if user is typing in an input field
+    if (e.target.matches('input, textarea, select, [contenteditable]')) {
+      return
+    }
+    
     // Build the key combination string
     const keys = []
     if (e.ctrlKey) keys.push('ctrl')

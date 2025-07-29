@@ -86,4 +86,7 @@ document.querySelector('#app').innerHTML = `
 `
 
 // Start Alpine after DOM is set up
-Alpine.start()
+// Need to wait for next tick to ensure Alpine processes all elements
+requestAnimationFrame(() => {
+  Alpine.start()
+})

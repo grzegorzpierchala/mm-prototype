@@ -13,17 +13,88 @@ Alpine.store('versions', {
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       author: 'You',
       message: 'Added demographic questions and improved flow',
+      surveySnapshot: {
+        title: 'Customer Satisfaction Survey 2024',
+        description: 'Help us improve your dining experience by sharing your feedback',
+        questions: [
+          {
+            id: 'q1',
+            questionNumber: 'Q1',
+            type: 'multiple_choice',
+            text: 'How satisfied were you with your overall dining experience?',
+            required: true,
+            options: [
+              { id: 'o1', text: 'Very Satisfied' },
+              { id: 'o2', text: 'Satisfied' },
+              { id: 'o3', text: 'Neutral' },
+              { id: 'o4', text: 'Dissatisfied' },
+              { id: 'o5', text: 'Very Dissatisfied' }
+            ]
+          },
+          {
+            id: 'q2',
+            questionNumber: 'Q2',
+            type: 'text_input',
+            text: 'What could we improve about your experience?',
+            required: false,
+            settings: { placeholder: 'Type your answer here...', rows: 4 }
+          },
+          {
+            id: 'q3',
+            questionNumber: 'Q3',
+            type: 'nps',
+            text: 'How likely are you to recommend our restaurant to a friend?',
+            required: true
+          },
+          {
+            id: 'q4',
+            questionNumber: 'Q4',
+            type: 'email',
+            text: 'Email (optional)',
+            required: false
+          },
+          {
+            id: 'q5',
+            questionNumber: 'Q5',
+            type: 'multiple_choice',
+            text: 'What is your age range?',
+            required: false,
+            options: [
+              { id: 'age1', text: '18-24' },
+              { id: 'age2', text: '25-34' },
+              { id: 'age3', text: '35-44' },
+              { id: 'age4', text: '45-54' },
+              { id: 'age5', text: '55+' }
+            ]
+          },
+          {
+            id: 'q6',
+            questionNumber: 'Q6',
+            type: 'multiple_choice',
+            text: 'How often do you visit us?',
+            required: false,
+            options: [
+              { id: 'freq1', text: 'First time' },
+              { id: 'freq2', text: 'Weekly' },
+              { id: 'freq3', text: 'Monthly' },
+              { id: 'freq4', text: 'Occasionally' }
+            ]
+          }
+        ]
+      },
       changes: [
         { 
           type: 'added', 
           item: 'question', 
           text: 'Added age range question (Q5)',
+          questionId: 'q5',
           id: 'change-1'
         },
         { 
           type: 'modified', 
           item: 'question', 
           text: 'Updated satisfaction scale from 3 points to 5 points (Q1)',
+          questionId: 'q1',
           oldText: 'Satisfied, Maybe, Dissatisfied',
           newText: 'Very Satisfied, Satisfied, Neutral, Dissatisfied, Very Dissatisfied',
           id: 'change-2'
@@ -32,6 +103,7 @@ Alpine.store('versions', {
           type: 'added', 
           item: 'question', 
           text: 'Added visit frequency question (Q6)',
+          questionId: 'q6',
           id: 'change-3'
         },
         { 
@@ -45,7 +117,88 @@ Alpine.store('versions', {
         questions: 6,
         responses: 0
       },
-      isCurrent: true
+      isCurrent: true,
+      // Snapshot of survey state at this version
+      surveySnapshot: {
+        title: 'Customer Satisfaction Survey',
+        description: 'Help us improve your experience by sharing your feedback',
+        questions: [
+          {
+            id: 'q1',
+            questionNumber: 'Q1',
+            type: 'multiple_choice',
+            text: 'How satisfied are you with our service?',
+            required: true,
+            options: [
+              { id: 'o1', text: 'Very Satisfied' },
+              { id: 'o2', text: 'Satisfied' },
+              { id: 'o3', text: 'Neutral' },
+              { id: 'o4', text: 'Dissatisfied' },
+              { id: 'o5', text: 'Very Dissatisfied' }
+            ]
+          },
+          {
+            id: 'q2',
+            questionNumber: 'Q2',
+            type: 'text_input',
+            text: 'What did you like most about your experience?',
+            required: false,
+            settings: {
+              placeholder: 'Please share your thoughts...',
+              rows: 4
+            }
+          },
+          {
+            id: 'q3',
+            questionNumber: 'Q3',
+            type: 'rating',
+            text: 'Rate your overall experience',
+            required: true,
+            settings: {
+              scale: 5,
+              showLabels: true
+            }
+          },
+          {
+            id: 'q4',
+            questionNumber: 'Q4',
+            type: 'text_input',
+            text: 'Email (optional)',
+            required: false,
+            settings: {
+              inputType: 'email',
+              placeholder: 'your@email.com'
+            }
+          },
+          {
+            id: 'q5',
+            questionNumber: 'Q5',
+            type: 'dropdown',
+            text: 'What is your age range?',
+            required: true,
+            options: [
+              { id: 'age1', text: '18-24' },
+              { id: 'age2', text: '25-34' },
+              { id: 'age3', text: '35-44' },
+              { id: 'age4', text: '45-54' },
+              { id: 'age5', text: '55+' }
+            ]
+          },
+          {
+            id: 'q6',
+            questionNumber: 'Q6',
+            type: 'multiple_choice',
+            text: 'How often do you use our service?',
+            required: true,
+            options: [
+              { id: 'freq1', text: 'Daily' },
+              { id: 'freq2', text: 'Weekly' },
+              { id: 'freq3', text: 'Monthly' },
+              { id: 'freq4', text: 'First time' }
+            ]
+          }
+        ]
+      }
     },
     {
       id: 'v2',
@@ -53,6 +206,53 @@ Alpine.store('versions', {
       timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       author: 'Sarah Chen',
       message: 'Legal compliance updates',
+      surveySnapshot: {
+        title: 'Customer Satisfaction Survey 2024',
+        description: 'Help us improve your dining experience by sharing your feedback',
+        questions: [
+          {
+            id: 'q1',
+            questionNumber: 'Q1',
+            type: 'multiple_choice',
+            text: 'How satisfied were you with your overall dining experience?',
+            required: true,
+            options: [
+              { id: 'o1', text: 'Satisfied' },
+              { id: 'o2', text: 'Maybe' },
+              { id: 'o3', text: 'Dissatisfied' }
+            ]
+          },
+          {
+            id: 'q2',
+            questionNumber: 'Q2',
+            type: 'text_input',
+            text: 'What could we improve about your experience?',
+            required: false,
+            settings: { placeholder: 'Type your answer here...', rows: 4 }
+          },
+          {
+            id: 'q3',
+            questionNumber: 'Q3',
+            type: 'nps',
+            text: 'How likely are you to recommend our restaurant to a friend?',
+            required: true
+          },
+          {
+            id: 'q4',
+            questionNumber: 'Q4',
+            type: 'email',
+            text: 'Email (optional)',
+            required: false
+          },
+          {
+            id: 'q5',
+            questionNumber: 'Q5',
+            type: 'phone',
+            text: 'Phone Number',
+            required: true
+          }
+        ]
+      },
       changes: [
         { 
           type: 'added', 
@@ -64,6 +264,7 @@ Alpine.store('versions', {
           type: 'modified', 
           item: 'question', 
           text: 'Made email field optional instead of required (Q4)',
+          questionId: 'q4',
           oldText: 'Email (required)',
           newText: 'Email (optional)',
           id: 'change-6'
@@ -72,6 +273,7 @@ Alpine.store('versions', {
           type: 'removed', 
           item: 'question', 
           text: 'Removed phone number field - too sensitive for initial survey',
+          questionId: 'q_phone',
           id: 'change-7'
         }
       ],
@@ -79,7 +281,71 @@ Alpine.store('versions', {
         questions: 4,
         responses: 0
       },
-      isCurrent: false
+      isCurrent: false,
+      // Snapshot of survey state at this version
+      surveySnapshot: {
+        title: 'Customer Satisfaction Survey',
+        description: 'Help us improve your experience by sharing your feedback\n\n[GDPR Notice: Your data will be processed in accordance with our privacy policy.]',
+        questions: [
+          {
+            id: 'q1',
+            questionNumber: 'Q1',
+            type: 'multiple_choice',
+            text: 'How satisfied are you with our service?',
+            required: true,
+            options: [
+              { id: 'o1', text: 'Satisfied' },
+              { id: 'o2', text: 'Maybe' },
+              { id: 'o3', text: 'Dissatisfied' }
+            ]
+          },
+          {
+            id: 'q2',
+            questionNumber: 'Q2',
+            type: 'text_input',
+            text: 'What did you like most about your experience?',
+            required: false,
+            settings: {
+              placeholder: 'Please share your thoughts...',
+              rows: 4
+            }
+          },
+          {
+            id: 'q3',
+            questionNumber: 'Q3',
+            type: 'rating',
+            text: 'Rate your overall experience',
+            required: true,
+            settings: {
+              scale: 5,
+              showLabels: true
+            }
+          },
+          {
+            id: 'q4',
+            questionNumber: 'Q4',
+            type: 'text_input',
+            text: 'Email (optional)',
+            required: false,
+            settings: {
+              inputType: 'email',
+              placeholder: 'your@email.com'
+            }
+          },
+          {
+            id: 'q_phone',
+            questionNumber: 'Q5',
+            type: 'text_input',
+            text: 'Phone number',
+            required: true,
+            settings: {
+              inputType: 'tel',
+              placeholder: '(555) 123-4567'
+            },
+            _removed: true
+          }
+        ]
+      }
     },
     {
       id: 'v1',
@@ -95,7 +361,48 @@ Alpine.store('versions', {
         questions: 3,
         responses: 0
       },
-      isCurrent: false
+      isCurrent: false,
+      // Snapshot of survey state at this version
+      surveySnapshot: {
+        title: 'Customer Satisfaction Survey',
+        description: 'Help us improve your experience',
+        questions: [
+          {
+            id: 'q1',
+            questionNumber: 'Q1',
+            type: 'multiple_choice',
+            text: 'How satisfied are you with our service?',
+            required: true,
+            options: [
+              { id: 'o1', text: 'Satisfied' },
+              { id: 'o2', text: 'Maybe' },
+              { id: 'o3', text: 'Dissatisfied' }
+            ]
+          },
+          {
+            id: 'q2',
+            questionNumber: 'Q2',
+            type: 'text_input',
+            text: 'What did you like most about your experience?',
+            required: false,
+            settings: {
+              placeholder: 'Please share your thoughts...',
+              rows: 4
+            }
+          },
+          {
+            id: 'q3',
+            questionNumber: 'Q3',
+            type: 'rating',
+            text: 'Rate your overall experience',
+            required: true,
+            settings: {
+              scale: 5,
+              showLabels: true
+            }
+          }
+        ]
+      }
     }
   ],
   
@@ -103,8 +410,11 @@ Alpine.store('versions', {
   compareMode: false,
   compareVersion: null,
   showVisualDiff: false,
+  showDiffHighlights: true, // New toggle for showing/hiding diff colors
   selectedVersion: null,
   hoveredChange: null,
+  leftVersion: 'v1',  // Default to version 1 for left comparison
+  rightVersion: 'v3', // Default to current version for right comparison
   
   // Actions
   getVersion(versionId) {
@@ -178,27 +488,103 @@ Alpine.store('versions', {
   // Helper methods for visual diff
   isQuestionNew(questionId) {
     if (!this.selectedVersion) return false
-    const version = this.getVersion(this.selectedVersion)
-    if (!version) return false
+    const selectedVersion = this.getVersion(this.selectedVersion)
+    if (!selectedVersion) return false
     
-    // Check if this question was added after the selected version
-    return version.changes.some(c => 
-      c.type === 'added' && 
-      c.item === 'question' && 
-      c.text.includes(questionId)
+    // Get all versions between selected and current
+    const selectedIndex = this.history.findIndex(v => v.id === this.selectedVersion)
+    const versionsAfterSelected = this.history.slice(0, selectedIndex)
+    
+    // Check if this question was added in any version after the selected one
+    return versionsAfterSelected.some(version => 
+      version.changes.some(c => 
+        c.type === 'added' && 
+        c.item === 'question' && 
+        c.questionId === questionId
+      )
     )
   },
   
   isQuestionModified(questionId) {
     if (!this.selectedVersion) return false
-    const version = this.getVersion(this.selectedVersion)
-    if (!version) return false
+    const selectedVersion = this.getVersion(this.selectedVersion)
+    if (!selectedVersion) return false
     
-    // Check if this question was modified after the selected version
-    return version.changes.some(c => 
-      c.type === 'modified' && 
-      c.item === 'question' && 
-      c.text.includes(questionId)
+    // Get all versions between selected and current
+    const selectedIndex = this.history.findIndex(v => v.id === this.selectedVersion)
+    const versionsAfterSelected = this.history.slice(0, selectedIndex)
+    
+    // Check if this question was modified in any version after the selected one
+    return versionsAfterSelected.some(version => 
+      version.changes.some(c => 
+        c.type === 'modified' && 
+        c.item === 'question' && 
+        c.questionId === questionId
+      )
     )
+  },
+  
+  isQuestionRemoved(questionId) {
+    if (!this.selectedVersion) return false
+    const selectedVersion = this.getVersion(this.selectedVersion)
+    if (!selectedVersion) return false
+    
+    // Check if the question exists in selected version but not in current
+    const existsInSelected = selectedVersion.surveySnapshot?.questions.some(q => q.id === questionId)
+    const existsInCurrent = Alpine.store('survey').questions.some(q => q.id === questionId)
+    
+    return existsInSelected && !existsInCurrent
+  },
+  
+  // Get the diff status for a specific question
+  getQuestionDiffStatus(questionId) {
+    if (!this.showDiffHighlights || !this.selectedVersion) return null
+    
+    if (this.isQuestionNew(questionId)) return 'added'
+    if (this.isQuestionModified(questionId)) return 'modified'
+    if (this.isQuestionRemoved(questionId)) return 'removed'
+    
+    return null
+  },
+  
+  // Get diff status between two specific versions
+  getQuestionDiffStatusBetween(questionId, leftVersionId, rightVersionId) {
+    if (!this.showDiffHighlights || !leftVersionId || !rightVersionId) return null
+    
+    const leftVersion = this.getVersion(leftVersionId)
+    const rightVersion = this.getVersion(rightVersionId)
+    
+    if (!leftVersion || !rightVersion) return null
+    
+    const existsInLeft = leftVersion.surveySnapshot?.questions.some(q => q.id === questionId)
+    const existsInRight = rightVersion.surveySnapshot?.questions.some(q => q.id === questionId)
+    
+    // Question was added (exists in right but not left)
+    if (!existsInLeft && existsInRight) return 'added'
+    
+    // Question was removed (exists in left but not right)
+    if (existsInLeft && !existsInRight) return 'removed'
+    
+    // Check if modified by looking at changes between versions
+    if (existsInLeft && existsInRight) {
+      const leftIndex = this.history.findIndex(v => v.id === leftVersionId)
+      const rightIndex = this.history.findIndex(v => v.id === rightVersionId)
+      
+      // Get all versions between left and right
+      const versionsBetween = this.history.slice(Math.min(leftIndex, rightIndex), Math.max(leftIndex, rightIndex) + 1)
+      
+      // Check if question was modified in any version between
+      const wasModified = versionsBetween.some(version => 
+        version.changes.some(c => 
+          c.type === 'modified' && 
+          c.item === 'question' && 
+          c.questionId === questionId
+        )
+      )
+      
+      if (wasModified) return 'modified'
+    }
+    
+    return null
   }
 })
