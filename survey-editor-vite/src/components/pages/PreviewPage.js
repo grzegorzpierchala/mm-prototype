@@ -556,39 +556,67 @@ export function PreviewPage() {
              x-transition:enter-end="opacity-100 transform scale-100"
              class="relative"
              x-data="{ 
-               get currentQuestion() {
-                 return $store.survey.questions[currentPage * paginatedQuestions.length + currentQuestionInPage] || null
-               },
                currentQuestionInPage: 0,
+               get currentQuestion() {
+                 return this.paginatedQuestions[this.currentQuestionInPage] || null
+               },
                get totalQuestionsInPage() {
-                 return paginatedQuestions.length
+                 return this.paginatedQuestions.length
                },
                get globalQuestionIndex() {
                  // Calculate the global index considering all pages
                  let index = 0
-                 for (let i = 0; i < currentPage; i++) {
-                   index += getPages()[i].length
+                 const pages = this.getPages()
+                 for (let i = 0; i < this.currentPage; i++) {
+                   index += pages[i].length
                  }
-                 return index + currentQuestionInPage
+                 return index + this.currentQuestionInPage
                },
                nextQuestion() {
-                 if (currentQuestionInPage < totalQuestionsInPage - 1) {
-                   currentQuestionInPage++
-                 } else if (currentPage < totalPages - 1) {
-                   nextPage()
-                   currentQuestionInPage = 0
+                 if (this.currentQuestionInPage < this.totalQuestionsInPage - 1) {
+                   this.currentQuestionInPage++
+                 } else if (this.currentPage < this.totalPages - 1) {
+                   this.nextPage()
+                   this.currentQuestionInPage = 0
                  }
                },
                previousQuestion() {
-                 if (currentQuestionInPage > 0) {
-                   currentQuestionInPage--
-                 } else if (currentPage > 0) {
-                   previousPage()
-                   currentQuestionInPage = getPages()[currentPage].length - 1
+                 if (this.currentQuestionInPage > 0) {
+                   this.currentQuestionInPage--
+                 } else if (this.currentPage > 0) {
+                   this.previousPage()
+                   const pages = this.getPages()
+                   this.currentQuestionInPage = pages[this.currentPage].length - 1
                  }
                },
                get isLastQuestion() {
-                 return currentPage === totalPages - 1 && currentQuestionInPage === totalQuestionsInPage - 1
+                 return this.currentPage === this.totalPages - 1 && this.currentQuestionInPage === this.totalQuestionsInPage - 1
+               },
+               // Copy parent scope variables and methods
+               currentPage: null,
+               totalPages: null,
+               paginatedQuestions: [],
+               getPages: null,
+               nextPage: null,
+               previousPage: null,
+               init() {
+                 // Get references from parent scope
+                 const parentData = this.$el.closest('[x-data]').__x.$data
+                 this.currentPage = parentData.currentPage
+                 this.totalPages = parentData.totalPages
+                 this.paginatedQuestions = parentData.paginatedQuestions
+                 this.getPages = parentData.getPages.bind(parentData)
+                 this.nextPage = parentData.nextPage.bind(parentData)
+                 this.previousPage = parentData.previousPage.bind(parentData)
+                 
+                 // Watch for page changes
+                 this.$watch(() => parentData.currentPage, (value) => {
+                   this.currentPage = value
+                   this.currentQuestionInPage = 0
+                 })
+                 this.$watch(() => parentData.paginatedQuestions, (value) => {
+                   this.paginatedQuestions = value
+                 })
                }
              }">
           <!-- iPhone Frame -->
@@ -602,16 +630,16 @@ export function PreviewPage() {
                 </div>
                 <div class="px-4 py-4 space-y-6">
                   <!-- Show current question only on mobile -->
-                  <template x-if="paginatedQuestions[currentQuestionInPage]">
+                  <template x-if="currentQuestion">
                     <div>
                       <div class="mb-4">
                         <span class="text-xs font-medium text-gray-500 block mb-2">Question <span x-text="globalQuestionIndex + 1"></span> of <span x-text="$store.survey.questions.length"></span></span>
-                        <h3 class="text-base font-medium text-gray-900" x-text="paginatedQuestions[currentQuestionInPage].text"></h3>
+                        <h3 class="text-base font-medium text-gray-900" x-text="currentQuestion.text"></h3>
                       </div>
                       
                       <!-- Multiple Choice -->
-                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'multiple_choice'" class="space-y-3">
-                        <template x-for="option in paginatedQuestions[currentQuestionInPage].options" :key="option.id">
+                      <div x-show="currentQuestion && currentQuestion.type === 'multiple_choice'" class="space-y-3">
+                        <template x-for="option in (currentQuestion ? currentQuestion.options : [])" :key="option.id">
                           <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
                             <input type="radio" :name="'mobile-q' + globalQuestionIndex" class="text-indigo-600 mr-3">
                             <span x-text="option.text"></span>
@@ -620,14 +648,14 @@ export function PreviewPage() {
                       </div>
                       
                       <!-- Text Input -->
-                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'text_input'">
+                      <div x-show="currentQuestion && currentQuestion.type === 'text_input'">
                         <textarea placeholder="Type your answer here..." 
                                   class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-base"
                                   rows="4"></textarea>
                       </div>
                       
                       <!-- Yes/No -->
-                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'yes_no'" class="space-y-3">
+                      <div x-show="currentQuestion && currentQuestion.type === 'yes_no'" class="space-y-3">
                         <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
                           <input type="radio" :name="'mobile-q' + globalQuestionIndex" class="text-indigo-600 mr-3">
                           <span>Yes</span>
@@ -639,7 +667,7 @@ export function PreviewPage() {
                       </div>
                       
                       <!-- NPS Score -->
-                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'nps'" class="space-y-3">
+                      <div x-show="currentQuestion && currentQuestion.type === 'nps'" class="space-y-3">
                         <div class="grid grid-cols-6 gap-1">
                           <template x-for="i in 11">
                             <button class="aspect-square rounded border border-gray-200 hover:border-indigo-500 transition-colors font-medium text-xs"

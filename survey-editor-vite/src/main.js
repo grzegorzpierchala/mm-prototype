@@ -9,6 +9,7 @@ import './stores/uiStore'
 import './stores/commentStore'
 import './stores/versionStore'
 import './stores/validationStore'
+import './stores/flowStore'
 
 // Register Alpine plugins
 Alpine.plugin(sort)

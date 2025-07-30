@@ -3,6 +3,7 @@ import { QuestionRenderer } from '../questions/QuestionRenderer'
 import { PreviewPage } from '../pages/PreviewPage'
 import { SharePage } from '../pages/SharePage'
 import { SettingsPage } from '../pages/SettingsPage'
+import { FlowPage } from '../pages/FlowPage'
 
 export function MainLayout() {
   return `
@@ -175,6 +176,8 @@ export function MainLayout() {
           </div>
         </div>
       </div>
+
+      ${FlowPage()}
 
       ${PreviewPage()}
 
