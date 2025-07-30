@@ -23,15 +23,23 @@ This is a **high-fidelity prototype** focused on:
 
 ### CRITICAL: Work Documentation Process
 
-**TRIGGER CONDITIONS** - Create work log file IMMEDIATELY when:
+**SINGLE WORK-LOG PER FEATURE RULE**:
+- Each feature/task should have ONE work-log file that gets continuously updated
+- Agents MUST check for existing work-log files for the current feature before creating new ones
+- Update existing work-log files with new timestamps instead of creating duplicates
+
+**TRIGGER CONDITIONS** - Create OR UPDATE work log file IMMEDIATELY when:
 - User requests ANY new feature, bug fix, or modification
 - User asks a "how to" question that requires implementation
 - User requests research or investigation that leads to code changes
 - Continuing work from a previous session
+- An agent is delegated to work on an existing feature
 
 **WORKFLOW INTEGRATION**:
 1. **Capture Phase** (When task is requested):
-   - Create `.claude/work-log/YYYY-MM-DD-HH-MM-[descriptive-task-name].md`
+   - FIRST: Check if a work-log file already exists for this feature/task
+   - If EXISTS: Update the existing file with new timestamp sections
+   - If NEW: Create `.claude/work-log/YYYY-MM-DD-HH-MM-[descriptive-task-name].md`
    - Use Bash tool to get current date and time to make it's the same as user system
    - Document: Context, User Request, Initial Assessment
    - Enter plan mode if needed for complex tasks
@@ -44,9 +52,10 @@ This is a **high-fidelity prototype** focused on:
 3. **Implementation Phase** (During work):
    - Keep TodoWrite tasks synchronized with progress
    - **CRITICAL**: Check if task involves UI/UX work
-     - If YES → Delegate to ui-ux-designer agent
+     - If YES → Delegate to ui-ux-designer agent (pass existing work-log filename)
      - If NO → Proceed with direct implementation
-   - Update work log file after EACH significant action:
+   - Update THE SAME work log file after EACH significant action:
+     - Add new timestamp section for each update
      - Commands run and their output
      - Files created/modified with line numbers
      - Decisions made and reasoning
@@ -70,7 +79,8 @@ For UI/UX tasks, follow this sequence:
 ### Work Log Template
 ```markdown
 # Task: [Descriptive Name]
-**Date**: YYYY-MM-DD HH:MM
+**Initial Date**: YYYY-MM-DD HH:MM
+**Last Updated**: YYYY-MM-DD HH:MM
 **Status**: Planning | In Progress | Completed | Blocked
 **Category**: Feature | Bug Fix | Refactor | Research
 
@@ -84,14 +94,27 @@ For UI/UX tasks, follow this sequence:
 [Detailed implementation plan with reasoning]
 
 ## Implementation Log
-### [Timestamp] - [Action]
+
+### [YYYY-MM-DD HH:MM] - Initial Implementation
+- **Agent**: [Name of agent or "Main Assistant"]
 - **What**: [Description of action taken]
 - **Files**: [Files affected with line numbers]
 - **Result**: [Outcome of the action]
 - **Notes**: [Any decisions, problems, or insights]
 
-### [Timestamp] - [Next Action]
-...
+### [YYYY-MM-DD HH:MM] - UI/UX Designer Updates
+- **Agent**: ui-ux-designer
+- **What**: [UI improvements made]
+- **Files**: [Files affected with line numbers]
+- **Result**: [Visual changes and improvements]
+- **Notes**: [Design decisions and rationale]
+
+### [YYYY-MM-DD HH:MM] - QA Testing Results
+- **Agent**: qa-playwright-tester
+- **What**: [Testing performed]
+- **Issues Found**: [List of issues discovered]
+- **Fixes Applied**: [How issues were resolved]
+- **Notes**: [Testing insights]
 
 ## Summary
 - **Changes Made**: [List all modifications]
@@ -101,11 +124,14 @@ For UI/UX tasks, follow this sequence:
 ```
 
 ### Enforcement Rules
-- I MUST create a work log file BEFORE any implementation begins
+- I MUST check for existing work-log files for the feature BEFORE creating new ones
+- I MUST update existing work-log files rather than creating duplicates
+- I MUST create a work log file BEFORE any implementation begins (if none exists)
 - I MUST update the log after each significant action (not just at the end)
 - I MUST use both TodoWrite (for active tracking) AND work log files (for audit trail)
-- If I forget, I should immediately stop and create the documentation
-- Work logs are permanent records - never delete, only update status
+- If I forget, I should immediately stop and create/update the documentation
+- Work logs are permanent records - never delete, only update status and add new sections
+- Agents MUST append to existing work-log files with new timestamp sections
 
 ## Agent Delegation (CRITICAL)
 
@@ -126,10 +152,12 @@ ALL user interface and user experience related tasks MUST be delegated to the `u
 
 **Delegation Process:**
 1. Identify if the task involves UI/UX work
-2. Use the Task tool with `subagent_type: "ui-ux-designer"`
-3. Provide clear context about the design requirements
-4. Let the agent handle implementation following design system guidelines
-5. Review and test the implementation with qa-playwright-tester
+2. Check for existing work-log file for the current feature
+3. Use the Task tool with `subagent_type: "ui-ux-designer"`
+4. Include the work-log filename in the prompt so the agent updates the same file
+5. Provide clear context about the design requirements
+6. Let the agent handle implementation following design system guidelines
+7. Review and test the implementation with qa-playwright-tester (using same work-log)
 
 **Example Delegations:**
 
@@ -137,7 +165,7 @@ ALL user interface and user experience related tasks MUST be delegated to the `u
 ```
 Task(
   description="Create settings panel for survey options",
-  prompt="Design and implement a settings panel for configuring survey options following our ultrathin design system",
+  prompt="Design and implement a settings panel for configuring survey options following our ultrathin design system. Update the existing work-log file: .claude/work-log/2025-07-30-14-00-settings-panel-feature.md",
   subagent_type="ui-ux-designer"
 )
 ```
@@ -146,7 +174,7 @@ Task(
 ```
 Task(
   description="Improve question card layout",
-  prompt="The question cards need better spacing and visual hierarchy. Improve the layout following our design system guidelines",
+  prompt="The question cards need better spacing and visual hierarchy. Improve the layout following our design system guidelines. Update the existing work-log file: .claude/work-log/2025-07-30-13-00-question-card-improvements.md",
   subagent_type="ui-ux-designer"
 )
 ```
@@ -155,7 +183,7 @@ Task(
 ```
 Task(
   description="Fix hover state issues",
-  prompt="Fix the hover states on version items that are causing layout shifts. Ensure smooth transitions without content jumping",
+  prompt="Fix the hover states on version items that are causing layout shifts. Ensure smooth transitions without content jumping. Update the existing work-log file: .claude/work-log/2025-07-29-13-46-fix-version-history-spacing.md",
   subagent_type="ui-ux-designer"
 )
 ```
