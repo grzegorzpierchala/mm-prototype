@@ -74,6 +74,9 @@ Alpine.store('survey', {
     }
   ],
   
+  // Page breaks - stores IDs of questions after which a page break appears
+  pageBreaks: [],
+  
   // Survey settings
   settings: {
     theme: 'light',
@@ -109,6 +112,21 @@ Alpine.store('survey', {
   reorderQuestions(fromIndex, toIndex) {
     const [removed] = this.questions.splice(fromIndex, 1)
     this.questions.splice(toIndex, 0, removed)
+  },
+  
+  // Page break actions
+  addPageBreak(afterQuestionId) {
+    if (!this.pageBreaks.includes(afterQuestionId)) {
+      this.pageBreaks.push(afterQuestionId)
+    }
+  },
+  
+  removePageBreak(afterQuestionId) {
+    this.pageBreaks = this.pageBreaks.filter(id => id !== afterQuestionId)
+  },
+  
+  hasPageBreakAfter(questionId) {
+    return this.pageBreaks.includes(questionId)
   },
   
   duplicateQuestion(questionId) {

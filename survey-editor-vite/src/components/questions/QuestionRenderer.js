@@ -122,11 +122,77 @@ export function QuestionRenderer() {
            }
          }">
     <template x-for="(question, index) in $store.survey.questions" :key="question.id">
-      <div class="question-block-wrapper relative"
-           :class="{
-             'drop-indicator-before': draggedOverQuestion === question.id && dropPosition === 'before' && draggedQuestion !== question.id,
-             'drop-indicator-after': draggedOverQuestion === question.id && dropPosition === 'after' && draggedQuestion !== question.id
-           }">
+      <div>
+        <!-- Page Break Zone (shows on hover BEFORE each question except the first) -->
+        <div x-show="index > 0" 
+             x-data="{ 
+               showButton: false, 
+               questionId: question.id, 
+               prevQuestionId: index > 0 ? $store.survey.questions[index - 1].id : null,
+               get hasPageBreak() { 
+                 return index > 0 && $store.survey.hasPageBreakAfter($store.survey.questions[index - 1].id);
+               }
+             }"
+             class="relative group">
+          
+          <!-- Page Break Indicator (shows when page break exists) -->
+          <div x-show="hasPageBreak"
+               @mouseenter="showButton = true" 
+               @mouseleave="showButton = false"
+               class="relative my-8">
+            
+            <!-- Page Break Line -->
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-dashed border-gray-300"></div>
+              </div>
+              <div class="relative flex justify-center">
+                <span class="px-4 bg-gray-50 text-sm text-gray-500">Page break</span>
+              </div>
+            </div>
+            
+            <!-- Remove Button (shows on hover) -->
+            <button x-show="showButton"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    @click="$store.survey.removePageBreak(prevQuestionId); $store.ui.debouncedAutoSave()"
+                    class="absolute top-0 right-4 text-xs text-gray-400 hover:text-red-500 transition-colors">
+              Remove
+            </button>
+          </div>
+          
+          <!-- Hover Zone for Adding Page Break -->
+          <div x-show="!hasPageBreak"
+               @mouseenter="showButton = true" 
+               @mouseleave="showButton = false"
+               class="h-8 -mt-2 -mb-2 relative hover-zone"
+               data-hover-zone>
+            <!-- Invisible hover zone -->
+            <div class="absolute inset-0 -top-2 -bottom-2"></div>
+            
+            <!-- Page Break Button (shows on hover) -->
+            <div x-show="showButton" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95"
+                 class="absolute inset-0 flex items-center justify-center">
+              <button @click="$store.survey.addPageBreak(prevQuestionId); $store.ui.debouncedAutoSave()"
+                      class="px-4 py-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap bg-white rounded-md shadow-sm border border-gray-200">
+                + Add page break
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="question-block-wrapper relative"
+             :class="{
+               'drop-indicator-before': draggedOverQuestion === question.id && dropPosition === 'before' && draggedQuestion !== question.id,
+               'drop-indicator-after': draggedOverQuestion === question.id && dropPosition === 'after' && draggedQuestion !== question.id
+             }">
         <div class="block group relative bg-white rounded-lg border-2 transition-all"
              :class="{
                'border-indigo-500 shadow-sm': $store.ui.selectedQuestionId === question.id && $store.ui.settingsPanelOpen,
@@ -4371,6 +4437,8 @@ export function QuestionRenderer() {
             </div>
         </div>
       </div>
+        </div>
+        </div>
       </div>
     </template>
     </div>

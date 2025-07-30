@@ -1,22 +1,87 @@
 // Preview Page Component
+
 export function PreviewPage() {
+  const previewDataFunction = `() => {
+  return {
+    previewDevice: 'desktop',
+    currentPage: 0,
+    
+    // Get questions for current page
+    get paginatedQuestions() {
+      const pages = this.getPages()
+      return pages[this.currentPage] || []
+    },
+    
+    // Get total number of pages
+    get totalPages() {
+      return this.getPages().length
+    },
+    
+    // Split questions into pages based on page breaks
+    getPages() {
+      const pages = []
+      let currentPageQuestions = []
+      
+      this.$store.survey.questions.forEach((question, index) => {
+        currentPageQuestions.push({ ...question, originalIndex: index })
+        
+        // Check if there's a page break after this question
+        if (this.$store.survey.hasPageBreakAfter(question.id)) {
+          pages.push(currentPageQuestions)
+          currentPageQuestions = []
+        }
+      })
+      
+      // Add remaining questions as the last page
+      if (currentPageQuestions.length > 0) {
+        pages.push(currentPageQuestions)
+      }
+      
+      // If no questions or pages, create one empty page
+      if (pages.length === 0) {
+        pages.push([])
+      }
+      
+      return pages
+    },
+    
+    // Navigation methods
+    nextPage() {
+      if (this.currentPage < this.totalPages - 1) {
+        this.currentPage++
+      }
+    },
+    
+    previousPage() {
+      if (this.currentPage > 0) {
+        this.currentPage--
+      }
+    },
+    
+    // Reset to first page when switching devices
+    switchDevice(device) {
+      this.previewDevice = device
+      this.currentPage = 0
+    }
+  }
+  }`
   return `
     <!-- Preview Tab Content -->
-    <div x-show="$store.ui.activeTab === 'preview'" x-data="{ previewDevice: 'desktop' }">
+    <div x-show="$store.ui.activeTab === 'preview'" x-data="${previewDataFunction}">
       <!-- Device Selector (Subtle Segmented Control) -->
       <div class="flex justify-center mb-6">
         <div class="inline-flex bg-gray-100 rounded-lg p-1">
-          <button @click="previewDevice = 'desktop'" 
+          <button @click="switchDevice('desktop')" 
                   :class="previewDevice === 'desktop' ? 'bg-white shadow-sm' : ''"
                   class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
             Desktop
           </button>
-          <button @click="previewDevice = 'tablet'" 
+          <button @click="switchDevice('tablet')" 
                   :class="previewDevice === 'tablet' ? 'bg-white shadow-sm' : ''"
                   class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
             Tablet
           </button>
-          <button @click="previewDevice = 'mobile'" 
+          <button @click="switchDevice('mobile')" 
                   :class="previewDevice === 'mobile' ? 'bg-white shadow-sm' : ''"
                   class="px-3 py-1.5 text-base font-medium rounded-md transition-all">
             Mobile
@@ -40,10 +105,10 @@ export function PreviewPage() {
             
             <!-- Survey Content -->
             <div class="px-8 py-6 space-y-8">
-              <template x-for="(question, index) in $store.survey.questions" :key="question.id">
+              <template x-for="(question, index) in paginatedQuestions" :key="question.id">
                 <div>
                   <div class="flex items-start space-x-3 mb-4">
-                    <span class="text-base font-medium text-gray-500" x-text="(index + 1) + '.'"></span>
+                    <span class="text-base font-medium text-gray-500" x-text="(question.originalIndex + 1) + '.'"></span>
                     <h3 class="text-lg font-medium text-gray-900" x-text="question.text"></h3>
                   </div>
                   
@@ -369,11 +434,21 @@ export function PreviewPage() {
             
             <!-- Survey Footer -->
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-              <div class="text-base text-gray-500">
-                Page 1 of 1
+              <div class="flex items-center gap-4">
+                <button @click="previousPage()" 
+                        :disabled="currentPage === 0"
+                        :class="currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'"
+                        class="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg transition-colors">
+                  Previous
+                </button>
+                <div class="text-base text-gray-500">
+                  Page <span x-text="currentPage + 1"></span> of <span x-text="totalPages"></span>
+                </div>
               </div>
-              <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                Submit
+              <button @click="currentPage < totalPages - 1 ? nextPage() : null"
+                      :class="currentPage < totalPages - 1 ? 'hover:bg-indigo-700' : 'hover:bg-indigo-700'"
+                      class="px-6 py-2 bg-indigo-600 text-white rounded-lg transition-colors"
+                      x-text="currentPage < totalPages - 1 ? 'Next' : 'Submit'">
               </button>
             </div>
           </div>
@@ -394,10 +469,10 @@ export function PreviewPage() {
                   <p class="mt-1 text-gray-600 text-base" x-text="$store.survey.description || 'Help us improve your dining experience by sharing your feedback'"></p>
                 </div>
                 <div class="px-6 py-5 space-y-6">
-                  <template x-for="(question, index) in $store.survey.questions" :key="question.id">
+                  <template x-for="(question, index) in paginatedQuestions" :key="question.id">
                     <div>
                       <div class="flex items-start space-x-2 mb-3">
-                        <span class="text-base font-medium text-gray-500" x-text="(index + 1) + '.'"></span>
+                        <span class="text-base font-medium text-gray-500" x-text="(question.originalIndex + 1) + '.'"></span>
                         <h3 class="text-base font-medium text-gray-900" x-text="question.text"></h3>
                       </div>
                       
@@ -453,11 +528,21 @@ export function PreviewPage() {
                 </div>
                 <!-- Survey Footer -->
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                  <div class="text-base text-gray-500">
-                    Page 1 of 1
+                  <div class="flex items-center gap-3">
+                    <button @click="previousPage()" 
+                            :disabled="currentPage === 0"
+                            :class="currentPage === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'"
+                            class="px-3 py-1.5 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg transition-colors">
+                      Previous
+                    </button>
+                    <div class="text-sm text-gray-500">
+                      Page <span x-text="currentPage + 1"></span> of <span x-text="totalPages"></span>
+                    </div>
                   </div>
-                  <button class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-base">
-                    Submit
+                  <button @click="currentPage < totalPages - 1 ? nextPage() : null"
+                          :class="currentPage < totalPages - 1 ? 'hover:bg-indigo-700' : 'hover:bg-indigo-700'"
+                          class="px-5 py-2 bg-indigo-600 text-white rounded-lg transition-colors text-base"
+                          x-text="currentPage < totalPages - 1 ? 'Next' : 'Submit'">
                   </button>
                 </div>
               </div>
@@ -470,7 +555,42 @@ export function PreviewPage() {
              x-transition:enter-start="opacity-0 transform scale-95"
              x-transition:enter-end="opacity-100 transform scale-100"
              class="relative"
-             x-data="{ currentQuestionIndex: 0 }">
+             x-data="{ 
+               get currentQuestion() {
+                 return $store.survey.questions[currentPage * paginatedQuestions.length + currentQuestionInPage] || null
+               },
+               currentQuestionInPage: 0,
+               get totalQuestionsInPage() {
+                 return paginatedQuestions.length
+               },
+               get globalQuestionIndex() {
+                 // Calculate the global index considering all pages
+                 let index = 0
+                 for (let i = 0; i < currentPage; i++) {
+                   index += getPages()[i].length
+                 }
+                 return index + currentQuestionInPage
+               },
+               nextQuestion() {
+                 if (currentQuestionInPage < totalQuestionsInPage - 1) {
+                   currentQuestionInPage++
+                 } else if (currentPage < totalPages - 1) {
+                   nextPage()
+                   currentQuestionInPage = 0
+                 }
+               },
+               previousQuestion() {
+                 if (currentQuestionInPage > 0) {
+                   currentQuestionInPage--
+                 } else if (currentPage > 0) {
+                   previousPage()
+                   currentQuestionInPage = getPages()[currentPage].length - 1
+                 }
+               },
+               get isLastQuestion() {
+                 return currentPage === totalPages - 1 && currentQuestionInPage === totalQuestionsInPage - 1
+               }
+             }">
           <!-- iPhone Frame -->
           <div class="device-frame w-[375px] h-[812px] bg-gray-900 rounded-[40px] p-3 shadow-2xl">
             <div class="w-full h-full bg-white rounded-[30px] overflow-hidden">
@@ -482,44 +602,44 @@ export function PreviewPage() {
                 </div>
                 <div class="px-4 py-4 space-y-6">
                   <!-- Show current question only on mobile -->
-                  <template x-if="$store.survey.questions[currentQuestionIndex]">
+                  <template x-if="paginatedQuestions[currentQuestionInPage]">
                     <div>
                       <div class="mb-4">
-                        <span class="text-xs font-medium text-gray-500 block mb-2">Question <span x-text="currentQuestionIndex + 1"></span> of <span x-text="$store.survey.questions.length"></span></span>
-                        <h3 class="text-base font-medium text-gray-900" x-text="$store.survey.questions[currentQuestionIndex].text"></h3>
+                        <span class="text-xs font-medium text-gray-500 block mb-2">Question <span x-text="globalQuestionIndex + 1"></span> of <span x-text="$store.survey.questions.length"></span></span>
+                        <h3 class="text-base font-medium text-gray-900" x-text="paginatedQuestions[currentQuestionInPage].text"></h3>
                       </div>
                       
                       <!-- Multiple Choice -->
-                      <div x-show="$store.survey.questions[currentQuestionIndex].type === 'multiple_choice'" class="space-y-3">
-                        <template x-for="option in $store.survey.questions[currentQuestionIndex].options" :key="option.id">
+                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'multiple_choice'" class="space-y-3">
+                        <template x-for="option in paginatedQuestions[currentQuestionInPage].options" :key="option.id">
                           <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                            <input type="radio" :name="'mobile-q' + currentQuestionIndex" class="text-indigo-600 mr-3">
+                            <input type="radio" :name="'mobile-q' + globalQuestionIndex" class="text-indigo-600 mr-3">
                             <span x-text="option.text"></span>
                           </label>
                         </template>
                       </div>
                       
                       <!-- Text Input -->
-                      <div x-show="$store.survey.questions[currentQuestionIndex].type === 'text_input'">
+                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'text_input'">
                         <textarea placeholder="Type your answer here..." 
                                   class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-base"
                                   rows="4"></textarea>
                       </div>
                       
                       <!-- Yes/No -->
-                      <div x-show="$store.survey.questions[currentQuestionIndex].type === 'yes_no'" class="space-y-3">
+                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'yes_no'" class="space-y-3">
                         <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                          <input type="radio" :name="'mobile-q' + currentQuestionIndex" class="text-indigo-600 mr-3">
+                          <input type="radio" :name="'mobile-q' + globalQuestionIndex" class="text-indigo-600 mr-3">
                           <span>Yes</span>
                         </label>
                         <label class="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                          <input type="radio" :name="'mobile-q' + currentQuestionIndex" class="text-indigo-600 mr-3">
+                          <input type="radio" :name="'mobile-q' + globalQuestionIndex" class="text-indigo-600 mr-3">
                           <span>No</span>
                         </label>
                       </div>
                       
                       <!-- NPS Score -->
-                      <div x-show="$store.survey.questions[currentQuestionIndex].type === 'nps'" class="space-y-3">
+                      <div x-show="paginatedQuestions[currentQuestionInPage].type === 'nps'" class="space-y-3">
                         <div class="grid grid-cols-6 gap-1">
                           <template x-for="i in 11">
                             <button class="aspect-square rounded border border-gray-200 hover:border-indigo-500 transition-colors font-medium text-xs"
@@ -539,12 +659,12 @@ export function PreviewPage() {
                       
                       <div class="mt-6 flex justify-between">
                         <button class="text-gray-400" 
-                                :class="{ 'opacity-50 cursor-not-allowed': currentQuestionIndex === 0 }"
-                                :disabled="currentQuestionIndex === 0"
-                                @click="currentQuestionIndex = Math.max(0, currentQuestionIndex - 1)">Previous</button>
+                                :class="{ 'opacity-50 cursor-not-allowed': globalQuestionIndex === 0 }"
+                                :disabled="globalQuestionIndex === 0"
+                                @click="previousQuestion()">Previous</button>
                         <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                                x-text="currentQuestionIndex === $store.survey.questions.length - 1 ? 'Submit' : 'Next'"
-                                @click="currentQuestionIndex = Math.min($store.survey.questions.length - 1, currentQuestionIndex + 1)"></button>
+                                x-text="isLastQuestion ? 'Submit' : 'Next'"
+                                @click="isLastQuestion ? null : nextQuestion()"></button>
                       </div>
                     </div>
                   </template>

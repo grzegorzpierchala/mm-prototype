@@ -2211,3 +2211,25 @@ input[type="range"].slider::-moz-range-thumb {
   width: 0;
   height: 0;
 }
+
+/* Page Break Styles */
+.hover-zone {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.hover-zone:hover {
+  background-color: rgba(99, 102, 241, 0.02);
+}
+
+/* Ensure page break zones don't interfere with drag and drop */
+.hover-zone {
+  pointer-events: all;
+  z-index: 5;
+}
+
+/* Page break indicator styling */
+.page-break-indicator {
+  margin: 24px 0;
+  position: relative;
+}

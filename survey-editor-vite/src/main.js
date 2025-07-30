@@ -16,11 +16,11 @@ Alpine.plugin(sort)
 // Make Alpine available globally before components register
 window.Alpine = Alpine
 
-// Register components before Alpine starts
-Alpine.data('surveyEditor', surveyEditor)
-
 // Import validation components first
 import ValidationError, { ValidationSummary } from './components/ui/ValidationError'
+
+// Register components before Alpine starts
+Alpine.data('surveyEditor', surveyEditor)
 
 // Register validation component
 Alpine.data('validationSummary', () => ({
