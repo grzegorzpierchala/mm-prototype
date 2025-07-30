@@ -177,13 +177,7 @@ This is a survey editor prototype being migrated from a single-page application 
 
 ## Architecture
 
-### Current State (Monolithic)
-The application is currently structured as a single HTML file (`survey-editor-prototype.html`) containing:
-- 3595+ lines of code
-- All components, styles, and logic in one file
-- Becoming difficult to maintain and iterate quickly
-
-### Target Architecture (Component-Based)
+### Current Component Architecture
 ```
 /src
   /components
@@ -212,38 +206,58 @@ The application is currently structured as a single HTML file (`survey-editor-pr
     - validators.js
 ```
 
-### Original Alpine.js Components:
-1. **Main Alpine.js Components:**
-   - `surveyEditor()` - Main application state and logic (will be refactored into stores)
-   - `surveyBuilderData()` - Question management and validation logic (will be modularized)
-
-2. **Key Features:**
-   - Drag-and-drop survey builder with multiple question types
-   - Real-time validation and duplicate question number detection
-   - Comment/review system with thread management
-   - Version history with diff visualization
-   - Preview modes (desktop/tablet/mobile)
-   - AI assistant integration
-   - Auto-save functionality
-
-3. **Data Models:**
-   - Questions array with settings, validation rules, and options
-   - Comments system with thread support
-   - Version history tracking
+### Question Types Documentation
+Comprehensive documentation for all Qualtrics question types available in `/question-types-doc/` including:
+- Implementation details
+- Configuration options
+- Validation rules
+- UI/UX patterns
+- Screenshots and examples
 
 ## Development Commands
 
-Since this is a standalone HTML file with no build process:
+### Survey Editor Vite Project
+```bash
+# Install dependencies
+npm install
 
-- **Run locally:** Open `survey-editor-prototype.html` directly in a web browser using playwright
+# Run development server (hot reload enabled)
+npm run dev
+# Opens at http://localhost:5173/
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Testing
+- **UI Testing**: Use the qa-playwright-tester agent after implementing features
+- **Manual Testing**: Use Playwright MCP server to interact with the running application
+- **No automated tests configured** - This is a prototype focused on rapid iteration
 
 ## Key Implementation Details
 
-- Question validation logic starts at line 42 (`validateQuestionNumber`)
-- The UI uses Alpine.js x-data attributes for reactivity
-- Tailwind CSS classes are used inline for styling
-- Custom CSS overrides are injected at runtime (lines 95-100)
-- The application simulates backend operations (save, restore) without actual API calls
+### Alpine.js Architecture
+- **Global Stores** (`/src/stores/`): Centralized state management
+  - `surveyStore.js`: Survey data, questions, CRUD operations
+  - `uiStore.js`: UI state, panels, tabs, auto-save functionality
+  - `commentStore.js`: Comments, threads, review system
+  - `versionStore.js`: Version history and comparison
+  - `validationStore.js`: Real-time validation and error tracking
+
+### Component Structure
+- **Layout Components** (`/src/components/layout/`): Page structure
+- **UI Components** (`/src/components/ui/`): Reusable interface elements
+- **Question Components** (`/src/components/questions/`): Individual question types
+- **Utility Functions** (`/src/utils/`): Validation, drag-drop, keyboard shortcuts
+
+### Key Features
+- Drag-and-drop question reordering (using @alpinejs/sort)
+- Real-time validation with duplicate question number detection
+- Mock data and simulated backend operations
+- Component-based architecture replacing 3595+ line monolithic file
 
 ## Prototyping Best Practices
 
@@ -278,3 +292,36 @@ Refer to `CLAUDE_UI_UX.md` for comprehensive design system and component pattern
 - Settings panel implementation (380px width)
 - Toggle switches and visual radio cards
 - Progressive disclosure patterns
+
+## Common Tasks and Patterns
+
+### Adding a New Question Type
+1. Create component in `/src/components/questions/[QuestionType].js`
+2. Export a function that returns HTML template with Alpine.js directives
+3. Add to question type mapping in `QuestionRenderer.js`
+4. Reference documentation in `/question-types-doc/` for implementation details
+
+### Working with Alpine.js Stores
+```javascript
+// Access store data in components
+$store.survey.questions
+$store.ui.activeTab
+$store.validation.getErrorsForQuestion(questionId)
+
+// Trigger store actions
+$store.survey.addQuestion(type)
+$store.ui.toggleSettingsPanel()
+$store.validation.validateAllQuestions()
+```
+
+### Component Communication
+- Use Alpine.js events: `$dispatch()` and `@custom-event`
+- Store shared state in global stores
+- Pass data via x-data attributes for component initialization
+
+## Important Notes
+
+- **No package-lock.json** is tracked in git - run `npm install` fresh
+- **Windows Development**: Project uses Windows paths (M:\Projects\mm-prototype)
+- **Prototype Focus**: Prioritize visual fidelity over full functionality
+- **Agent Collaboration**: Always test UI changes with qa-playwright-tester
