@@ -32,7 +32,7 @@ User wants to add a survey flow feature similar to Qualtrics but with improved U
 - **What**: Used Playwright to research Qualtrics survey flow documentation
 - **Files**: 
   - Visited: https://www.qualtrics.com/support/survey-platform/survey-module/survey-flow/survey-flow-overview/
-  - Created: src/docs/survey-flow-research.md
+  - Created: survey-flow-research.md (moved to root directory)
 - **Result**: Comprehensive research document created with all flow elements documented
 - **Notes**: Identified major UI/UX issues with current Qualtrics implementation:
   - Outdated visual design with basic colored rectangles
