@@ -294,19 +294,32 @@ export function ResultsPage() {
           <!-- Distribution Chart -->
           <div>
             <h4 class="text-base font-medium text-gray-900 mb-4">Score Distribution</h4>
-            <div class="flex items-end space-x-1 h-32">
-              <template x-for="response in $store.results.questionResults.q3.responses" :key="response.value">
-                <div class="flex-1 flex flex-col items-center">
-                  <div class="w-full bg-indigo-600 rounded-t transition-all duration-1000 ease-out"
-                       :style="'height: ' + Math.max(4, (response.count / 52) * 100) + '%'"></div>
-                  <div class="text-xs text-gray-600 mt-2" x-text="response.value"></div>
-                  <div class="text-xs text-gray-500" x-text="response.count"></div>
-                </div>
-              </template>
-            </div>
-            <div class="flex justify-between text-sm text-gray-500 mt-2">
-              <span>Not at all likely</span>
-              <span>Extremely likely</span>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="flex items-end space-x-1.5 h-40">
+                <template x-for="(response, index) in $store.results.questionResults.q3.responses" :key="response.value">
+                  <div class="flex-1 flex flex-col items-center group relative">
+                    <div class="w-full rounded-t-md transition-all duration-700 ease-out hover:opacity-90"
+                         :class="{
+                           'bg-gradient-to-t from-red-500 to-red-400': response.value <= 6,
+                           'bg-gradient-to-t from-yellow-500 to-yellow-400': response.value >= 7 && response.value <= 8,
+                           'bg-gradient-to-t from-green-500 to-green-400': response.value >= 9
+                         }"
+                         :style="'height: ' + Math.max(8, (response.count / 52) * 100) + '%'"
+                         x-init="$el.style.height = '0%'; setTimeout(() => $el.style.height = Math.max(8, (response.count / 52) * 100) + '%', index * 50)">
+                      <!-- Tooltip -->
+                      <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                        <span x-text="response.count + ' responses'"></span>
+                      </div>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-700 mt-2" x-text="response.value"></div>
+                    <div class="text-xs text-gray-500" x-text="response.count"></div>
+                  </div>
+                </template>
+              </div>
+              <div class="flex justify-between text-sm text-gray-600 mt-3 px-2">
+                <span class="font-medium">Not at all likely</span>
+                <span class="font-medium">Extremely likely</span>
+              </div>
             </div>
           </div>
           
@@ -335,13 +348,20 @@ export function ResultsPage() {
         <!-- Response Timeline -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           <h3 class="text-xl font-semibold text-gray-900 mb-6">Response Timeline</h3>
-          <div class="flex items-end space-x-2 h-40">
-            <template x-for="day in $store.results.responsesOverTime" :key="day.date">
-              <div class="flex-1 flex flex-col items-center">
-                <div class="w-full bg-indigo-600 rounded-t transition-all duration-1000 ease-out"
-                     :style="'height: ' + Math.max(8, (day.responses / 52) * 100) + '%'"></div>
-                <div class="text-xs text-gray-600 mt-2" x-text="new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })"></div>
-                <div class="text-xs text-gray-500" x-text="day.responses"></div>
+          <div class="flex items-end space-x-3 h-48">
+            <template x-for="(day, index) in $store.results.responsesOverTime" :key="day.date">
+              <div class="flex-1 flex flex-col items-center group">
+                <div class="w-full relative" style="height: 160px;">
+                  <div class="absolute bottom-0 w-full bg-gradient-to-t from-indigo-600 to-indigo-500 rounded-t-md hover:from-indigo-700 hover:to-indigo-600 transition-all duration-300 ease-out shadow-sm group-hover:shadow-md"
+                       :style="'height: ' + Math.max(4, (day.responses / 60) * 100) + '%'"
+                       x-init="$el.style.height = '0%'; setTimeout(() => $el.style.height = Math.max(4, (day.responses / 60) * 100) + '%', index * 100)">
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                      <span x-text="day.responses + ' responses'"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-xs text-gray-600 mt-2 font-medium" x-text="new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })"></div>
+                <div class="text-sm font-semibold text-gray-700" x-text="day.responses"></div>
               </div>
             </template>
           </div>

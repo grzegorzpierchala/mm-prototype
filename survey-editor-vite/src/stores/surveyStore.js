@@ -101,34 +101,101 @@ Alpine.store('survey', {
   
   // Actions
   addQuestion(question) {
+    const index = this.questions.length
     this.questions.push(question)
+    
+    // Record action for undo
+    Alpine.store('history').recordAction({
+      type: 'ADD_QUESTION',
+      data: {
+        question: { ...question },
+        questionId: question.id,
+        questionType: question.type,
+        index: index
+      }
+    })
   },
   
   updateQuestion(questionId, updates) {
     const index = this.questions.findIndex(q => q.id === questionId)
     if (index !== -1) {
+      const oldData = { ...this.questions[index] }
       this.questions[index] = { ...this.questions[index], ...updates }
+      
+      // Record action for undo
+      Alpine.store('history').recordAction({
+        type: 'UPDATE_QUESTION',
+        data: {
+          questionId: questionId,
+          questionNumber: oldData.questionNumber,
+          oldData: oldData,
+          newData: { ...this.questions[index] }
+        }
+      })
     }
   },
   
   removeQuestion(questionId) {
-    this.questions = this.questions.filter(q => q.id !== questionId)
+    const index = this.questions.findIndex(q => q.id === questionId)
+    const question = this.questions[index]
+    
+    if (index !== -1) {
+      this.questions = this.questions.filter(q => q.id !== questionId)
+      
+      // Record action for undo
+      Alpine.store('history').recordAction({
+        type: 'REMOVE_QUESTION',
+        data: {
+          question: { ...question },
+          questionId: questionId,
+          index: index
+        }
+      })
+    }
   },
   
   reorderQuestions(fromIndex, toIndex) {
+    const oldOrder = [...this.questions]
     const [removed] = this.questions.splice(fromIndex, 1)
     this.questions.splice(toIndex, 0, removed)
+    
+    // Record action for undo
+    Alpine.store('history').recordAction({
+      type: 'REORDER_QUESTIONS',
+      data: {
+        oldOrder: oldOrder,
+        newOrder: [...this.questions],
+        fromIndex: fromIndex,
+        toIndex: toIndex
+      }
+    })
   },
   
   // Page break actions
   addPageBreak(afterQuestionId) {
     if (!this.pageBreaks.includes(afterQuestionId)) {
       this.pageBreaks.push(afterQuestionId)
+      
+      // Record action for undo
+      Alpine.store('history').recordAction({
+        type: 'ADD_PAGE_BREAK',
+        data: {
+          afterQuestionId: afterQuestionId
+        }
+      })
     }
   },
   
   removePageBreak(afterQuestionId) {
     this.pageBreaks = this.pageBreaks.filter(id => id !== afterQuestionId)
+    
+    // Record action for undo
+    Alpine.store('history').recordAction({
+      type: 'REMOVE_PAGE_BREAK',
+      data: {
+        afterQuestionId: afterQuestionId
+      }
+    })
   },
   
   hasPageBreakAfter(questionId) {
@@ -150,6 +217,19 @@ Alpine.store('survey', {
       
       const index = this.questions.findIndex(q => q.id === questionId)
       this.questions.splice(index + 1, 0, duplicate)
+      
+      // Record action for undo
+      Alpine.store('history').recordAction({
+        type: 'DUPLICATE_QUESTION',
+        data: {
+          originalQuestionId: questionId,
+          newQuestionId: duplicate.id,
+          newQuestion: { ...duplicate },
+          questionNumber: question.questionNumber,
+          index: index
+        }
+      })
+      
       return duplicate.id
     }
   },
@@ -169,6 +249,17 @@ Alpine.store('survey', {
     }
     
     question.options.push(newOption)
+    
+    // Record action for undo
+    Alpine.store('history').recordAction({
+      type: 'ADD_OPTION',
+      data: {
+        questionId: questionId,
+        optionId: newOption.id,
+        option: { ...newOption }
+      }
+    })
+    
     Alpine.store('ui').debouncedAutoSave()
   },
   
@@ -176,7 +267,22 @@ Alpine.store('survey', {
     const question = this.questions.find(q => q.id === questionId)
     if (!question || !question.options || question.options.length <= 2) return
     
+    const optionIndex = question.options.findIndex(opt => opt.id === optionId)
+    const option = question.options[optionIndex]
+    
     question.options = question.options.filter(opt => opt.id !== optionId)
+    
+    // Record action for undo
+    Alpine.store('history').recordAction({
+      type: 'REMOVE_OPTION',
+      data: {
+        questionId: questionId,
+        optionId: optionId,
+        option: { ...option },
+        index: optionIndex
+      }
+    })
+    
     Alpine.store('ui').debouncedAutoSave()
   },
   

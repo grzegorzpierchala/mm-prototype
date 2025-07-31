@@ -26,6 +26,29 @@ export function Header() {
             <span class="text-xs opacity-70 ml-1">(2 hours ago)</span>
           </div>
           
+          <!-- Undo/Redo Buttons -->
+          <div class="flex items-center space-x-1">
+            <!-- Undo Button -->
+            <button @click="$store.history.undo()"
+                    :disabled="!$store.history.canUndo()"
+                    :title="$store.history.canUndo() ? \`Undo: \${$store.history.getUndoDescription()} (Ctrl+Z)\` : 'Nothing to undo (Ctrl+Z)'"
+                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+              </svg>
+            </button>
+            
+            <!-- Redo Button -->
+            <button @click="$store.history.redo()"
+                    :disabled="!$store.history.canRedo()"
+                    :title="$store.history.canRedo() ? \`Redo: \${$store.history.getRedoDescription()} (Ctrl+Shift+Z)\` : 'Nothing to redo (Ctrl+Shift+Z)'"
+                    class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"/>
+              </svg>
+            </button>
+          </div>
+          
           <!-- Status Dropdown -->
           <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" 

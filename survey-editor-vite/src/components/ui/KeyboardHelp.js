@@ -93,6 +93,28 @@ export function KeyboardHelp() {
                   <span class="text-sm text-gray-600">Delete question</span>
                   <span class="kbd">Delete</span>
                 </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Undo</span>
+                  <div class="flex gap-1 items-center">
+                    <span class="kbd">⌘</span>
+                    <span class="text-gray-400 text-xs">/</span>
+                    <span class="kbd">Ctrl</span>
+                    <span class="text-gray-400 text-xs">+</span>
+                    <span class="kbd">Z</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Redo</span>
+                  <div class="flex gap-1 items-center">
+                    <span class="kbd">⌘</span>
+                    <span class="text-gray-400 text-xs">/</span>
+                    <span class="kbd">Ctrl</span>
+                    <span class="text-gray-400 text-xs">+</span>
+                    <span class="kbd">Shift</span>
+                    <span class="text-gray-400 text-xs">+</span>
+                    <span class="kbd">Z</span>
+                  </div>
+                </div>
               </div>
             </div>
             

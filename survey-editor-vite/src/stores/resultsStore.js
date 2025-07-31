@@ -15,13 +15,13 @@ Alpine.store('results', {
   
   // Time-based data for charts
   responsesOverTime: [
-    { date: '2025-07-24', responses: 12 },
     { date: '2025-07-25', responses: 28 },
     { date: '2025-07-26', responses: 45 },
     { date: '2025-07-27', responses: 38 },
     { date: '2025-07-28', responses: 52 },
     { date: '2025-07-29', responses: 41 },
-    { date: '2025-07-30', responses: 31 }
+    { date: '2025-07-30', responses: 31 },
+    { date: '2025-07-31', responses: 36 }
   ],
   
   // Mock response data for each question

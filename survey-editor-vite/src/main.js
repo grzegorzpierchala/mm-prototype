@@ -11,6 +11,7 @@ import './stores/versionStore'
 import './stores/validationStore'
 import './stores/flowStore'
 import './stores/resultsStore'
+import './stores/historyStore'
 
 // Register Alpine plugins
 Alpine.plugin(sort)
@@ -55,6 +56,9 @@ Alpine.data('validationSummary', () => ({
 // Initialize UI store
 Alpine.store('ui').initAutoSave()
 
+// Initialize history store
+Alpine.store('history').init()
+
 // Import layout components
 import { Header } from './components/layout/Header'
 import { TabNavigation } from './components/layout/TabNavigation'
@@ -66,6 +70,7 @@ import { CommentSidebar } from './components/ui/CommentSidebar'
 import { VersionHistory } from './components/ui/VersionHistory'
 import { AIAssistant } from './components/ui/AIAssistant'
 import { KeyboardHelp } from './components/ui/KeyboardHelp'
+import { NotificationToast } from './components/ui/NotificationToast'
 
 // Set up the app structure
 document.querySelector('#app').innerHTML = `
@@ -83,6 +88,7 @@ document.querySelector('#app').innerHTML = `
     ${AIAssistant()}
     ${KeyboardHelp()}
     ${ValidationSummary()}
+    ${NotificationToast()}
     
   </div>
 `
