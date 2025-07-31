@@ -4,6 +4,7 @@ import { PreviewPage } from '../pages/PreviewPage'
 import { SharePage } from '../pages/SharePage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { FlowPage } from '../pages/FlowPage'
+import { ResultsPage } from '../pages/ResultsPage'
 
 export function MainLayout() {
   return `
@@ -182,6 +183,8 @@ export function MainLayout() {
       ${PreviewPage()}
 
       ${SharePage()}
+
+      ${ResultsPage()}
 
       ${SettingsPage()}
 

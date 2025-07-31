@@ -50,7 +50,8 @@
       "Bash(grep:*)",
       "Bash(git checkout:*)",
       "Bash(curl:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__playwright__browser_resize"
     ],
     "deny": []
   }
