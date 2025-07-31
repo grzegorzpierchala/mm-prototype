@@ -11,6 +11,51 @@ This is a **high-fidelity prototype** focused on:
 - **Zero to minimal backend** - Mock data and simulated interactions for demo purposes
 - **Fast iteration cycles** - Quick changes based on stakeholder feedback
 
+## Development Commands
+
+### Survey Editor Vite Project
+```bash
+# Install dependencies
+npm install
+
+# Run development server (hot reload enabled)
+npm run dev
+# Opens at http://localhost:5173/
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Testing
+- **UI Testing**: Use the qa-playwright-tester agent after implementing features
+- **Manual Testing**: Use Playwright MCP server to interact with the running application
+- **No automated tests configured** - This is a prototype focused on rapid iteration
+
+## Key Implementation Details
+
+### Alpine.js Architecture
+- **Global Stores** (`/src/stores/`): Centralized state management
+  - `surveyStore.js`: Survey data, questions, CRUD operations
+  - `uiStore.js`: UI state, panels, tabs, auto-save functionality
+  - `commentStore.js`: Comments, threads, review system
+  - `versionStore.js`: Version history and comparison
+  - `validationStore.js`: Real-time validation and error tracking
+
+### Component Structure
+- **Layout Components** (`/src/components/layout/`): Page structure
+- **UI Components** (`/src/components/ui/`): Reusable interface elements
+- **Question Components** (`/src/components/questions/`): Individual question types
+- **Utility Functions** (`/src/utils/`): Validation, drag-drop, keyboard shortcuts
+
+### Key Features
+- Drag-and-drop question reordering (using @alpinejs/sort)
+- Real-time validation with duplicate question number detection
+- Mock data and simulated backend operations
+- Component-based architecture replacing 3595+ line monolithic file
+
 ## Work Management & Audit Trail (MANDATORY)
 
 ### Project Structure
@@ -203,64 +248,72 @@ This is a survey editor prototype being migrated from a single-page application 
 - **Component-based structure** for maintainability
 - Server is running on http://localhost:5173/
 
-## Architecture
+## Prototyping Best Practices
 
-### Current Component Architecture
-```
-/src
-  /components
-    /questions      # Individual question type components
-      - TextInput.js
-      - MultipleChoice.js
-      - Rating.js
-      - etc.
-    /ui            # Reusable UI components
-      - SettingsPanel.js
-      - CommentThread.js
-      - VersionHistory.js
-      - ToggleSwitch.js
-    /layout        # Layout components
-      - Header.js
-      - TabNavigation.js
-      - Sidebar.js
-  /pages           # Main pages
-    - SurveyEditor.js
-    - Preview.js
-  /stores          # Alpine.js stores for shared state
-    - surveyStore.js
-    - commentStore.js
-  /utils           # Helper functions
-    - mockData.js
-    - validators.js
-```
+When working on this prototype, follow these guidelines:
 
-### Question Types Documentation
-Comprehensive documentation for all Qualtrics question types available in `/question-types-doc/` including:
-- Implementation details
-- Configuration options
-- Validation rules
-- UI/UX patterns
-- Screenshots and examples
+1. **Mock First, Implement Later**
+   - Use mock data and simulated interactions
+   - Focus on visual fidelity and user flow
+   - Don't worry about backend integration
 
-## Development Commands
+2. **Component Reusability**
+   - Create components that can be easily duplicated and modified
+   - Use props/parameters for variations
+   - Keep components focused on single responsibilities
 
-### Survey Editor Vite Project
-```bash
-# Install dependencies
-npm install
+3. **Rapid Iteration**
+   - Hot module replacement for instant feedback
+   - Component showcase/library for quick testing
+   - Easy A/B testing of different approaches
 
-# Run development server (hot reload enabled)
-npm run dev
-# Opens at http://localhost:5173/
+4. **Stakeholder-Friendly**
+   - Clear visual hierarchy
+   - Realistic interactions (even if mocked)
+   - Easy to navigate and understand
 
-# Build for production
-npm run build
+## UI/UX Guidelines
 
-# Preview production build
-npm run preview
+Refer to `CLAUDE_UI_UX.md` for comprehensive design system and component patterns including:
+- Notion-inspired block editing
+- Ultrathin design aesthetic
+- Tab-based workflow organization
+- Settings panel implementation (380px width)
+- Toggle switches and visual radio cards
+- Progressive disclosure patterns
+
+## Common Tasks and Patterns
+
+### Adding a New Question Type
+1. Create component in `/src/components/questions/[QuestionType].js`
+2. Export a function that returns HTML template with Alpine.js directives
+3. Add to question type mapping in `QuestionRenderer.js`
+4. Reference documentation in `/question-types-doc/` for implementation details
+
+### Working with Alpine.js Stores
+```javascript
+// Access store data in components
+$store.survey.questions
+$store.ui.activeTab
+$store.validation.getErrorsForQuestion(questionId)
+
+// Trigger store actions
+$store.survey.addQuestion(type)
+$store.ui.toggleSettingsPanel()
+$store.validation.validateAllQuestions()
 ```
 
-### Testing
+### Component Communication
+- Use Alpine.js events: `$dispatch()` and `@custom-event`
+- Store shared state in global stores
+- Pass data via x-data attributes for component initialization
+
+## Important Notes
+
+- **No package-lock.json** is tracked in git - run `npm install` fresh
+- **Windows Development**: Project uses Windows paths (M:\Projects\mm-prototype)
+- **Prototype Focus**: Prioritize visual fidelity over full functionality
+- **Agent Collaboration**: Always test UI changes with qa-playwright-tester
 - **UI Testing**: Use the qa-playwright-tester agent after implementing features
 - **Manual Testing**: Use Playwright MCP server to interact with the running application
 - **No automated tests configured** - This is a prototype focused on rapid iteration
