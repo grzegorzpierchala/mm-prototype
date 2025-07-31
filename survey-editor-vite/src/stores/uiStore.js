@@ -5,6 +5,10 @@ Alpine.store('ui', {
   // Tab navigation
   activeTab: 'build', // build, preview, share, settings, results, analytics
   
+  // Sidebar navigation
+  sidebarCollapsed: false,
+  activePage: 'surveys', // surveys, interviews, usability, settings, profile
+  
   // Panel states
   settingsPanelOpen: false,
   settingsSection: 'general', // general, logic, validation, appearance
@@ -64,6 +68,19 @@ Alpine.store('ui', {
   
   setActiveTab(tab) {
     this.activeTab = tab
+  },
+  
+  // Sidebar actions
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed
+  },
+  
+  setSidebarCollapsed(collapsed) {
+    this.sidebarCollapsed = collapsed
+  },
+  
+  setActivePage(page) {
+    this.activePage = page
   },
   
   setPreviewDevice(device) {

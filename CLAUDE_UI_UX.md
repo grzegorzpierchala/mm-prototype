@@ -15,6 +15,18 @@
 4. **Auto-Save**: No save buttons, continuous sync
 5. **Natural Language AI**: Floating assistant for all features
 
+### Ultrathin Design Philosophy
+**Apple-like minimalism meets modern SaaS functionality**
+
+- **Color Restraint**: Use color sparingly - only for active states and brand accents (indigo-600)
+- **Naked Elements**: Remove unnecessary backgrounds, containers, and visual chrome
+- **Subtle Separation**: Prefer thin borders (gray-100) and whitespace over heavy backgrounds
+- **Refined Typography**: Font-medium weights with tracking-tight for elegant text rendering
+- **Minimal Feedback**: Hover states should be barely perceptible but functionally clear
+- **Accent Lines**: Use thin accent lines (0.5px width) instead of full background highlighting
+- **Icon Refinement**: Smaller icons (20px) with reduced stroke-width (1.5) for delicate appearance
+- **Whitespace Priority**: Let content breathe - generous spacing creates focus and clarity
+
 ## Pattern Language System
 
 ### 🎨 Design Tokens
@@ -89,6 +101,57 @@ Build → Flow → Preview → Share → Results* → Analytics* → Settings
 ```javascript
 // Show Logic tab only for these types (line 2312)
 ['multiple_choice', 'dropdown', 'rating_scale', 'matrix', 'ranking']
+```
+
+### 📋 Main Navigation Sidebar
+**Used for:** Platform-level navigation between different sections  
+**Implementation:** `/src/components/layout/MainSidebar.js`
+
+#### Structure
+1. **Header** - Logo/branding + collapse button (64px height)
+2. **Navigation** - Main navigation items with active states
+3. **Bottom Section** - Settings and user profile
+
+#### Collapsible Functionality
+```javascript
+// State management in uiStore
+sidebarCollapsed: false,
+activePage: 'surveys'
+
+// Toggle method
+toggleSidebar() {
+  this.sidebarCollapsed = !this.sidebarCollapsed
+}
+```
+
+#### Design Specifications
+- **Expanded Width**: 256px (w-64)
+- **Collapsed Width**: 64px (w-16)
+- **Transition**: 300ms ease-out
+- **Theme**: Professional dark theme for better contrast
+- **Background**: Gray-900 (bg-gray-900) with gray-700 borders for modern appearance
+- **Header Height**: px-6 py-3 padding to match main content header (52px total)
+- **Icons**: 20px (w-5 h-5) with stroke-width 1.5 for refined appearance
+- **Tooltips**: Gray-700 background with shadow-lg and arrow pointer for collapsed state
+- **Active State**: Left accent line (w-0.5 h-6 bg-indigo-400 rounded-r-full) with indigo-300 text and indigo-900/30 background
+- **Text Colors**: 
+  - Brand: White with font-medium and tracking-tight
+  - Navigation Active: indigo-300 with indigo-900/30 background
+  - Navigation Inactive: gray-300 with white on hover and gray-800 background on hover
+  - Coming Soon: gray-500 with gray-700/gray-400 badges
+  - Icons Active: indigo-400
+  - Icons Inactive: gray-400 with gray-300 on hover
+- **User Section**: Smart dropdown pattern following modern dashboard conventions
+  - Avatar: indigo-600 background with white initials
+  - Dropdown: gray-800 background with gray-600 borders
+  - Menu items: gray-300 text with white on hover and gray-700 background on hover
+
+#### Layout Integration
+All main layout components (Header, TabNavigation, MainLayout) automatically adjust margins:
+```css
+.transition-all.duration-300.ease-out {
+  margin-left: sidebarCollapsed ? '4rem' : '16rem';
+}
 ```
 
 ### 🎯 Question Type System
@@ -274,6 +337,7 @@ Alpine.store('ui').initAutoSave()
 
 | Pattern | Location | Description |
 |---------|----------|-------------|
+| Main Sidebar | `/src/components/layout/MainSidebar.js` | Platform navigation with collapse functionality |
 | Tab Navigation | `/src/components/layout/TabNavigation.js` | Main navigation tabs with Flow addition |
 | Question Builder | `/src/components/questions/QuestionRenderer.js` | Block editor with drag-drop |
 | Settings Panel | `/src/components/ui/SettingsPanel.js` | Dynamic contextual settings (380px) |

@@ -1,7 +1,12 @@
 // Tab Navigation Component
 export function TabNavigation() {
   return `
-    <nav class="bg-white border-b border-gray-200">
+    <nav class="bg-white border-b border-gray-200 transition-all duration-300 ease-out"
+         :class="{
+           'ml-64': !$store.ui.sidebarCollapsed,
+           'ml-16': $store.ui.sidebarCollapsed
+         }"
+         :style="{ marginLeft: $store.ui.sidebarCollapsed ? '4rem' : '16rem' }">
       <div class="px-6">
         <div class="flex space-x-8">
           <button @click="$store.ui.setActiveTab('build')" 

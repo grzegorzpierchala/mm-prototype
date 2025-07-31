@@ -63,6 +63,7 @@ Alpine.store('history').init()
 import { Header } from './components/layout/Header'
 import { TabNavigation } from './components/layout/TabNavigation'
 import { MainLayout } from './components/layout/MainLayout'
+import { MainSidebar } from './components/layout/MainSidebar'
 
 // Import UI components
 import { SettingsPanel } from './components/ui/SettingsPanel'
@@ -78,6 +79,7 @@ document.querySelector('#app').innerHTML = `
        @keydown.window.ctrl.h="$store.ui.toggleVersionHistory()"
        class="min-h-screen bg-gray-50">
     
+    ${MainSidebar()}
     ${Header()}
     ${TabNavigation()}
     ${MainLayout()}

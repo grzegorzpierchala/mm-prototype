@@ -8,7 +8,12 @@ import { ResultsPage } from '../pages/ResultsPage'
 
 export function MainLayout() {
   return `
-    <main class="px-6 py-8">
+    <main class="transition-all duration-300 ease-out"
+          :class="{
+            'ml-64': !$store.ui.sidebarCollapsed,
+            'ml-16': $store.ui.sidebarCollapsed
+          }">
+      <div class="px-6 py-8">
       
       <!-- Build Tab Content -->
       <div x-show="$store.ui.activeTab === 'build'" 
@@ -187,7 +192,8 @@ export function MainLayout() {
       ${ResultsPage()}
 
       ${SettingsPage()}
-
+      
+      </div>
     </main>
   `
 }

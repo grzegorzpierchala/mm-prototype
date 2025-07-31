@@ -1,9 +1,14 @@
 // Header Component
 export function Header() {
   return `
-    <header class="bg-white border-b border-gray-200 px-6 py-3">
+    <header class="bg-white border-b border-gray-200 px-6 py-3 transition-all duration-300 ease-out"
+            :class="{
+              'ml-64': !$store.ui.sidebarCollapsed,
+              'ml-16': $store.ui.sidebarCollapsed
+            }"
+            :style="{ marginLeft: $store.ui.sidebarCollapsed ? '4rem' : '16rem' }">
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-3 px-2">
           <a href="#" class="text-gray-500 hover:text-gray-700">← Surveys</a>
           <span class="text-gray-400">/</span>
           <h1 class="text-xl font-medium text-gray-900">Customer Satisfaction Survey 2024</h1>
