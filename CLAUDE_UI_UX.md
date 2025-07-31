@@ -1,7 +1,8 @@
 # Mindful Metrics UI/UX Design System
 
 > **🚨 IMPORTANT: Claude must keep this file updated when UI/UX changes are made.**
-> **📍 Reference Implementation: survey-editor-prototype.html**
+> **📍 Reference Implementation: survey-editor-vite (Component-based architecture)**
+> **🔧 Development Server: http://localhost:5173/**
 
 ## Core Design Philosophy
 
@@ -66,15 +67,17 @@
 
 ### 📋 Universal Tab Navigation
 **Used in:** All features (surveys, interviews, tests)  
-**Implementation:** Lines 1669-1691
+**Implementation:** `/src/components/layout/TabNavigation.js`
 
 ```
-Build → Preview → Share → Results* → Analytics* → Settings
+Build → Flow → Preview → Share → Results* → Analytics* → Settings
 (*disabled until data exists)
 ```
 
+**New Addition:** Flow tab for visual survey logic editor
+
 ### 🎛️ Settings Panel (380px width)
-**Implementation:** Lines 2282-3185
+**Implementation:** `/src/components/ui/SettingsPanel.js`
 
 #### Structure
 1. **Header** - Title + close button (20px 24px padding)
@@ -89,7 +92,7 @@ Build → Preview → Share → Results* → Analytics* → Settings
 ```
 
 ### 🎯 Question Type System
-**Implementation:** Lines 16-63 (categories), 1760-1814 (dropdown)
+**Implementation:** `/src/components/questions/QuestionRenderer.js`
 
 #### Categories & Icons
 - **Essentials**: 💬📝🔘☑️▼👍
@@ -100,7 +103,7 @@ Build → Preview → Share → Results* → Analytics* → Settings
 - **Interactive**: 🔥🎯📍⊞
 
 ### 🏗️ Block Editor Pattern
-**Implementation:** Lines 1718-2262
+**Implementation:** `/src/components/questions/QuestionRenderer.js`
 
 ```html
 <div class="block group relative">
@@ -151,7 +154,7 @@ Template: Complete Settings Panel
 
 ### Alpine.js Data Structure
 ```javascript
-// Question object schema (lines 4529-4592)
+// Question object schema (maintained in stores)
 {
   id: 'q1',
   questionNumber: 'Q1',
@@ -168,22 +171,36 @@ Template: Complete Settings Panel
 }
 ```
 
+### Store Architecture
+- `/src/stores/surveyStore.js` - Survey data and CRUD operations
+- `/src/stores/uiStore.js` - UI state, panels, auto-save
+- `/src/stores/commentStore.js` - Comments and review system
+- `/src/stores/versionStore.js` - Version history
+- `/src/stores/validationStore.js` - Real-time validation
+- `/src/stores/flowStore.js` - Flow editor state
+
 ### Event Handling
 ```javascript
 // Debounced autosave pattern
-@input="debouncedAutosave"
+@input="$store.ui.debouncedAutoSave()"
 
-// Dropdown keyboard navigation (lines 4902-4915)
-@keydown="handleDropdownKeydown($event, question.id)"
+// Drag and drop for questions
+@dragstart="handleQuestionDragStart($event, question.id)"
+@dragend="handleQuestionDragEnd($event)"
+
+// Page break insertion
+@click="$store.survey.addPageBreak(prevQuestionId)"
 ```
 
 ### State Management
 ```javascript
-// Component initialization (lines 4791-4830)
-init() {
-  Object.assign(this, window.surveyBuilderData());
-  // Load saved state, setup watchers
-}
+// Store initialization in main.js
+import './stores/surveyStore'
+import './stores/uiStore'
+// ... other stores
+
+// Auto-save initialization
+Alpine.store('ui').initAutoSave()
 ```
 
 ## Visual Components
@@ -209,20 +226,21 @@ init() {
 ## Feature-Specific Patterns
 
 ### Comment System
-**Implementation:** Lines 4489-4781
+**Implementation:** `/src/components/ui/CommentSidebar.js`
 - Thread-based discussions
 - 6 comment types with badges
-- Sidebar overlay (400px desktop, bottom sheet mobile)
+- Sidebar overlay (380px desktop, bottom sheet mobile)
 
 ### Version History  
-**Implementation:** Lines 4095-4473
+**Implementation:** `/src/components/ui/VersionHistory.js`
 - Timeline visualization with change previews
 - Visual diff comparison (split screen)
 - Hover previews for changes
+- Expandable panel (520px default, full-width when expanded)
 
 ### AI Assistant
-**Implementation:** Lines 4021-4093
-- Fixed bottom-right (56px button)
+**Implementation:** `/src/components/ui/AIAssistant.js`
+- Fixed bottom-right (60px button)
 - Suggestion cards
 - Chat interface (380px window)
 
@@ -252,18 +270,45 @@ init() {
 - [ ] Escape key closes modals/dropdowns
 - [ ] Error states use icons + color
 
-## Where to Find in Prototype
+## Where to Find in Implementation
 
-| Pattern | Lines | Description |
-|---------|-------|-------------|
-| Tab Navigation | 1669-1691 | Main navigation tabs |
-| Question Builder | 1718-2262 | Block editor implementation |
-| Settings Panel | 2282-3185 | Dynamic contextual settings |
-| Question Types | 16-63, 1760-1814 | Type definitions and dropdown |
-| Comment System | 4489-4781 | Thread management |
-| Version History | 4095-4473 | Change tracking UI |
-| Alpine.js Init | 4791-4830 | Component initialization |
+| Pattern | Location | Description |
+|---------|----------|-------------|
+| Tab Navigation | `/src/components/layout/TabNavigation.js` | Main navigation tabs with Flow addition |
+| Question Builder | `/src/components/questions/QuestionRenderer.js` | Block editor with drag-drop |
+| Settings Panel | `/src/components/ui/SettingsPanel.js` | Dynamic contextual settings (380px) |
+| Question Types | `/src/components/questions/` | Individual question components |
+| Comment System | `/src/components/ui/CommentSidebar.js` | Thread management |
+| Version History | `/src/components/ui/VersionHistory.js` | Change tracking UI |
+| Flow Editor | `/src/components/ui/FlowEditor.js` | Visual survey flow designer |
+| Page Breaks | `/src/components/ui/PageBreak.js` | Hover zones for page insertion |
+| Alpine.js Stores | `/src/stores/` | Modular state management |
+| Styles | `/src/style.css` | Tailwind + custom CSS |
+
+## New Components in Vite Implementation
+
+### 🔀 Flow Editor
+**Implementation:** `/src/components/ui/FlowEditor.js` & `/src/components/pages/FlowPage.js`
+- Canvas-based visual flow designer
+- Drag-and-drop element palette
+- Connection system between elements
+- Zoom controls (10% increments)
+- Pan functionality
+- Element types: Start, End, Block, Branch, Randomizer, Embedded
+
+### 📄 Page Break System
+**Implementation:** `/src/components/ui/PageBreak.js`
+- Hover zones between questions
+- Visual indicator with dashed line
+- "+ Add page break" button on hover
+- Remove functionality when hovering existing breaks
+
+### 🎮 Keyboard Shortcuts Modal
+**Implementation:** `/src/components/ui/KeyboardHelp.js`
+- Modal overlay with shortcut reference
+- Categorized by action type
+- Visual kbd elements
 
 ---
 
-*This document provides a complete design system while being 50% smaller than the original. All patterns are preserved with clear implementation references.*
+*This document provides a complete design system for the Vite-based implementation. All patterns are preserved with updated implementation references.*
