@@ -155,5 +155,92 @@ Alpine.store('ui', {
       'map_location', 'card_sort', 'constant_sum', 'max_diff'
     ]
     return advancedTypes.includes(questionType)
+  },
+
+  // Smart UX Logic Helpers
+  getAvailableFormats(questionType, answerType) {
+    if (questionType === 'multiple_choice') {
+      if (answerType === 'multiple') {
+        // For multiple answers, only List format makes UX sense
+        return ['list']
+      } else {
+        // For single answer, all formats are available
+        return ['list', 'dropdown', 'select_box']
+      }
+    }
+    
+    // Return all formats for other question types (to be expanded)
+    return ['list', 'dropdown', 'select_box']
+  },
+
+  isFormatDisabled(questionType, answerType, format) {
+    const availableFormats = this.getAvailableFormats(questionType, answerType)
+    return !availableFormats.includes(format)
+  },
+
+  getSmartTextTypes(currentType) {
+    // Smart logic for text entry types
+    if (currentType === 'password') {
+      // Password type should disable multi-line options
+      return {
+        available: ['single_line', 'password'],
+        disabled: ['multiple_lines', 'essay_box', 'autocomplete']
+      }
+    }
+    
+    return {
+      available: ['single_line', 'multiple_lines', 'essay_box', 'password', 'autocomplete'],
+      disabled: []
+    }
+  },
+
+  isTextTypeDisabled(currentType, optionType) {
+    const typeInfo = this.getSmartTextTypes(currentType)
+    return typeInfo.disabled.includes(optionType)
+  },
+
+  getSliderInteractionModes(sliderType) {
+    if (sliderType === 'stars') {
+      return ['discrete', 'half_step', 'continuous']
+    }
+    return []
+  },
+
+  shouldShowSliderInteraction(sliderType) {
+    return sliderType === 'stars'
+  },
+
+  shouldShowLayoutOptions(questionType, format) {
+    return questionType === 'multiple_choice' && format === 'list'
+  },
+
+  shouldShowLabelPosition(questionType, format, layout) {
+    return questionType === 'multiple_choice' && format === 'list' && layout === 'horizontal'
+  },
+
+  shouldShowColumns(questionType, format, layout) {
+    return questionType === 'multiple_choice' && format === 'list' && layout === 'columns'
+  },
+
+  // Smart format switching when answer type changes
+  handleAnswerTypeChange(question, newAnswerType) {
+    const availableFormats = this.getAvailableFormats(question.type, newAnswerType)
+    
+    // If current format is not available for new answer type, switch to first available
+    if (!availableFormats.includes(question.settings.format)) {
+      question.settings.format = availableFormats[0]
+    }
+    
+    return question
+  },
+
+  // Smart answer type switching when format changes
+  handleFormatChange(question, newFormat) {
+    // If switching to dropdown or select_box, force single answer type
+    if (['dropdown', 'select_box'].includes(newFormat) && question.settings.answerType === 'multiple') {
+      question.settings.answerType = 'single'
+    }
+    
+    return question
   }
 })

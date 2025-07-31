@@ -521,6 +521,24 @@ select option {
   color: #4F46E5;
 }
 
+/* Disabled state for display format cards */
+.display-format-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+
+.display-format-card.disabled:hover {
+  border-color: #E5E7EB;
+  background: #F9FAFB;
+}
+
+.display-format-card.disabled .display-format-icon,
+.display-format-card.disabled .display-format-label {
+  color: #9CA3AF;
+}
+
 /* Comment Sidebar Styles */
 .comment-sidebar-overlay {
   position: fixed;

@@ -23,18 +23,21 @@ Alpine.store('survey', {
         { id: 'o5', text: 'Very Dissatisfied' }
       ],
       settings: {
-        allowMultiple: false,
+        answerType: 'single', // single or multiple
+        format: 'list', // list, dropdown, select_box
+        layout: 'vertical', // vertical, horizontal, columns
+        columns: 2,
+        labelPosition: 'side', // side, above
         randomizeOptions: false,
-        displayFormat: 'list',
+        useSuggestedChoices: false,
         placeholder: ''
       },
       validation: {
+        forceResponse: true,
+        requestResponse: false,
         minSelections: 1,
         maxSelections: 1,
-        requiredError: 'Please select your satisfaction level',
-        pattern: '',
-        patternError: '',
-        maxLength: null
+        requiredError: 'Please select your satisfaction level'
       }
     },
     {
@@ -45,9 +48,12 @@ Alpine.store('survey', {
       required: false,
       settings: {
         placeholder: 'Type your answer here...',
-        textType: 'multiple_lines'
+        textType: 'single_line'
       },
       validation: {
+        forceResponse: false,
+        requestResponse: false,
+        minLength: null,
         maxLength: 500,
         requiredError: 'Please provide your feedback',
         pattern: '',

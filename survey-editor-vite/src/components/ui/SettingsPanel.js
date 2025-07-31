@@ -13,7 +13,9 @@ export function SettingsPanel() {
       <template x-if="$store.ui.selectedQuestionId">
         <div class="h-full flex flex-col"
              x-data="{
-               question: $store.survey.questions.find(q => q.id === $store.ui.selectedQuestionId),
+               get question() {
+                 return $store.survey.questions.find(q => q.id === $store.ui.selectedQuestionId);
+               },
                updateSetting(path, value) {
                  const keys = path.split('.');
                  let obj = this.question;
@@ -72,7 +74,7 @@ export function SettingsPanel() {
           <div class="settings-content">
             <!-- General Tab -->
             <div x-show="$store.ui.settingsSection === 'general'" class="space-y-6">
-              <!-- Question Type -->
+              <!-- Question Type (First) -->
               <div class="settings-section">
                 <h4 class="settings-section-title">Question Type</h4>
                 <select x-model="question.type" 
@@ -127,17 +129,7 @@ export function SettingsPanel() {
                 </select>
               </div>
               
-              <!-- Question Text -->
-              <div class="settings-section">
-                <h4 class="settings-section-title">Question Text</h4>
-                <textarea x-model="question.text" 
-                          @input="$store.ui.debouncedAutoSave()"
-                          rows="3"
-                          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-base"
-                          placeholder="Enter your question..."></textarea>
-              </div>
-              
-              <!-- Question Number -->
+              <!-- Question Number (Second) -->
               <div class="settings-section">
                 <h4 class="settings-section-title">Question Number</h4>
                 <input type="text" 
@@ -149,7 +141,17 @@ export function SettingsPanel() {
                 <p class="text-sm text-gray-500 mt-1">For research reference purposes</p>
               </div>
               
-              <!-- Required Toggle -->
+              <!-- Question Text (Third) -->
+              <div class="settings-section">
+                <h4 class="settings-section-title">Question Text</h4>
+                <textarea x-model="question.text" 
+                          @input="$store.ui.debouncedAutoSave()"
+                          rows="3"
+                          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-base"
+                          placeholder="Enter your question..."></textarea>
+              </div>
+              
+              <!-- Required Toggle (Fourth) -->
               <div class="settings-section">
                 <div class="flex items-center justify-between">
                   <div>
@@ -183,12 +185,29 @@ export function SettingsPanel() {
                       <select x-model="question.settings.textType"
                               @change="$store.ui.debouncedAutoSave()"
                               class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <option value="single_line">Single Line</option>
-                        <option value="multiple_lines">Multiple Lines</option>
-                        <option value="essay_box">Essay Text Box</option>
-                        <option value="password">Password</option>
-                        <option value="autocomplete">Autocomplete</option>
+                        <option value="single_line" 
+                                :disabled="$store.ui.isTextTypeDisabled(question.settings.textType, 'single_line')">
+                          Single Line
+                        </option>
+                        <option value="multiple_lines"
+                                :disabled="$store.ui.isTextTypeDisabled(question.settings.textType, 'multiple_lines')">
+                          Multiple Lines
+                        </option>
+                        <option value="essay_box"
+                                :disabled="$store.ui.isTextTypeDisabled(question.settings.textType, 'essay_box')">
+                          Essay Text Box
+                        </option>
+                        <option value="password">
+                          Password
+                        </option>
+                        <option value="autocomplete"
+                                :disabled="$store.ui.isTextTypeDisabled(question.settings.textType, 'autocomplete')">
+                          Autocomplete
+                        </option>
                       </select>
+                      <p x-show="question.settings.textType === 'password'" class="text-xs text-amber-600 mt-1">
+                        💡 Password type disables multi-line options for security
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -208,7 +227,7 @@ export function SettingsPanel() {
                         <input type="radio" 
                                x-model="question.settings.answerType"
                                value="single"
-                               @change="$store.ui.debouncedAutoSave()"
+                               @change="$store.ui.handleAnswerTypeChange(question, 'single'); $store.ui.debouncedAutoSave()"
                                class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
                         <div>
                           <span class="text-sm font-medium text-gray-900">Allow one answer</span>
@@ -219,7 +238,7 @@ export function SettingsPanel() {
                         <input type="radio" 
                                x-model="question.settings.answerType"
                                value="multiple"
-                               @change="$store.ui.debouncedAutoSave()"
+                               @change="$store.ui.handleAnswerTypeChange(question, 'multiple'); $store.ui.debouncedAutoSave()"
                                class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
                         <div>
                           <span class="text-sm font-medium text-gray-900">Allow multiple answers</span>
@@ -229,16 +248,17 @@ export function SettingsPanel() {
                     </div>
                   </div>
                   
-                  <!-- Format -->
+                  <!-- Format (Smart Logic Applied) -->
                   <div class="settings-section">
                     <h4 class="settings-section-title">Format</h4>
                     <div class="grid grid-cols-2 gap-3">
+                      <!-- List Format (Always Available) -->
                       <label class="display-format-card cursor-pointer" 
                              :class="{ 'selected': question.settings.format === 'list' }">
                         <input type="radio" 
                                x-model="question.settings.format"
                                value="list"
-                               @change="$store.ui.debouncedAutoSave()"
+                               @change="$store.ui.handleFormatChange(question, 'list'); $store.ui.debouncedAutoSave()"
                                class="sr-only">
                         <div class="display-format-icon">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,12 +268,17 @@ export function SettingsPanel() {
                         <span class="display-format-label">List</span>
                       </label>
                       
+                      <!-- Dropdown Format (Disabled for Multiple Answers) -->
                       <label class="display-format-card cursor-pointer" 
-                             :class="{ 'selected': question.settings.format === 'dropdown' }">
+                             :class="{ 
+                               'selected': question.settings.format === 'dropdown',
+                               'disabled': $store.ui.isFormatDisabled(question.type, question.settings.answerType, 'dropdown')
+                             }">
                         <input type="radio" 
                                x-model="question.settings.format"
                                value="dropdown"
-                               @change="$store.ui.debouncedAutoSave()"
+                               @change="$store.ui.handleFormatChange(question, 'dropdown'); $store.ui.debouncedAutoSave()"
+                               :disabled="$store.ui.isFormatDisabled(question.type, question.settings.answerType, 'dropdown')"
                                class="sr-only">
                         <div class="display-format-icon">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,12 +288,17 @@ export function SettingsPanel() {
                         <span class="display-format-label">Dropdown</span>
                       </label>
                       
+                      <!-- Select Box Format (Disabled for Multiple Answers) -->
                       <label class="display-format-card cursor-pointer" 
-                             :class="{ 'selected': question.settings.format === 'select_box' }">
+                             :class="{ 
+                               'selected': question.settings.format === 'select_box',
+                               'disabled': $store.ui.isFormatDisabled(question.type, question.settings.answerType, 'select_box')
+                             }">
                         <input type="radio" 
                                x-model="question.settings.format"
                                value="select_box"
-                               @change="$store.ui.debouncedAutoSave()"
+                               @change="$store.ui.handleFormatChange(question, 'select_box'); $store.ui.debouncedAutoSave()"
+                               :disabled="$store.ui.isFormatDisabled(question.type, question.settings.answerType, 'select_box')"
                                class="sr-only">
                         <div class="display-format-icon">
                           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,10 +309,27 @@ export function SettingsPanel() {
                         <span class="display-format-label">Select Box</span>
                       </label>
                     </div>
+                    
+                    <!-- Smart UX Explanation -->
+                    <div x-show="question.settings.answerType === 'multiple'" 
+                         class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div class="flex items-start space-x-2">
+                        <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                          <p class="text-sm font-medium text-blue-800">Smart UX Applied</p>
+                          <p class="text-xs text-blue-700 mt-1">
+                            When allowing multiple answers, only List format provides good UX. 
+                            Dropdown and Select Box don't work well for multiple selections.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <!-- Layout (only for List format) -->
-                  <div class="settings-section" x-show="question.settings.format === 'list'">
+                  <!-- Layout (Smart Conditional Display) -->
+                  <div class="settings-section" x-show="$store.ui.shouldShowLayoutOptions(question.type, question.settings.format)">
                     <h4 class="settings-section-title">Layout</h4>
                     <select x-model="question.settings.layout"
                             @change="$store.ui.debouncedAutoSave()"
@@ -292,7 +339,8 @@ export function SettingsPanel() {
                       <option value="columns">Columns</option>
                     </select>
                     
-                    <div x-show="question.settings.layout === 'columns'" class="mt-3">
+                    <!-- Number of Columns (Smart Conditional) -->
+                    <div x-show="$store.ui.shouldShowColumns(question.type, question.settings.format, question.settings.layout)" class="mt-3">
                       <label class="block text-sm font-medium text-gray-700 mb-1">Number of Columns</label>
                       <input type="number" 
                              x-model="question.settings.columns"
@@ -301,7 +349,8 @@ export function SettingsPanel() {
                              min="2" max="4" step="1">
                     </div>
                     
-                    <div x-show="question.settings.layout === 'horizontal'" class="mt-3">
+                    <!-- Label Position (Smart Conditional) -->
+                    <div x-show="$store.ui.shouldShowLabelPosition(question.type, question.settings.format, question.settings.layout)" class="mt-3">
                       <label class="block text-sm font-medium text-gray-700 mb-1">Label Position</label>
                       <select x-model="question.settings.labelPosition"
                               @change="$store.ui.debouncedAutoSave()"
@@ -417,6 +466,21 @@ export function SettingsPanel() {
                     </div>
                   </div>
                   
+                  <!-- Stars Interaction Mode (Smart Conditional) -->
+                  <div class="settings-section" x-show="$store.ui.shouldShowSliderInteraction(question.settings.type)">
+                    <h4 class="settings-section-title">Interaction Mode</h4>
+                    <select x-model="question.settings.interactionMode"
+                            @change="$store.ui.debouncedAutoSave()"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                      <template x-for="mode in $store.ui.getSliderInteractionModes(question.settings.type)" :key="mode">
+                        <option :value="mode" x-text="mode === 'discrete' ? 'Whole Stars Only' : mode === 'half_step' ? 'Half Stars' : 'Any Portion'"></option>
+                      </template>
+                    </select>
+                    <p class="text-xs text-blue-600 mt-1">
+                      💡 Stars support different interaction modes for precise rating
+                    </p>
+                  </div>
+                  
                   <!-- Display Options -->
                   <div class="settings-section">
                     <h4 class="settings-section-title">Display Options</h4>
@@ -447,7 +511,7 @@ export function SettingsPanel() {
                         </label>
                       </div>
                       
-                      <div>
+                      <div x-show="question.settings.snapToIncrements || question.settings.type !== 'stars'">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Increments</label>
                         <input type="number" 
                                x-model="question.settings.increments"
